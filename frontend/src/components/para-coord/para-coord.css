@@ -1,0 +1,14 @@
+rect.selection {
+    stroke:#666;
+    stroke-width: 2;
+    fill: steelblue;
+  }
+
+  .dropdown-menu{
+    /* max-height: 150px; */
+    overflow-y: scroll;
+  }
+
+  .line{
+    stroke-width: 1.5;
+  }

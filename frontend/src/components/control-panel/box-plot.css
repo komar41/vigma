@@ -1,0 +1,27 @@
+.tooltip {
+    background-color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 15px;
+    min-width: 400px;
+    text-align: left;
+    color: white;
+  }
+
+  /* .line {
+    stroke: black;
+  }
+  
+  .box {
+    fill: #4daf4a;
+    stroke: black;
+  }
+  
+  .median {
+    stroke: #377eb8;
+    stroke-width: 2;
+  }
+  
+  .outlier {
+    fill: #e41a1c;
+  } */

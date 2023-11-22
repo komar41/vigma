@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LoadData } from "./load-data";
 import { LineChart } from "../line-chart/line-chart";
 import { BoxChart } from "../box-chart/box-chart";
+import { RadarChart } from "../radar-chart/radar-chart";
 
 export const DataProcessView = (props) => {
   const [data, setData] = useState([]);
@@ -39,22 +40,25 @@ export const DataProcessView = (props) => {
       setPatientId1(patientId);
       setTrialId1(trialId);
     } else if (panelNo == 2) {
+      console.log("panelNo 2");
       setData2(data);
       setDataType2(dataType);
       setPatientId2(patientId);
       setTrialId2(trialId);
     } else if (panelNo == 3) {
+      console.log("panelNo 3");
       setData3(data);
       setDataType3(dataType);
       setPatientId3(patientId);
       setTrialId3(trialId);
     } else if (panelNo == 4) {
+      console.log("panelNo 4");
       setData4(data);
       setDataType4(dataType);
       setPatientId4(patientId);
       setTrialId4(trialId);
     }
-  }, [panelNo]);
+  }, [panelNo, dataType, patientId, trialId, data]);
   
 
   const handleDataLoaded = (loadedData) => {
@@ -147,22 +151,10 @@ export const DataProcessView = (props) => {
             </div>
 
             <div className="col-lg-7 offset-lg-2">
-              <BoxChart
-                color="#d95f02"
-                data={data}
-                dataType={dataType}
-                patientId={patientId}
-                trialId={trialId}
-              />
+              <BoxChart/>
             </div>
             <div className="col-lg-3">
-              <BoxChart
-                color="#7570b3"
-                data={data}
-                dataType={dataType}
-                patientId={patientId}
-                trialId={trialId}
-              />
+              <RadarChart/>
             </div>  
           </div>
         </div>

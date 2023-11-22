@@ -29,6 +29,7 @@ export const LoadData = (props) => {
       setPInput(patientId);
       return;
     } else {
+      // console.log("Patient exists!")
       let patientId = pInput;
 
       const flask_url = `http://localhost:5000/get_patient_data?`;
@@ -186,6 +187,7 @@ export const LoadData = (props) => {
               className="btn btn-primary"
               value="set"
               onClick={() => {
+                console.log("set panel no.")
                 loadPatientData();
                 
               }}

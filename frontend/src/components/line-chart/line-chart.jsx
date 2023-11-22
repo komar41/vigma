@@ -23,22 +23,18 @@ export const LineChart = (props) => {
   const lineChartContainer = useRef(null);
   const [width, setWidth] = useState();
   const margin = { top: 30, right: 30, bottom: 40, left: 70 };
-  const height = 250 - margin.top - margin.bottom;
+  const height = 300 - margin.top - margin.bottom;
 
   // This function calculates width and height of the container
   const getSvgContainerSize = () => {
     let width =
       lineChartContainer.current.clientWidth - margin.left - margin.right;
-    // console.log(newWidth);
     setWidth(width);
   };
 
   useEffect(() => {
-    // detect 'width' and 'height' on render
     getSvgContainerSize();
-    // listen for resize changes, and detect dimensions again when they change
     window.addEventListener("resize", getSvgContainerSize);
-    // cleanup event listener
     return () => window.removeEventListener("resize", getSvgContainerSize);
   }, []);
 
@@ -47,10 +43,10 @@ export const LineChart = (props) => {
     VT: "#1b9e77",
     AP: "#d95f02",
     ML: "#7570b3",
-    foot: "#e7298a",
-    thigh: "#66a61e",
-    shank: "#e6ab02",
-    trunk: "#a6761d",
+    foot: "#fb8072",
+    thigh: "#80b1d3",
+    shank: "#fdb462",
+    trunk: "#b3de69",
   };
 
   // ref for svg

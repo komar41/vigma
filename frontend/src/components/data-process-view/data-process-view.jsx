@@ -3,6 +3,7 @@ import { LoadData } from "./load-data";
 import { LineChart } from "../line-chart/line-chart";
 import { BoxChart } from "../box-chart/box-chart";
 import { RadarChart } from "../radar-chart/radar-chart";
+import { Container, Row, Col } from 'react-bootstrap';
 
 export const DataProcessView = (props) => {
   const [data, setData] = useState([]);
@@ -92,73 +93,38 @@ export const DataProcessView = (props) => {
   }
 
   return (
-    <>
-      <div
-        // className="tab-pane fade show active"
-        // id="nav-home"
-        // role="tabpanel"
-        // aria-labelledby="nav-home-tab"
-        // style={{ height: "100%" }}
-      >
-        <div className="container-fluid" style={{ height: "100%" }}>
-          <div className="row" style={{ marginTop: "5px" }}>
-            <div className="col-lg-2">
-              <LoadData
-                onDataLoaded={handleDataLoaded}
-                onDataTypeChanged={handleDataTypeChange}
-                onPatientIDChanged={handlePatientIDChange}
-                onTrialIDChanged={handleTrialIDChange}
-                onPanelNoChange={handlePanelNoChange}
-              />
-            </div>
-            <div className="col-lg-5">
-              <LineChart
-                color="#d95f02"
-                data={data1}
-                dataType={dataType1}
-                patientId={patientId1}
-                trialId={trialId1}
-              />
-            </div>
-            <div className="col-lg-5">
-              <LineChart
-                color="#7570b3"
-                data={data2}
-                dataType={dataType2}
-                patientId={patientId2}
-                trialId={trialId2}
-              />
-            </div>
+    <Container fluid style={{ height: "100%" }}>
+      <Row style={{ marginTop: "5px" }}>
+        <Col lg={4}>
+          <LoadData
+            onDataLoaded={handleDataLoaded}
+            onDataTypeChanged={handleDataTypeChange}
+            onPatientIDChanged={handlePatientIDChange}
+            onTrialIDChanged={handleTrialIDChange}
+            onPanelNoChange={handlePanelNoChange}
+          />
+        </Col>
+        <Col lg={4}>
+          <LineChart color="#d95f02" data={data1} dataType={dataType1} patientId={patientId1} trialId={trialId1} />
+        </Col>
+        <Col lg={4}>
+          <LineChart color="#7570b3" data={data2} dataType={dataType2} patientId={patientId2} trialId={trialId2} />
+        </Col>
 
+        <Col lg={{ span: 5, offset: 2 }}>
+          <LineChart color="#d95f02" data={data3} dataType={dataType3} patientId={patientId3} trialId={trialId3} />
+        </Col>
+        <Col lg={5}>
+          <LineChart color="#7570b3" data={data4} dataType={dataType4} patientId={patientId4} trialId={trialId4} />
+        </Col>
 
-            <div className="col-lg-5 offset-lg-2">
-              <LineChart
-                color="#d95f02"
-                data={data3}
-                dataType={dataType3}
-                patientId={patientId3}
-                trialId={trialId3}
-              />
-            </div>
-            <div className="col-lg-5">
-              <LineChart
-                color="#7570b3"
-                data={data4}
-                dataType={dataType4}
-                patientId={patientId4}
-                trialId={trialId4}
-              />
-            </div>
-
-            <div className="col-lg-7 offset-lg-2">
-              <BoxChart/>
-            </div>
-            <div className="col-lg-3">
-              <RadarChart/>
-            </div>  
-          </div>
-        </div>
-      </div>
-    </>
+        <Col lg={{ span: 7, offset: 2 }}>
+          <BoxChart />
+        </Col>
+        <Col lg={3}>
+          <RadarChart />
+        </Col>
+      </Row>
+    </Container>
   );
 };

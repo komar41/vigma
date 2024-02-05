@@ -1,5 +1,8 @@
 import React, {useState } from "react";
+import { Dropdown, Container, Row, Col, InputGroup, FormControl, Form, Button, DropdownButton} from 'react-bootstrap';
+import "./load-data.css";
 
+// LoadData component
 export const LoadData = (props) => {
   const [fileLocation, setFileLocation] = useState("");
 
@@ -11,6 +14,36 @@ export const LoadData = (props) => {
   const [trialIdx, setTrialIdx] = useState("");
 
   const [dataType, setDataType] = useState("");
+
+  const [trialGroup1, setTrialGroup1] = useState('');
+  const [trialGroup2, setTrialGroup2] = useState('');
+  const [trialGroup3, setTrialGroup3] = useState('');
+
+  const [textInputValue, setTextInputValue] = useState('');
+
+  const handleInputChange = (event) => {
+    setTextInputValue(event.target.value);
+  };
+
+
+  const [panelOptions, setPanelOptions] = useState('');
+  const [group, setGroup] = useState('');
+  const [footing, setFooting] = useState('');
+
+  const [gaitCycle, setGaitCycle] = useState('');
+
+
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
+  };
+
+
+  const getParagraphStyle = () => ({
+    fontSize: window.innerWidth < 576 ? '10px' : '16px',
+  });
+
 
 
   // Load first data upon set patient
@@ -56,148 +89,202 @@ export const LoadData = (props) => {
   };
 
   return (
-    <>
-      <div style={{ marginTop: "10px" }}>
-        
 
-        <div className="input-group mb-3">
-          <span className="input-group-text">File Location</span>
-          <input
-            type="text"
-            className="form-control"
-            id="file_location"
-            name="file_location"
-            required
-            value={fileLocation}
-            onChange={(e) => setFileLocation(e.target.value)}
-          />
-        </div>
-
-        <div className="input-group mb-3">
-          <span className="input-group-text">Patient Id</span>
-          <input
-            type="text"
-            className="form-control"
-            required
-            value={pInput}
-            onChange={(e) => setPInput(e.target.value)}
-          />
-        </div>
-
-
-            <div className="d-flex align-items-center">
-              <div className="input-group" >
-                <span className="input-group-text">Trial Id</span>
-                <input
-                  type="number"
-                  className="form-control"
-                  style={{ textAlign: "center" }}
-                  id="trial_id"
-                  value={trialIdx}
-                  onChange={(e) => setTrialIdx(e.target.value)}
-                />
-              </div>
-
-              
-            </div>
-
-            <div className="row" style={{ marginTop: "10px" }}>
-              <h6 className="col-md-4" style={{ textDecoration: "underline" }}>
-                Data Type
-              </h6>
-            </div>
-
-            <div style={{}}>
-              <div className="form-check form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="inlineRadioOptions"
-                  value="macro"
-                  checked={dataType === "macro"}
-                  onChange={(e) => {
-                    setDataType(e.target.value);
-                  }}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="inlineRadio1"
-                  // style={{ width: "100px" }}
-                >
-                  Macros (Z)
-                </label>
-              </div>
-
-              <div className="form-check form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="inlineRadioOptions"
-                  checked={dataType === "grf"}
-                  value="grf"
-                  onChange={(e) => {
-                    setDataType(e.target.value);
-                  }}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="inlineRadio2"
-                  // style={{ minWidth: "150px" }}
-                >
-                  Ground Reaction Force
-                </label>
-              </div>
-
-              <div className="form-check form-check-inline">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="inlineRadioOptions"
-                  checked={dataType === "jnt"}
-                  value="jnt"
-                  onChange={(e) => {
-                    setDataType(e.target.value);
-                  }}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="inlineRadio3"
-                  // style={{ width: "100px" }}
-                >
-                  Joint Angles
-                </label>
-              </div>
-            </div>
-
-          <div className="input-group mb-3">
-            <span className="input-group-text">Panel No.</span>
-            <input
-                type="text"
-                className="form-control"
-                id="panel_id"
-                name="panel_id"
-                // disabled={!toggleSetPatient}
-                // required
-                // value={pInput}
-                onChange={(e) => setPanelNo(e.target.value)}
+    <Container fluid style={{ marginTop: '10px' }}>
+      <Row>
+        <Col>
+          <InputGroup lg={3}>
+            <InputGroup.Text>File Location</InputGroup.Text>
+            <FormControl
+              placeholder="Enter file location"
+              value={fileLocation}
+              onChange={(e) => setFileLocation(e.target.value)}
             />
+          </InputGroup>
+          </Col>
+      </Row>
 
-            <input
-              type="button"
-              className="btn btn-primary"
-              value="set"
-              onClick={() => {
-                console.log("set panel no.")
-                loadPatientData();
-                
-              }}
-            />
-          </div>
-          
-        
+      <Row>
+      <Col lg={6}>
 
-        
-      </div>
-    </>
+      <InputGroup >
+        <InputGroup.Text style={{ width: 'auto', getParagraphStyle}}>Group 1:</InputGroup.Text>
+        <DropdownButton 
+          as={InputGroup.Prepend}
+          variant="outline-secondary"
+          title={trialGroup1 || "Select"}
+          id="input-group-dropdown-1"
+          alignRight
+        >
+          {[1, 2, 3, 4, 5].map((nulger) => (
+            <Dropdown.Item key={nulger} onClick={() => setTrialGroup1(nulger)}>
+              {nulger}
+            </Dropdown.Item>
+          ))}
+        </DropdownButton>
+      </InputGroup>
+
+      </Col>
+
+          <Col lg={6}>
+
+          <InputGroup >
+            <InputGroup.Text style={{ width: 'auto' }}>Group 2:</InputGroup.Text>
+            <DropdownButton 
+              as={InputGroup.Prepend}
+              variant="outline-secondary"
+              title={trialGroup2 || "Select"}
+              id="input-group-dropdown-1"
+              alignRight
+            >
+              {[1, 2, 3, 4, 5].map((nulger) => (
+                <Dropdown.Item key={nulger} onClick={() => setTrialGroup2(nulger)}>
+                  {nulger}
+                </Dropdown.Item>
+              ))}
+            </DropdownButton>
+          </InputGroup>
+
+          </Col>
+      </Row>
+      <Row>
+      <Col lg={6}>
+
+      <InputGroup >
+        <InputGroup.Text style={{ width: 'auto' }}>Group 3:</InputGroup.Text>
+        <DropdownButton 
+          as={InputGroup.Prepend}
+          variant="outline-secondary"
+          title={trialGroup3 || "Select"}
+          id="input-group-dropdown-1"
+          alignRight
+        >
+          {[1, 2, 3, 4, 5].map((nulger) => (
+            <Dropdown.Item key={nulger} onClick={() => setTrialGroup3(nulger)}>
+              {nulger}
+            </Dropdown.Item>
+          ))}
+        </DropdownButton>
+      </InputGroup>
+
+      </Col>
+      <Col lg={6}>
+    
+        <InputGroup >
+          <FormControl
+            id="textInput"
+            placeholder="Stroke Patients"
+            aria-label="Text input"
+            aria-describedby="basic-addon1"
+            value={textInputValue}
+            onChange={handleInputChange}
+          />
+        </InputGroup>
+      </Col>
+
+      </Row>
+      <Row>
+      <InputGroup >
+        <InputGroup.Text >Select plot options for panel :</InputGroup.Text>
+        <DropdownButton 
+          as={InputGroup.Prepend}
+          variant="outline-secondary"
+          title={panelOptions || "Select"}
+          id="input-group-dropdown-1"
+          alignRight
+        >
+          {[1, 2, 3, 4, 5].map((nulger) => (
+            <Dropdown.Item key={nulger} onClick={() => setPanelOptions(nulger)}>
+              {nulger}
+            </Dropdown.Item>
+          ))}
+        </DropdownButton>
+      </InputGroup>
+    
+      </Row>
+
+      <Row>
+      <Col lg={6}>
+
+      <InputGroup >
+        <InputGroup.Text style={{ width: '40%' }}>Group:</InputGroup.Text>
+        <DropdownButton 
+          as={InputGroup.Prepend}
+          variant="outline-secondary"
+          title={group || "Select"}
+          id="input-group-dropdown-1"
+          alignRight
+        >
+          {[1, 2, 3, 4, 5].map((nulger) => (
+            <Dropdown.Item key={nulger} onClick={() => setGroup(nulger)}>
+              {nulger}
+            </Dropdown.Item>
+          ))}
+        </DropdownButton>
+      </InputGroup>
+
+      </Col>
+
+          <Col lg={6}>
+
+          <InputGroup >
+            <InputGroup.Text style={{ width: '40%' }}>Footing:</InputGroup.Text>
+            <DropdownButton 
+              as={InputGroup.Prepend}
+              variant="outline-secondary"
+              title={footing || "Select"}
+              id="input-group-dropdown-1"
+              alignRight
+            >
+              {[1, 2, 3, 4, 5].map((nulger) => (
+                <Dropdown.Item key={nulger} onClick={() => setFooting(nulger)}>
+                  {nulger}
+                </Dropdown.Item>
+              ))}
+            </DropdownButton>
+          </InputGroup>
+
+          </Col>
+      </Row>
+
+      
+      <Row>
+      <Col lg={6}>
+
+      <InputGroup >
+        <InputGroup.Text style={{ width: '40%' }}>Gait Cycle:</InputGroup.Text>
+        <DropdownButton 
+          as={InputGroup.Prepend}
+          variant="outline-secondary"
+          title={gaitCycle || "Select"}
+          id="input-group-dropdown-1"
+          alignRight
+        >
+          {[1, 2, 3, 4, 5].map((nulger) => (
+            <Dropdown.Item key={nulger} onClick={() => setGaitCycle(nulger)}>
+              {nulger}
+            </Dropdown.Item>
+          ))}
+        </DropdownButton>
+      </InputGroup>
+
+      </Col>
+
+          <Col lg={6} className="d-flex align-items-end">
+
+          <Form.Check
+        type="checkbox"
+        id="checkboxExample"
+        label="Show Spread"
+        checked={isChecked}
+        onChange={handleCheckboxChange}
+      />
+
+          </Col>
+      </Row>
+
+
+
+    </Container>
   );
 };

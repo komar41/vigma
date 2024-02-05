@@ -1,0 +1,50 @@
+.dropdown {
+  width: 50%;
+}
+
+
+/* ResponsiveDropdown.css */
+.responsive-menu a {
+    font-size: 14px; /* Default font size */
+  }
+  
+  @media (min-width: 576px) {
+    .responsive-menu a {
+      font-size: 16px; /* Adjust font size for small screens */
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-menu a {
+      font-size: 18px; /* Adjust font size for medium screens */
+    }
+  }
+  
+  @media (min-width: 992px) {
+    .responsive-menu a {
+      font-size: 20px; /* Adjust font size for large screens */
+    }
+  }
+
+  /* ResponsiveDropdown.css */
+.dropdown-toggle {
+    font-size: 14px; /* Default font size for label */
+  }
+  
+  @media (min-width: 576px) {
+    .dropdown-toggle {
+      font-size: 16px; /* Adjust font size for small screens */
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .dropdown-toggle {
+      font-size: 18px; /* Adjust font size for medium screens */
+    }
+  }
+  
+  @media (min-width: 992px) {
+    .dropdown-toggle {
+      font-size: 20px; /* Adjust font size for large screens */
+    }
+  }

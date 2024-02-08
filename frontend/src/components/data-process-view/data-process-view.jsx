@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import LoadDataLearn  from "./load-data-learn";
 import { LoadData } from "./load-data";
 import { LineChart } from "../line-chart/line-chart";
 import { BoxChart } from "../box-chart/box-chart";
@@ -96,13 +97,14 @@ export const DataProcessView = (props) => {
     <Container fluid style={{ height: "100%" }}>
       <Row style={{ marginTop: "5px" }}>
         <Col lg={4}>
-          <LoadData
+
+           <LoadData
             onDataLoaded={handleDataLoaded}
             onDataTypeChanged={handleDataTypeChange}
             onPatientIDChanged={handlePatientIDChange}
             onTrialIDChanged={handleTrialIDChange}
             onPanelNoChange={handlePanelNoChange}
-          />
+          /> 
         </Col>
         <Col lg={4}>
           <LineChart color="#d95f02" data={data1} dataType={dataType1} patientId={patientId1} trialId={trialId1} />

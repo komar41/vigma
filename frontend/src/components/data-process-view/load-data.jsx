@@ -1,6 +1,20 @@
-import React, {useState } from "react";
-import { Dropdown, Container, Row, Col, InputGroup, FormControl, Form, Button, DropdownButton} from 'react-bootstrap';
+import React, {useState, useEffect } from "react";
+import { Grid, TextField, FormControl, Select, MenuItem, OutlinedInput, InputLabel, FormControlLabel, Checkbox } from '@mui/material';
 import "./load-data.css";
+
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+
 
 // LoadData component
 export const LoadData = (props) => {
@@ -15,9 +29,10 @@ export const LoadData = (props) => {
 
   const [dataType, setDataType] = useState("");
 
-  const [trialGroup1, setTrialGroup1] = useState('');
-  const [trialGroup2, setTrialGroup2] = useState('');
-  const [trialGroup3, setTrialGroup3] = useState('');
+
+  const [trialGroup1, setTrialGroup1] = useState([]);
+  const [trialGroup2, setTrialGroup2] = useState([]);
+  const [trialGroup3, setTrialGroup3] = useState("");
 
   const [textInputValue, setTextInputValue] = useState('');
 
@@ -35,6 +50,9 @@ export const LoadData = (props) => {
 
   const [isChecked, setIsChecked] = useState(false);
 
+  const [folderNames, setFolderNames] = useState([]);
+
+
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
   };
@@ -44,6 +62,20 @@ export const LoadData = (props) => {
     fontSize: window.innerWidth < 576 ? '10px' : '16px',
   });
 
+
+  const names = [
+    1,2,3,4,5
+  ];
+  
+  const handleChange = (event, stateVariable) => {
+    const {
+      target: { value },
+    } = event;
+    stateVariable(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
 
 
   // Load first data upon set patient
@@ -88,203 +120,213 @@ export const LoadData = (props) => {
     }
   };
 
+  const handlePanelChange = (event) => {
+    setPanelOptions(event.target.value);
+  };
+
+  useEffect(() => {
+    console.log('Effect started',process.env.REACT_APP_BACKEND_URL + '/get_folder_names' );
+  
+    fetch('http://127.0.0.1:5000' + '/get_folder_names')
+      .then(response => {
+        console.log('Fetching data');
+        return response.json();
+      })
+      .then(data => {
+        console.log('Data fetched:', data);
+        setFolderNames(data);
+      })
+      .catch(error => console.error('Error fetching folder names:', error));
+  
+    return () => {
+      console.log('Effect cleanup');
+    };
+  }, []);
   return (
+<Grid container spacing={3}>
+  <Grid item xs={12}>
+  <TextField
+          placeholder="Enter file location"
+          label="File Location" variant="outlined"
+          fullWidth
+          size="medium"
+          value={fileLocation}
+          onChange={(e) => setFileLocation(e.target.value)}
+        />
+  </Grid>
+  <Grid item xs={6}>
+  <InputLabel id="demo-multiple-name-label">Group 1</InputLabel>
+  <Select
+          fullWidth
+          labelId="demo-multiple-name-label"
+          id="demo-multiple-name"
+          multiple
+          value={trialGroup1}
+          onChange={(e)=>handleChange(e, setTrialGroup1)}
+          input={<OutlinedInput label="Name"  />}
+          MenuProps={MenuProps}
+        >
+          {folderNames.map((name) => (
+            <MenuItem
+              key={name}
+              value={name}
+            >
+              {name}
+            </MenuItem>
+          ))}
+  </ Select>
+  </Grid>
+  <Grid item xs={6}>
+  <InputLabel id="demo-multiple-name-label">Group 2</InputLabel>
+  <Select
+          fullWidth
+          labelId="demo-multiple-name-label"
+          id="demo-multiple-name"
+          multiple
+          value={trialGroup2}
+          onChange={(e)=>handleChange(e, setTrialGroup2)}
+          input={<OutlinedInput label="Name"  />}
+          MenuProps={MenuProps}
+        >
+          {folderNames.map((name) => (
+            <MenuItem
+              key={name}
+              value={name}
+            >
+              {name}
+            </MenuItem>
+          ))}
+  </ Select>
+  </Grid>
+  <Grid item xs={6}>
+  <InputLabel id="demo-multiple-name-label">Group 3</InputLabel>
+  <Select
+          fullWidth
+          labelId="demo-multiple-name-label"
+          id="demo-multiple-name"
+          value={trialGroup3}
+          onChange={(e)=>handleChange(e, setTrialGroup3)}
+          input={<OutlinedInput label="Name"  />}
+          MenuProps={MenuProps}
+        >
+          {names.map((name) => (
+            <MenuItem
+              key={name}
+              value={name}
+            >
+              {name}
+            </MenuItem>
+          ))}
+  </ Select>
+  </Grid>
 
-    <Container fluid style={{ marginTop: '10px' }}>
-      <Row>
-        <Col>
-          <InputGroup lg={3}>
-            <InputGroup.Text>File Location</InputGroup.Text>
-            <FormControl
-              placeholder="Enter file location"
-              value={fileLocation}
-              onChange={(e) => setFileLocation(e.target.value)}
+  <Grid item xs={6}>
+    <TextField
+      label="Stroke Patients"
+      variant="standard"
+      fullWidth
+      size="medium"
+      value={textInputValue}
+      onChange={handleInputChange}
+    />
+  </Grid>
+  <Grid item xs={12}>
+    <FormControl fullWidth >
+      <InputLabel id="panel-options-label">Select plot options for panel :</InputLabel>
+      <Select
+        labelId="panel-options-label"
+        id="panel-options-select"
+        value={panelOptions}
+        onChange={handlePanelChange}
+      >
+        {[1, 2, 3, 4, 5].map((number) => (
+          <MenuItem key={number} value={number}>
+            {number}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  </Grid>
+  <Grid item xs={6}>
+    <InputLabel id="demo-multiple-name-label">Group</InputLabel>
+    <Select
+            fullWidth
+            labelId="demo-multiple-name-label"
+            id="demo-multiple-name"
+            value={group}
+            onChange={(e)=>handleChange(e, setGroup)}
+            input={<OutlinedInput label="Name"  />}
+            MenuProps={MenuProps}
+          >
+            {names.map((name) => (
+              <MenuItem
+                key={name}
+                value={name}
+              >
+                {name}
+              </MenuItem>
+            ))}
+    </ Select>  
+  </Grid>
+  <Grid item xs={6}>
+    <InputLabel id="demo-multiple-name-label">Footing</InputLabel>
+    <Select
+            fullWidth
+            labelId="demo-multiple-name-label"
+            id="demo-multiple-name"
+            value={footing}
+            onChange={(e)=>handleChange(e, setFooting)}
+            input={<OutlinedInput label="Name"  />}
+            MenuProps={MenuProps}
+          >
+            {names.map((name) => (
+              <MenuItem
+                key={name}
+                value={name}
+              >
+                {name}
+              </MenuItem>
+            ))}
+    </ Select>  
+  </Grid>
+
+  <Grid item xs={6}>
+    <InputLabel id="demo-multiple-name-label">Gait Cycle</InputLabel>
+    <Select
+            fullWidth
+            labelId="demo-multiple-name-label"
+            id="demo-multiple-name"
+            value={gaitCycle}
+            onChange={(e)=>handleChange(e, setGaitCycle)}
+            input={<OutlinedInput label="Name"  />}
+            MenuProps={MenuProps}
+          >
+            {names.map((name) => (
+              <MenuItem
+                key={name}
+                value={name}
+              >
+                {name}
+              </MenuItem>
+            ))}
+    </ Select>  
+  </Grid>
+  <Grid item xs={6}   >
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isChecked}
+              onChange={handleCheckboxChange}
+              id="checkboxExample"
             />
-          </InputGroup>
-          </Col>
-      </Row>
-
-      <Row>
-      <Col lg={6}>
-
-      <InputGroup >
-        <InputGroup.Text style={{ width: 'auto', getParagraphStyle}}>Group 1:</InputGroup.Text>
-        <DropdownButton 
-          as={InputGroup.Prepend}
-          variant="outline-secondary"
-          title={trialGroup1 || "Select"}
-          id="input-group-dropdown-1"
-          alignRight
-        >
-          {[1, 2, 3, 4, 5].map((nulger) => (
-            <Dropdown.Item key={nulger} onClick={() => setTrialGroup1(nulger)}>
-              {nulger}
-            </Dropdown.Item>
-          ))}
-        </DropdownButton>
-      </InputGroup>
-
-      </Col>
-
-          <Col lg={6}>
-
-          <InputGroup >
-            <InputGroup.Text style={{ width: 'auto' }}>Group 2:</InputGroup.Text>
-            <DropdownButton 
-              as={InputGroup.Prepend}
-              variant="outline-secondary"
-              title={trialGroup2 || "Select"}
-              id="input-group-dropdown-1"
-              alignRight
-            >
-              {[1, 2, 3, 4, 5].map((nulger) => (
-                <Dropdown.Item key={nulger} onClick={() => setTrialGroup2(nulger)}>
-                  {nulger}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
-          </InputGroup>
-
-          </Col>
-      </Row>
-      <Row>
-      <Col lg={6}>
-
-      <InputGroup >
-        <InputGroup.Text style={{ width: 'auto' }}>Group 3:</InputGroup.Text>
-        <DropdownButton 
-          as={InputGroup.Prepend}
-          variant="outline-secondary"
-          title={trialGroup3 || "Select"}
-          id="input-group-dropdown-1"
-          alignRight
-        >
-          {[1, 2, 3, 4, 5].map((nulger) => (
-            <Dropdown.Item key={nulger} onClick={() => setTrialGroup3(nulger)}>
-              {nulger}
-            </Dropdown.Item>
-          ))}
-        </DropdownButton>
-      </InputGroup>
-
-      </Col>
-      <Col lg={6}>
-    
-        <InputGroup >
-          <FormControl
-            id="textInput"
-            placeholder="Stroke Patients"
-            aria-label="Text input"
-            aria-describedby="basic-addon1"
-            value={textInputValue}
-            onChange={handleInputChange}
-          />
-        </InputGroup>
-      </Col>
-
-      </Row>
-      <Row>
-      <InputGroup >
-        <InputGroup.Text >Select plot options for panel :</InputGroup.Text>
-        <DropdownButton 
-          as={InputGroup.Prepend}
-          variant="outline-secondary"
-          title={panelOptions || "Select"}
-          id="input-group-dropdown-1"
-          alignRight
-        >
-          {[1, 2, 3, 4, 5].map((nulger) => (
-            <Dropdown.Item key={nulger} onClick={() => setPanelOptions(nulger)}>
-              {nulger}
-            </Dropdown.Item>
-          ))}
-        </DropdownButton>
-      </InputGroup>
-    
-      </Row>
-
-      <Row>
-      <Col lg={6}>
-
-      <InputGroup >
-        <InputGroup.Text style={{ width: '40%' }}>Group:</InputGroup.Text>
-        <DropdownButton 
-          as={InputGroup.Prepend}
-          variant="outline-secondary"
-          title={group || "Select"}
-          id="input-group-dropdown-1"
-          alignRight
-        >
-          {[1, 2, 3, 4, 5].map((nulger) => (
-            <Dropdown.Item key={nulger} onClick={() => setGroup(nulger)}>
-              {nulger}
-            </Dropdown.Item>
-          ))}
-        </DropdownButton>
-      </InputGroup>
-
-      </Col>
-
-          <Col lg={6}>
-
-          <InputGroup >
-            <InputGroup.Text style={{ width: '40%' }}>Footing:</InputGroup.Text>
-            <DropdownButton 
-              as={InputGroup.Prepend}
-              variant="outline-secondary"
-              title={footing || "Select"}
-              id="input-group-dropdown-1"
-              alignRight
-            >
-              {[1, 2, 3, 4, 5].map((nulger) => (
-                <Dropdown.Item key={nulger} onClick={() => setFooting(nulger)}>
-                  {nulger}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
-          </InputGroup>
-
-          </Col>
-      </Row>
-
+          }
+          label="Show Spread"
+        />
+      </Grid>
+  
       
-      <Row>
-      <Col lg={6}>
 
-      <InputGroup >
-        <InputGroup.Text style={{ width: '40%' }}>Gait Cycle:</InputGroup.Text>
-        <DropdownButton 
-          as={InputGroup.Prepend}
-          variant="outline-secondary"
-          title={gaitCycle || "Select"}
-          id="input-group-dropdown-1"
-          alignRight
-        >
-          {[1, 2, 3, 4, 5].map((nulger) => (
-            <Dropdown.Item key={nulger} onClick={() => setGaitCycle(nulger)}>
-              {nulger}
-            </Dropdown.Item>
-          ))}
-        </DropdownButton>
-      </InputGroup>
-
-      </Col>
-
-          <Col lg={6} className="d-flex align-items-end">
-
-          <Form.Check
-        type="checkbox"
-        id="checkboxExample"
-        label="Show Spread"
-        checked={isChecked}
-        onChange={handleCheckboxChange}
-      />
-
-          </Col>
-      </Row>
-
-
-
-    </Container>
+</Grid>
+    
   );
 };

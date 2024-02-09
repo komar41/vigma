@@ -1,7 +1,6 @@
 import React, {useState, useEffect } from "react";
-import { Grid, TextField, FormControl, Select, MenuItem, OutlinedInput, InputLabel, FormControlLabel, Checkbox } from '@mui/material';
-import "./load-data.css";
-
+import { Grid, TextField, FormControl, Select, MenuItem, OutlinedInput, InputLabel, FormControlLabel, Checkbox } from '@mui/material';import "./load-data.css";
+import axios from 'axios';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -50,7 +49,7 @@ export const LoadData = (props) => {
 
   const [isChecked, setIsChecked] = useState(false);
 
-  const [folderNames, setFolderNames] = useState([]);
+  const [folderNames, setFolderNames] = useState(["Empty Folder List"]);
 
 
   const handleCheckboxChange = () => {
@@ -58,9 +57,45 @@ export const LoadData = (props) => {
   };
 
 
-  const getParagraphStyle = () => ({
-    fontSize: window.innerWidth < 576 ? '10px' : '16px',
-  });
+
+  useEffect(() => {
+    const handleSubmit = async () => {
+      try {
+        const response = await axios.post('http://localhost:5000/send-data', { fileLocation });
+        console.log(response.data); // Handle response from Flask backend
+        setFolderNames(response.data);
+      } catch (error) {
+        console.error('Error sending data to backend:', error);
+      }
+    };
+
+    handleSubmit();
+    
+
+    // const fetchData = async () => {
+    // console.log('Effect started',process.env.REACT_APP_BACKEND_URL + '/get_folder_names' );
+  
+    // fetch('http://127.0.0.1:5000' + '/get_folder_names')
+    //   .then(response => {
+    //     console.log('Fetching data');
+    //     return response.json();
+    //   })
+    //   .then(data => {
+    //     console.log('Data fetched:', data);
+    //     setFolderNames(data);
+    //   })
+    //   .catch(error => console.error('Error fetching folder names:', error));
+  
+    // return () => {
+    //   console.log('Effect cleanup');
+    // };
+
+  // };
+
+  // fetchData();
+
+
+  }, [fileLocation]);
 
 
   const names = [
@@ -124,24 +159,6 @@ export const LoadData = (props) => {
     setPanelOptions(event.target.value);
   };
 
-  useEffect(() => {
-    console.log('Effect started',process.env.REACT_APP_BACKEND_URL + '/get_folder_names' );
-  
-    fetch('http://127.0.0.1:5000' + '/get_folder_names')
-      .then(response => {
-        console.log('Fetching data');
-        return response.json();
-      })
-      .then(data => {
-        console.log('Data fetched:', data);
-        setFolderNames(data);
-      })
-      .catch(error => console.error('Error fetching folder names:', error));
-  
-    return () => {
-      console.log('Effect cleanup');
-    };
-  }, []);
   return (
 <Grid container spacing={3}>
   <Grid item xs={12}>

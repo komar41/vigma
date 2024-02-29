@@ -1,6 +1,7 @@
 import React, {useState, useEffect } from "react";
-import { Grid, TextField, FormControl, Select, MenuItem, OutlinedInput, InputLabel, FormControlLabel, Checkbox } from '@mui/material';import "./load-data.css";
+import { Grid, Button, TextField, FormControl, Select, MenuItem, OutlinedInput, InputLabel, FormControlLabel, Checkbox } from '@mui/material';import "./load-data.css";
 import axios from 'axios';
+import MultipleSelect from "./subComponents/multipleSelect";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -17,6 +18,7 @@ const MenuProps = {
 
 // LoadData component
 export const LoadData = (props) => {
+  const [tempFileLocation, setTempFileLocation] = useState("");
   const [fileLocation, setFileLocation] = useState("");
 
   const [pInput, setPInput] = useState("");
@@ -71,30 +73,6 @@ export const LoadData = (props) => {
 
     handleSubmit();
     
-
-    // const fetchData = async () => {
-    // console.log('Effect started',process.env.REACT_APP_BACKEND_URL + '/get_folder_names' );
-  
-    // fetch('http://127.0.0.1:5000' + '/get_folder_names')
-    //   .then(response => {
-    //     console.log('Fetching data');
-    //     return response.json();
-    //   })
-    //   .then(data => {
-    //     console.log('Data fetched:', data);
-    //     setFolderNames(data);
-    //   })
-    //   .catch(error => console.error('Error fetching folder names:', error));
-  
-    // return () => {
-    //   console.log('Effect cleanup');
-    // };
-
-  // };
-
-  // fetchData();
-
-
   }, [fileLocation]);
 
 
@@ -159,85 +137,56 @@ export const LoadData = (props) => {
     setPanelOptions(event.target.value);
   };
 
+
+
   return (
 <Grid container spacing={3}>
-  <Grid item xs={12}>
+  <Grid item xs={8}>
   <TextField
           placeholder="Enter file location"
           label="File Location" variant="outlined"
           fullWidth
           size="medium"
-          value={fileLocation}
-          onChange={(e) => setFileLocation(e.target.value)}
+          value={tempFileLocation}
+          onChange={(e) => setTempFileLocation(e.target.value)}
         />
+        </Grid>
+  <Grid item xs={4}>
+  <Button
+  variant="contained"
+  onClick={() => setFileLocation(tempFileLocation)}
+>
+  Submit
+</Button>
   </Grid>
   <Grid item xs={6}>
-  <InputLabel id="demo-multiple-name-label">Group 1</InputLabel>
-  <Select
-          fullWidth
-          labelId="demo-multiple-name-label"
-          id="demo-multiple-name"
-          multiple
-          value={trialGroup1}
-          onChange={(e)=>handleChange(e, setTrialGroup1)}
-          input={<OutlinedInput label="Name"  />}
-          MenuProps={MenuProps}
-        >
-          {folderNames.map((name) => (
-            <MenuItem
-              key={name}
-              value={name}
-            >
-              {name}
-            </MenuItem>
-          ))}
-  </ Select>
+  <MultipleSelect
+          title="Group 1"
+          options={folderNames}
+          selectedValue={trialGroup1}
+          multiple={true}
+          onChange={(selected) => setTrialGroup1(selected)} 
+          />
   </Grid>
   <Grid item xs={6}>
-  <InputLabel id="demo-multiple-name-label">Group 2</InputLabel>
-  <Select
-          fullWidth
-          labelId="demo-multiple-name-label"
-          id="demo-multiple-name"
-          multiple
-          value={trialGroup2}
-          onChange={(e)=>handleChange(e, setTrialGroup2)}
-          input={<OutlinedInput label="Name"  />}
-          MenuProps={MenuProps}
-        >
-          {folderNames.map((name) => (
-            <MenuItem
-              key={name}
-              value={name}
-            >
-              {name}
-            </MenuItem>
-          ))}
-  </ Select>
+  <MultipleSelect
+          title="Group 2"
+          options={folderNames}
+          selectedValue={trialGroup2}
+          multiple={true}
+          onChange={(selected) => setTrialGroup2(selected)} 
+          />
   </Grid>
   <Grid item xs={6}>
-  <InputLabel id="demo-multiple-name-label">Group 3</InputLabel>
-  <Select
-          fullWidth
-          labelId="demo-multiple-name-label"
-          id="demo-multiple-name"
-          value={trialGroup3}
-          onChange={(e)=>handleChange(e, setTrialGroup3)}
-          input={<OutlinedInput label="Name"  />}
-          MenuProps={MenuProps}
-        >
-          {names.map((name) => (
-            <MenuItem
-              key={name}
-              value={name}
-            >
-              {name}
-            </MenuItem>
-          ))}
-  </ Select>
+  <MultipleSelect
+          title="Group Label"
+          options={names}
+          selectedValue={trialGroup3}
+          onChange={ setTrialGroup3} 
+          />
   </Grid>
 
-  <Grid item xs={6}>
+  {/* <Grid item xs={6}>
     <TextField
       label="Stroke Patients"
       variant="standard"
@@ -245,8 +194,8 @@ export const LoadData = (props) => {
       size="medium"
       value={textInputValue}
       onChange={handleInputChange}
-    />
-  </Grid>
+    /> 
+  </Grid>*/}
   <Grid item xs={12}>
     <FormControl fullWidth >
       <InputLabel id="panel-options-label">Select plot options for panel :</InputLabel>

@@ -7,6 +7,7 @@ import base64
 import pandas as pd
 import requests  
 import zipfile
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -331,12 +332,26 @@ def receive_data():
     if folder_location and os.path.exists(folder_location):
         # List all files inside the folder and its subfolders
         file_list = []
-        for root, dirs, files in os.walk(folder_location):
-            for file in files:
-                file_list.append(os.path.join(root, file))
+
+        folder_files = {}
+                # Iterate through the folders
+        for entry in os.listdir(folder_location):
+            full_path = os.path.join(folder_location, entry)
+            if os.path.isdir(full_path):
+                folder_files[entry] = []
+                for file in os.listdir(full_path):
+                    if file.startswith(entry):  # Check if file name starts with folder name
+                        file_path = os.path.join(full_path, file)
+                        if os.path.isfile(file_path):  # Make sure it's a file
+                            # Add the file name to the list corresponding to this folder
+                            folder_files[entry].append(file)
+
+
+        # Convert the dictionary to JSON format
+        json_output = json.dumps(folder_files, indent=4)
 
         # Return the list of files as JSON
-        return jsonify(file_list)
+        return json_output
     else:
         # Return an empty JSON array if folder doesn't exist
         return jsonify([])

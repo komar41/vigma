@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Grid, Button, TextField, FormControl, Select, MenuItem, OutlinedInput, InputLabel, FormControlLabel, Checkbox } from '@mui/material';
 import axios from 'axios';
 import MultipleSelect from "./subComponents/multipleSelect";
+
+import { TreeSelect } from "primereact/treeselect";
+import { NodeService } from "./service/NodeService";
+
+import "primeflex/primeflex.css";
+import "primereact/resources/primereact.css";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
 //import FolderFileList from "./subComponents/FolderFileList";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -41,8 +48,8 @@ export const LoadData = (props) => {
   const [folder2Names, setFolder2Names] = useState(["Empty Folder List"]);
   const [fileteredFolder1Names, setfileteredFolder1Names] = useState(["Empty Folder List"]);
   const [fileteredFolder2Names, setfileteredFolder2Names] = useState(["Empty Folder List"]);
-  const panelOptions = [1, 2, 3, 4, 5]; // Assuming 'names' are used for multiple selects
-  const groupOptions = [1, 2]; // Assuming 'names' are used for multiple selects
+  const panelOptions = [1, 2, 3, 4, 5]; 
+  const parameterOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx']; 
   const footingOptions = ["left","right"]; // Assuming 'names' are used for multiple selects
   const gaitCycleOptions = ["left","right"]; // Assuming 'names' are used for multiple selects
 
@@ -139,6 +146,12 @@ export const LoadData = (props) => {
 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\.DS_Store', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\081517ap\\081517apstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\081517ap\\081517ap_8_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\081517ap\\081517ap_8_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\081517ap\\081517ap_9_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\081517ap\\081517ap_9_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\083117ji\\.DS_Store', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\083117ji\\083117jistep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\083117ji\\083117ji_49_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\083117ji\\083117ji_49_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\083117ji\\083117ji_50_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\083117ji\\083117ji_50_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\090717jg\\090717jgstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\090717jg\\090717jg_42_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\090717jg\\090717jg_42_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\090717jg\\090717jg_43_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\090717jg\\090717jg_43_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\091917yd\\091917ydstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\091917yd\\091917yd_47_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\091917yd\\091917yd_47_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\091917yd\\091917yd_50_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\091917yd\\091917yd_50_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100217jw\\100217jwstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100217jw\\100217jw_10_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100217jw\\100217jw_10_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100217jw\\100217jw_9_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100217jw\\100217jw_9_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100317wt\\100317wtstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100317wt\\100317wt_39_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100317wt\\100317wt_39_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100317wt\\100317wt_40_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\100317wt\\100317wt_40_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101117th\\101117thstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101117th\\101117th_31_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101117th\\101117th_31_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101117th\\101117th_32_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101117th\\101117th_32_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101217al\\101217alstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101217al\\101217al_29_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101217al\\101217al_29_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101217al\\101217al_30_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101217al\\101217al_30_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101317mm\\101317mmstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101317mm\\101317mm_78_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101317mm\\101317mm_78_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101317mm\\101317mm_79_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101317mm\\101317mm_79_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101617lw\\101617lwstep.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101617lw\\101617lw_30_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101617lw\\101617lw_30_jnt.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101617lw\\101617lw_31_grf.csv', 'D:\\Research Assistant\\eMoGis\\BackendFlask\\data\\healthy_controls\\101617lw\\101617lw_31_jnt.csv'
   ];
 
+  const [nodes, setNodes] = useState(null);
+  const [selectedNodeKeys, setSelectedNodeKeys] = useState(null);
+
+  useEffect(() => {
+    NodeService.getTreeNodes().then((data) => setNodes(data));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
 
   return (
@@ -170,11 +183,11 @@ export const LoadData = (props) => {
               name="parameter"
               labelId="parameter-label"
               id="parameter-select"
-              value={formData.panelOptions}
+              value={formData.parameter}
               onChange={handleChange}
               MenuProps={MenuProps}
             >
-              {panelOptions.map((number) => (
+              {parameterOptions.map((number) => (
                 <MenuItem key={number} value={number}>
                   {number}
                 </MenuItem>
@@ -225,13 +238,16 @@ export const LoadData = (props) => {
         </Grid>
         <Grid container spacing={2} columns={12}>
         <Grid item xs={6}  >
-          <MultipleSelect
-            title="Group 1"
-            options={fileteredFolder1Names}
-            selectedValue={formData.trialGroup1}
-            multiple={true}
-            onChange={(selected) => handleGroupChange(selected, 'trialGroup1')} 
-          />
+        <TreeSelect
+            value={selectedNodeKeys}
+            onChange={(e) => setSelectedNodeKeys(e.value)}
+            options={nodes}
+            metaKeySelection={false}
+            className="w-full"
+            selectionMode="checkbox"
+            display="chip"
+            placeholder="Select Items"
+          ></TreeSelect>
         </Grid>
 
         <Grid item xs={6} >

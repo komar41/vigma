@@ -23,9 +23,6 @@ from scipy.signal import argrelextrema
 import glob
 import sys
 
-
-
-
 def interpolate_data(df, min_points):
     indices = np.arange(len(df))
     interpolated_data = pd.DataFrame()
@@ -381,6 +378,8 @@ def fetch_csv_data(file_location):
     except Exception as e:
         print(f"An error occurred while reading the CSV file: {e}")
         return None
+
+  
 
 @app.route('/process-form-data', methods=['PUT'])
 def process_form_data():

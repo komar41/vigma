@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import './lineChart.css';
 
 const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spread, group2Spread, group1Footing, group2Footing  }) => {
   const svgRef = useRef();
@@ -42,6 +43,24 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
       .domain([-100,50])
       .range([height, 0]);
 
+
+      // Add X grid lines
+svg.append("g")
+.attr("class", "grid")
+.attr("transform", "translate(0," + height + ")")
+.call(d3.axisBottom(x)
+    .tickSize(-height)
+    .tickFormat("")
+);
+
+// Add Y grid lines
+svg.append("g")
+.attr("class", "grid")
+.call(d3.axisLeft(y)
+    .tickSize(-width)
+    .tickFormat("")
+);
+
     svg.append("g")
       .call(d3.axisLeft(y));
     console.log("Line chart data",group1Data);
@@ -50,9 +69,9 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
     // Show confidence interval
     svg.append("path")
       .datum(group1Data)
-      .attr("fill", "red")
-      .attr("stroke", "#000000")
-      .attr("opacity", 0.3)
+      .attr("fill", "#ffb4a2")
+      .attr("stroke", "none")
+      .attr("opacity", 0.5)
       .attr("d", d3.area()
         .x(function (d) { return x(d.time) })
         .y0(function (d) { return y(d[lfootKeyGroup1]) })
@@ -104,7 +123,7 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
       svg.append("path")
         .datum(group2Data)
         .attr("fill", "none")
-        .attr("stroke", "black")
+        .attr("stroke", "#114232")       //green line
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
           .x(function (d) { return x(d.time) })
@@ -118,8 +137,8 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
       
       svg.append("path")
         .datum(group2Data)
-        .attr("fill", "grey")
-        .attr("stroke", "grey")
+        .attr("fill", "#87A922")        //green spread
+        .attr("stroke", "#87A922")
         .attr("opacity", 0.3 )
         .attr("d", d3.area()
           .x(function (d) { return x(d.time) })

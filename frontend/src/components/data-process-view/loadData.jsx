@@ -105,6 +105,7 @@ export const LoadData = (props) => {
       ...prevState,
       [name]: value,
     }));
+    console.log("Form Data",formData);
   };
 
 
@@ -122,18 +123,31 @@ export const LoadData = (props) => {
   const handleFormSubmitChild = async (e) => {
     e.preventDefault();
     try {
-      setFormData((prevState) => ({
-        ...prevState,
-        "group1SelectedFiles": selectedNodeKeysGroup1,
-      }));
-  
-      setFormData((prevState) => ({
-        ...prevState,
-        "group2SelectedFiles": selectedNodeKeysGroup2,
-      }));
 
-      console.log("Form Data Child",formData);
-      await props.handleFormSubmitParent(formData); // Call parent function with form data
+      const updatedFormData = {
+        ...formData,
+        group1SelectedFiles: selectedNodeKeysGroup1,
+        group2SelectedFiles: selectedNodeKeysGroup2,
+      };
+    
+      console.log("Form Data Child", updatedFormData);
+    
+      // Now use updatedFormData instead of formData
+      await props.handleFormSubmitParent(updatedFormData);
+
+
+      // setFormData((prevState) => ({
+      //   ...prevState,
+      //   "group1SelectedFiles": selectedNodeKeysGroup1,
+      // }));
+  
+      // setFormData((prevState) => ({
+      //   ...prevState,
+      //   "group2SelectedFiles": selectedNodeKeysGroup2,
+      // }));
+
+      // console.log("Form Data Child",formData);
+      // await props.handleFormSubmitParent(formData); // Call parent function with form data
     } catch (error) {
       console.error('Error sending form data to parent:', error);
     }
@@ -141,7 +155,7 @@ export const LoadData = (props) => {
 
 
   return (
-    <form onSubmit={handleFormSubmitChild}>
+    <>
       <Grid container spacing={1}>
       <Grid item xs={10}>
           <TextField
@@ -244,7 +258,9 @@ export const LoadData = (props) => {
           </FormControl>
         </Grid>
       <Grid item xs={6} style={{ paddingTop: '10px' }}>
-          <Button type="submit" variant="contained" size="small">
+          <Button variant="contained" size="small"
+          onClick={(e) => handleFormSubmitChild(e)}
+          >
             Process
           </Button>
         </Grid>
@@ -388,13 +404,13 @@ export const LoadData = (props) => {
             </Select>
           </FormControl>
         </Grid>
-        {/* <Grid item xs={6}>
+        <Grid item xs={6}>
           <Button type="submit" variant="contained" size="small">
             Submit
           </Button>
-        </Grid> */}
         </Grid>
-    </form>
+        </Grid>
+    </>
   );
 };
 

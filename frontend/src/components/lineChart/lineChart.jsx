@@ -1,8 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spread, group2Spread  }) => {
+const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spread, group2Spread, group1Footing, group2Footing  }) => {
   const svgRef = useRef();
+  const mfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_m' : 'Lfoot_m';
+  const lfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
+  const ufootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
+
+  const mfootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_m' : 'Lfoot_m';
+  const lfootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
+  const ufootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
+
 
   useEffect(() => {
     if (!group1Data)
@@ -47,8 +55,8 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
       .attr("opacity", 0.3)
       .attr("d", d3.area()
         .x(function (d) { return x(d.time) })
-        .y0(function (d) { return y(d.Lfoot_l) })
-        .y1(function (d) { return y(d.Lfoot_u) })
+        .y0(function (d) { return y(d[lfootKeyGroup1]) })
+        .y1(function (d) { return y(d[ufootKeyGroup1]) })
       );
 
 
@@ -62,7 +70,7 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
     .attr("stroke", "red")
     .attr("d", d3.line()
       .x(function (d) { return x(d.time) })
-      .y(function (d) { return y(d.Lfoot_m) })
+      .y(function (d) { return y(d[mfootKeyGroup1]) })
     );
 
 
@@ -100,7 +108,7 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
           .x(function (d) { return x(d.time) })
-          .y(function (d) { return y(d.Lfoot_m) })
+          .y(function (d) { return y(d[mfootKeyGroup2]) })
         );
 
 
@@ -115,8 +123,8 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
         .attr("opacity", 0.3 )
         .attr("d", d3.area()
           .x(function (d) { return x(d.time) })
-          .y0(function (d) { return y(d.Lfoot_l) })
-          .y1(function (d) { return y(d.Lfoot_u) })
+          .y0(function (d) { return y(d[lfootKeyGroup2]) })
+          .y1(function (d) { return y(d[ufootKeyGroup2]) })
         );
       }
     //const legendYPosition = height + margin.bottom - 20;

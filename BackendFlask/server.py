@@ -25,6 +25,7 @@ import sys
 
 
 
+
 def interpolate_data(df, min_points):
     indices = np.arange(len(df))
     interpolated_data = pd.DataFrame()
@@ -51,7 +52,10 @@ def get_normalized_data(file_location, data_files, col):
     def normalize_data(file_location, data_files, col):
         min_points = 100
         array_L_cycle, array_R_cycle = [], []
-        #print("data files",data_files)
+        
+        print("data files",data_files)
+
+
         for file in data_files:
             #print("files",file)
             # Use os.path.dirname to get the directory name of the filepath
@@ -60,7 +64,7 @@ def get_normalized_data(file_location, data_files, col):
             # Use os.path.basename to get the base name (i.e., the last component) of the directory
             desired_name = os.path.basename(directory_name)
 
-            #print("desired files",desired_name)
+            print("desired files",desired_name)
             
             
             patient_id = file.split('\\')[-2]
@@ -323,12 +327,15 @@ def create_zip_with_csv(files, zip_name):
 
 
 
+
+
 @app.route('/send-data', methods=['POST'])
 def receive_data():
     # Get folder location from the frontend
+
     data = request.json
     folder_location = data.get('fileLocation')
-
+    
     if folder_location and os.path.exists(folder_location):
         # List all files inside the folder and its subfolders
         file_list = []
@@ -336,24 +343,32 @@ def receive_data():
         folder_files = {}
                 # Iterate through the folders
         for entry in os.listdir(folder_location):
+            print("Entry:", entry)
             full_path = os.path.join(folder_location, entry)
             if os.path.isdir(full_path):
-                folder_files[entry] = []
-                for file in os.listdir(full_path):
-                    if file.startswith(entry):  # Check if file name starts with folder name
-                        file_path = os.path.join(full_path, file)
-                        if os.path.isfile(file_path):  # Make sure it's a file
-                            # Add the file name to the list corresponding to this folder
-                            folder_files[entry].append(file)
+                print("Full Path:", full_path)
+                folder_files[entry] = {}
+                for sub_entry in os.listdir(full_path):
+                    sub_full_path = os.path.join(full_path, sub_entry)
+                    if os.path.isdir(sub_full_path):
+                        folder_files[entry][sub_entry] = []  # Initialize the list for this subfolder
+                        for file in os.listdir(sub_full_path):
+                            if file.startswith(sub_entry):  # Check if file name starts with subfolder name
+                                file_path = os.path.join(sub_full_path, file)
+                                if os.path.isfile(file_path):  # Make sure it's a file
+                                    # Add the file name to the list corresponding to this subfolder
+                                    folder_files[entry][sub_entry].append(file)
 
 
         # Convert the dictionary to JSON format
         json_output = json.dumps(folder_files, indent=4)
+        print("JSON Output",json_output)
 
         # Return the list of files as JSON
         return json_output
     else:
         # Return an empty JSON array if folder doesn't exist
+        print("Folder doesn't exist")
         return jsonify([])
 
 #CSV_URL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_IC.csv"
@@ -371,24 +386,65 @@ def fetch_csv_data(file_location):
 def process_form_data():
     form_data = request.json
     # Access the form data fields as needed
-    file_1_location = form_data.get('file1Location')
-    file_2_location = form_data.get('file2Location')
+    group1FileLocation = form_data.get('file1Location')
+    group2FileLocation = form_data.get('file2Location')
+    group1Files = form_data.get('group1SelectedFiles')
+    group2Files = form_data.get('group2SelectedFiles')
+    print("group 1 File location",group1FileLocation)
+    print("group 2 File location",group2FileLocation)
+    print("Group 1 Files",group1Files)
+    print("Group 2 Files",group2Files)
 
-    # Check if the provided paths are valid directories
-    if not os.path.isdir(file_1_location) or not os.path.isdir(file_2_location):
-        print("Error: Invalid directory paths.")
-        sys.exit(1)
+    # patternFilesGroup1 = [fname for fname, status in group1Files.items() if '_jnt.csv' in fname and status['checked']]
+    # print("Pattern Files",patternFilesGroup1)
+    # # Now, we want to check if these files actually exist in your directory structure and collect them
+    # grp_1_files = []
+    # for fname in patternFilesGroup1:
+    #     # Create the pattern for glob to match any files that include this file name in the directory/subdirectories
+    #     folder_name, file_name = fname.split('-', 1) 
+    #     search_pattern = os.path.join(group1FileLocation, folder_name, file_name)
+    #     # Use glob to find matching files (in case there are matching files in subdirectories)
+    #     matched_files = glob.glob(search_pattern, recursive=True)
+    #     grp_1_files.extend(matched_files)
 
-    grp_1_files = glob.glob(os.path.join(file_1_location, '**', '*jnt.csv'), recursive=True)
-    grp_2_files = glob.glob(os.path.join(file_2_location, '**', '*jnt.csv'), recursive=True)
-    #print("\n\n\n\n group 1 files")
-    #print(grp_1_files)
+    # patternFilesGroup2 = [fname for fname, status in group2Files.items() if '_jnt.csv' in fname and status['checked']]
+    # print("Pattern Files",patternFilesGroup2)
+    # # Now, we want to check if these files actually exist in your directory structure and collect them
+    # grp_2_files = []
+    # for fname in patternFilesGroup2:
+    #     # Create the pattern for glob to match any files that include this file name in the directory/subdirectories
+    #     folder_name, file_name = fname.split('-', 1) 
+    #     search_pattern = os.path.join(group1FileLocation, folder_name, file_name)
+    #     # Use glob to find matching files (in case there are matching files in subdirectories)
+    #     matched_files = glob.glob(search_pattern, recursive=True)
+    #     grp_2_files.extend(matched_files)
+
+    # # Check if the provided paths are valid directories
+    # if not os.path.isdir(file_1_location) or not os.path.isdir(file_2_location):
+    #     print("Error: Invalid directory paths.")
+    #     sys.exit(1)
+
+
+    # print("Group 1 Files",grp_1_files)
+    # #print("\n\n\n\n group 1 files")
+    # #print(grp_1_files)
 
     cols = ['foot', 'shank', 'thigh', 'trunk', 'hipx']
     # cols = ['AP', 'ML', 'VT']
 
+
+    group1FileLocationOld= os.path.join(group1FileLocation, 'healthy_controls')
+    print("Group 1 File Location Old",group1FileLocationOld)
+    group2FileLocationOld = os.path.join(group1FileLocation, 'stroke_patients') 
+    print("Group 2 File Location Old",group2FileLocationOld) 
+
+    grp_1_filesOld = glob.glob(os.path.join(group1FileLocationOld, '**', '*jnt.csv'), recursive=True)
+    grp_2_filesOld = glob.glob(os.path.join(group2FileLocationOld, '**', '*jnt.csv'), recursive=True)
+
+    print("Group 1 Files Old",grp_1_filesOld)    
+
     # Generate images
-    path = generate_images(file_1_location, file_2_location, grp_1_files, grp_2_files, cols)
+    path = generate_images(group1FileLocationOld, group2FileLocationOld, grp_1_filesOld, grp_2_filesOld, cols)
 
     zipFilePath = create_zip_with_csv(path, 'output.zip')
     #print("CSV Data12",csv_data)

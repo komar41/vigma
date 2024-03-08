@@ -373,7 +373,7 @@ export const DataProcessView = (props) => {
             
           /> 
         </Grid>
-
+ 
         <Grid item xs={12} md={6} lg={3} style={{ margin: '20px' }}>
           <LineChart group1Data={lineChartData1Group1Data} group2Data={lineChartData1Group2Data} 
           group1Label={lineChartData1Group1Label} group2Label={lineChartData1Group2Label} 

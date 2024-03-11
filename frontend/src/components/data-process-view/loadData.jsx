@@ -21,22 +21,43 @@ const MenuProps = {
 };
 
 export const LoadData = (props) => {
-  const [formData, setFormData] = useState({
-    temp1FileLocation: "",
-    file1Location: "",
-    group1SelectedFiles: [],
-    group2SelectedFiles: [],
-    group1Label: "",
-    group2Label: "",
-    panelOptions: "",
-    parameter: "",
-    group1Footing: "",
-    group1GaitCycle: "",
-    group2Footing: "",
-    group2GaitCycle: "",
-    isGroup1Checked: false,
-    isGroup2Checked: false,
-  });
+//   const [formData, setFormData] = useState({
+//     temp1FileLocation: "",
+//     file1Location: "",
+//     group1SelectedFiles: [],
+//     group2SelectedFiles: [],
+//     group1Label: "",
+//     group2Label: "",
+//     panelOptions: "",
+//     parameter: "",
+//     group1Footing: "",
+//     group1GaitCycle: "",
+//     group2Footing: "",
+//     group2GaitCycle: "",
+//     isGroup1Checked: false,
+//     isGroup2Checked: false,
+//   });
+
+const [processFormData, setProcessFormData] = useState({
+  temp1FileLocation: "",
+  file1Location: "",
+  group1SelectedFiles: [],
+  group2SelectedFiles: [],
+  parameter: "",
+});
+
+const [submitFormData, setSubmitFormData] = useState({
+  group1Label: "",
+  group2Label: "",
+  group1Footing: "",
+  group1GaitCycle: "",
+  group2Footing: "",
+  group2GaitCycle: "",
+  isGroup1Checked: false,
+  isGroup2Checked: false,
+  panelOptions: "",
+});
+
 
 
   const panelOptions = [1, 2, 3, 4, 5]; 
@@ -55,9 +76,9 @@ export const LoadData = (props) => {
   
   useEffect(() => {
     const fetchFolders = async () => {
-      if (formData.file1Location) {
+      if (processFormData.file1Location) {
         try {
-          const response = await axios.post('http://localhost:5000/send-data', { fileLocation: formData.file1Location });
+          const response = await axios.post('http://localhost:5000/send-data', { fileLocation: processFormData.file1Location });
           console.log("Flask Response",response.data); // Handle response from Flask backend
           NodeService.updateData(response.data);
           // Retrieve the updated tree structure
@@ -70,47 +91,92 @@ export const LoadData = (props) => {
     };
     fetchFolders();
     
-  }, [formData.file1Location]);
+  }, [processFormData.file1Location]);
 
 
-  const handleChange = (event) => {
+  // const handleChange = (event) => {
+  //   const { name, value } = event.target;
+  //   setFormData((prevState) => ({
+  //     ...prevState,
+  //     [name]: value,
+  //   }));
+  //   console.log("Form Data",formData);
+  // };
+
+  const handleProcessChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prevState) => ({
+    setProcessFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
-    console.log("Form Data",formData);
-  };
+};
 
+const handleSubmitChange = (event) => {
+    const { name, value } = event.target;
+    setSubmitFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+};
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target; // Destructure name and checked from the event target
-    setFormData((prevState) => ({
+    setSubmitFormData((prevState) => ({
       ...prevState,
       [name]: checked, // Use computed property name based on the checkbox name
     }));
 };
 
 
-const handleFormSubmitChild = async (e) => {
-    e.preventDefault();
-    try {
+// const handleFormSubmitChild = async (e) => {
+//     e.preventDefault();
+//     try {
 
-      const updatedFormData = {
-        ...formData,
-        group1SelectedFiles: selectedNodeKeysGroup1,
-        group2SelectedFiles: selectedNodeKeysGroup2,
-      };
+//       const updatedFormData = {
+//         ...formData,
+//         group1SelectedFiles: selectedNodeKeysGroup1,
+//         group2SelectedFiles: selectedNodeKeysGroup2,
+//       };
     
-      console.log("Form Data Child", updatedFormData);
+//       console.log("Form Data Child", updatedFormData);
+//       await props.handleFormSubmitParent(updatedFormData);
+
+
+
+//     } catch (error) {
+//       console.error('Error sending form data to parent:', error);
+//     }
+//   };
+
+const handleProcessSubmit = async (e) => {
+  e.preventDefault();
+  try {
+      const updatedFormData = {
+          ...processFormData,
+          group1SelectedFiles: selectedNodeKeysGroup1,
+          group2SelectedFiles: selectedNodeKeysGroup2,
+      };
+      // Process the data (similar to your existing functionality)
+      console.log("Process Form Data", updatedFormData);
+      // Assuming you want to keep similar functionality but for different purposes
       await props.handleFormSubmitParent(updatedFormData);
+  } catch (error) {
+      console.error('Error processing data:', error);
+  }
+};
 
+const handleSubmitForm = async (e) => {
+  e.preventDefault();
+  try {
+      // Similar structure to handleProcessSubmit
+      console.log("Submit Form Data", submitFormData);
+      // Send the data (you can pass this to another component or perform another action)
+      await props.handleFormSubmitParent2(submitFormData);
+  } catch (error) {
+      console.error('Error submitting data:', error);
+  }
+};
 
-
-    } catch (error) {
-      console.error('Error sending form data to parent:', error);
-    }
-  };
 
 
   return (
@@ -123,8 +189,8 @@ const handleFormSubmitChild = async (e) => {
             label="File Location"
             variant="filled"
             fullWidth
-            value={formData.temp1FileLocation}
-            onChange={handleChange}
+            value={processFormData.temp1FileLocation}
+            onChange={handleProcessChange}
             size="small"
           />
         </Grid>
@@ -132,7 +198,7 @@ const handleFormSubmitChild = async (e) => {
           <Button
             variant="contained"
             size="small"
-            onClick={() => setFormData({ ...formData, file1Location: formData.temp1FileLocation })}
+            onClick={() => setProcessFormData({ ...processFormData, file1Location: processFormData.temp1FileLocation })}
           >
             Set
           </Button>
@@ -179,8 +245,8 @@ const handleFormSubmitChild = async (e) => {
               name="parameter"
               labelId="parameter-label"
               id="parameter-select"
-              value={formData.parameter}
-              onChange={handleChange}
+              value={processFormData.parameter}
+              onChange={handleProcessChange}
               MenuProps={MenuProps}
             >
               {parameterOptions.map((number) => (
@@ -193,7 +259,7 @@ const handleFormSubmitChild = async (e) => {
         </Grid>
       <Grid item xs={6} style={{ paddingTop: '10px' }}>
           <Button variant="contained" size="small"
-          onClick={(e) => handleFormSubmitChild(e)}
+          onClick={(e) => handleProcessSubmit(e)}
           >
             Process
           </Button>
@@ -211,8 +277,8 @@ const handleFormSubmitChild = async (e) => {
             label="Group 1 Label"
             variant="standard"
             fullWidth
-            value={formData.group1Label}
-            onChange={handleChange}
+            value={submitFormData.group1Label}
+            onChange={handleSubmitChange}
           />
         </Grid>
 
@@ -223,8 +289,8 @@ const handleFormSubmitChild = async (e) => {
           label="Group 2 Label"
           variant="standard"
           fullWidth
-          value={formData.group2Label}
-          onChange={handleChange}
+          value={submitFormData.group2Label}
+          onChange={handleSubmitChange}
         />
       </Grid>
 
@@ -236,8 +302,8 @@ const handleFormSubmitChild = async (e) => {
               name="group1Footing"
               labelId="group1-footing-label"
               id="group1-footing-select"
-              value={formData.group1Footing}
-              onChange={handleChange}
+              value={submitFormData.group1Footing}
+              onChange={handleSubmitChange}
               MenuProps={MenuProps}
             >
               {footingOptions.map((name) => (
@@ -255,8 +321,8 @@ const handleFormSubmitChild = async (e) => {
               name="group2Footing"
               labelId="group2-footing-label"
               id="group2-footing-select"
-              value={formData.group2Footing}
-              onChange={handleChange}
+              value={submitFormData.group2Footing}
+              onChange={handleSubmitChange}
               MenuProps={MenuProps}
             >
               {footingOptions.map((name) => (
@@ -274,8 +340,8 @@ const handleFormSubmitChild = async (e) => {
               name="group1GaitCycle"
               labelId="group1-gait-cycle-label"
               id="group1-gait-cycle-select"
-              value={formData.group1GaitCycle}
-              onChange={handleChange}
+              value={submitFormData.group1GaitCycle}
+              onChange={handleSubmitChange}
               MenuProps={MenuProps}
             >
               {gaitCycleOptions.map((name) => (
@@ -293,8 +359,8 @@ const handleFormSubmitChild = async (e) => {
               name="group2GaitCycle"
               labelId="group2-gait-cycle-label"
               id="group2-gait-cycle-select"
-              value={formData.group2GaitCycle}
-              onChange={handleChange}
+              value={submitFormData.group2GaitCycle}
+              onChange={handleSubmitChange}
               MenuProps={MenuProps}
             >
               {gaitCycleOptions.map((name) => (
@@ -307,13 +373,13 @@ const handleFormSubmitChild = async (e) => {
         </Grid>
         <Grid item xs={6} >
           <FormControlLabel
-            control={<Checkbox checked={formData.isGroup1Checked} onChange={handleCheckboxChange} name="isGroup1Checked" />}
+            control={<Checkbox checked={submitFormData.isGroup1Checked} onChange={handleCheckboxChange} name="isGroup1Checked" />}
             label="Group1 Spread"
           />
         </Grid>
         <Grid item xs={6} >
           <FormControlLabel
-            control={<Checkbox checked={formData.isGroup2Checked} onChange={handleCheckboxChange} name="isGroup2Checked" />}
+            control={<Checkbox checked={submitFormData.isGroup2Checked} onChange={handleCheckboxChange} name="isGroup2Checked" />}
             label="Group2 Spread"
           />
         </Grid>
@@ -325,8 +391,8 @@ const handleFormSubmitChild = async (e) => {
               name="panelOptions"
               labelId="panel-options-label"
               id="panel-options-select"
-              value={formData.panelOptions}
-              onChange={handleChange}
+              value={submitFormData.panelOptions}
+              onChange={handleSubmitChange}
               // MenuProps={MenuProps}
               size="small"
             >
@@ -339,7 +405,7 @@ const handleFormSubmitChild = async (e) => {
           </FormControl>
         </Grid>
         <Grid item xs={6}>
-          <Button type="submit" variant="contained" size="small">
+          <Button type="submit" variant="contained" size="small" onClick={(e) =>handleSubmitForm(e)}>
             Submit
           </Button>
         </Grid>

@@ -2,10 +2,27 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import './lineChart.css';
 
-const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spread, group2Spread, group1Footing, group2Footing  }) => {
+const LineChart = 
+({ chartData }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 }); // State for dimensions
+  // console.log("Line chart data inside the plot component",chartData);
+  const active = chartData.active;
+  const plotNumber = chartData.plotNumber;
+  const group1Data = chartData.group1Data;
+  const group2Data = chartData.group2Data;
+  const group1Label = chartData.group1Label;
+  const group2Label  = chartData.group2Label;
+  const group1Spread  = chartData.group1Spread;
+  const group2Spread  = chartData.group2Spread;
+  const group1Footing  = chartData.group1Footing;
+  const group2Footing = chartData.group2Footing;
+  const group1Cycle = chartData.group1GaitCycle;
+  const group2Cycle = chartData.group2GaitCycle;
+  
+  const [dimensions, setDimensions] = useState({ width: 450, height: 450 }); // State for dimensions
+  const [dimensionsInitialized, setDimensionsInitialized] = useState(false);
+
   const mfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_m' : 'Lfoot_m';
   const lfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
   const ufootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
@@ -14,14 +31,49 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
   const lfootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
   const ufootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
 
+  const Tooltip = ({ text, x, y }) => (
+    <div
+      style={{
+        position: 'absolute',
+        textAlign: 'center',
+        width: 'auto',
+        padding: '8px',
+        fontSize: '12px',
+        background: 'lightsteelblue',
+        border: '0px',
+        borderRadius: '8px',
+        left: `${x}px`,
+        top: `${y}px`,
+        pointerEvents: 'none', // Ensure the tooltip doesn't interfere with mouse events.
+      }}
+    >
+      {text}
+    </div>
+  );
+  
+
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    text: '',
+    x: 0,
+    y: 0,
+  });
+  
+
 
   useEffect(() => {
     // Resize observer for the container
     const observeTarget = containerRef.current;
     const resizeObserver = new ResizeObserver(entries => {
-      entries.forEach(entry => {
-        setDimensions({ width: entry.contentRect.width, height: entry.contentRect.height });
-      });
+
+      let { width, height } = entries[0].contentRect;
+      if (width > 10 && height > 10) { // Use whatever minimum you deem appropriate
+        console.log("Width and height",width,height);
+        console.log("Dimensions",dimensions);
+        setDimensions({ width : width, height : height });
+        console.log("Dimensions",dimensions);
+        setDimensionsInitialized(true);
+    }
     });
 
     if (observeTarget) {
@@ -29,24 +81,28 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
     }
 
     // Cleanup for the observer
-    return () => {
-      if (observeTarget) {
-        resizeObserver.unobserve(observeTarget);
-      }
-    };
+    // return () => {
+    //   if (observeTarget) {
+    //     resizeObserver.unobserve(observeTarget);
+    //   }
+    //   setDimensionsInitialized(false); // Reset on cleanup
+    // };
   }, []); 
 
   useEffect(() => {
+    // console.log("Line chart data inside the plot component",chartData);
     if (!group1Data  || dimensions.width === 0 || dimensions.height === 0)
+    {
+      console.log("group1 Data",group1Data);
+      console.log("dimensions.width",dimensions.width);
+      console.log("dimensions.height",    dimensions.height)
+      console.log("No data or dimensions");
      return;
-
+    }
+    // console.log("Line chart data inside the plot component",group1Data);
     d3.select(svgRef.current).selectAll("*").remove();
     // set the dimensions and margins of the graph
-    // const margin = { top: 40, right: 30, bottom: 70, left: 60 },
-    //   width = 460 - margin.left - margin.right,
-    //   height = 460 - margin.top - margin.bottom;
-
-   const dynamicMargin = { top: dimensions.height * 0.05, right: dimensions.width * 0.05, bottom: dimensions.height * 0.05, left: dimensions.width * 0.10 };
+   const dynamicMargin = { top: dimensions.height * 0.05, right: dimensions.width * 0.05, bottom: dimensions.height * 0.10, left: dimensions.width * 0.10 };
    const dynamicWidth = dimensions.width - dynamicMargin.left - dynamicMargin.right;
    const dynamicHeight = dimensions.height - dynamicMargin.top - dynamicMargin.bottom;
   
@@ -57,13 +113,6 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
       .attr("height", dynamicHeight + dynamicMargin.top + dynamicMargin.bottom)
       .append("g")
       .attr("transform", `translate(${dynamicMargin.left},${dynamicMargin.top})`);
-
-  // append the svg object to the body of the page
-  // const svg = d3.select(svgRef.current)
-  // .attr("width", dimensions.width)
-  // .attr("height", dimensions.height)
-  // .append("g")
-  // .attr("transform", `translate(${dynamicMargin.left},${dynamicMargin.top})`);
 
     // Add X axis --> it is a date format
     var x = d3.scaleLinear()
@@ -76,29 +125,29 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
     // Add Y axis
     var y = d3.scaleLinear()
       .domain([-100,50])
-      .range([ dynamicHeight, 0]);
+      .range([ dimensions.height  - dynamicMargin.top - dynamicMargin.bottom, 0]);
 
 
       // Add X grid lines
-svg.append("g")
-.attr("class", "grid")
-.attr("transform", "translate(0," +  dimensions.height  - dynamicMargin.top - dynamicMargin.bottom + ")")
-.call(d3.axisBottom(x)
-    .tickSize( dimensions.height - dynamicMargin.top - dynamicMargin.bottom)
-    .tickFormat("")
-);
+    svg.append("g")
+    .attr("class", "grid")
+    .attr("transform", "translate(0," +  dimensions.height  - dynamicMargin.top - dynamicMargin.bottom + ")")
+    .call(d3.axisBottom(x)
+        .tickSize( dimensions.height - dynamicMargin.top - dynamicMargin.bottom)
+        .tickFormat("")
+    );
 
-// Add Y grid lines
-svg.append("g")
-.attr("class", "grid")
-.call(d3.axisLeft(y)
-    .tickSize(- dimensions.width + dynamicMargin.right + dynamicMargin.left)
-    .tickFormat("")
-);
+    // Add Y grid lines
+    svg.append("g")
+    .attr("class", "grid")
+    .call(d3.axisLeft(y)
+        .tickSize(- dimensions.width + dynamicMargin.right + dynamicMargin.left)
+        .tickFormat("")
+    );
 
     svg.append("g")
       .call(d3.axisLeft(y));
-    console.log("Line chart data",group1Data);
+    // console.log("Line chart data",group1Data);
 
     if (group1Spread) {
     // Show confidence interval
@@ -125,28 +174,27 @@ svg.append("g")
     .attr("d", d3.line()
       .x(function (d) { return x(d.time) })
       .y(function (d) { return y(d[mfootKeyGroup1]) })
-    );
-
+    ) ; // Adapt this as well
 
     // Add title
     svg.append("text")
-      .attr("x",  dimensions.width / 2)
+      .attr("x",  dynamicWidth / 2)
       .attr("y", -dynamicMargin.top / 2)
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("text-decoration", "underline")
-      .text("Title of the Line Chart");
+      .text(`Group 1: ${group1Footing} ${group1Cycle} and Group2 ${group2Footing} ${group2Cycle}  `);
 
     // Add x-axis label
     svg.append("text")
-      .attr("transform", `translate(${dimensions.width / 4}, ${dimensions.height + dynamicMargin.bottom / 2})`)
+      .attr("transform", `translate(${dynamicWidth /2 }, ${dimensions.height - dynamicMargin.bottom / 1.5 })`)
       .style("text-anchor", "middle")
       .text("Gait Cycle (%)");
 
     // Add y-axis label
     svg.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", -dynamicMargin.left)
+      .attr("y", -dynamicMargin.left / 1.1)
       .attr("x", -dimensions.height / 2)
       .attr("dy", "1em")
       .style("text-anchor", "middle")
@@ -154,7 +202,7 @@ svg.append("g")
 
 
     if (group2Data) {
-      console.log("Entered group2Data", group2Data);
+      // console.log("Entered group2Data", group2Data);
       svg.append("path")
         .datum(group2Data)
         .attr("fill", "none")
@@ -182,8 +230,8 @@ svg.append("g")
     //const legendYPosition = height + margin.bottom - 20;
             // Add legends
     const legendData = [
-      { color: "red", text: group1Label, x : dynamicMargin.left, y : 0, textX : 1.5*dynamicMargin.left, textY : 0 + 9},
-      { color: "black", text: group2Label, x : dynamicMargin.left, y : dynamicMargin.bottom, textX : 1.5*dynamicMargin.left , textY : dynamicMargin.bottom + 9}
+      { color: "red", text: group1Label, x : dynamicMargin.left, y : 10, textX : 1.5*dynamicMargin.left, textY : 0 + 19},
+      { color: "#114232", text: group2Label, x : dynamicMargin.left, y : 10 + dynamicMargin.bottom/2, textX : 1.5*dynamicMargin.left , textY : dynamicMargin.bottom/2 + 19}
     ];
 
     const legend = svg.selectAll(".legend")
@@ -212,12 +260,24 @@ svg.append("g")
       console.log("No group2Data");
     }
 
-  }, [group1Data,group2Data, group1Label, group2Label, group1Spread, group2Spread, dimensions.width, dimensions.height, group1Footing, group2Footing]);
+  }, [chartData, group2Data, group2Label, group1Spread, group2Spread, group1Footing, group2Footing, mfootKeyGroup1, lfootKeyGroup1, ufootKeyGroup1, mfootKeyGroup2, lfootKeyGroup2, ufootKeyGroup2]);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%'  ,minHeight: '450px'}}> {/* This div is the container for your SVG */}
-      <svg ref={svgRef}></svg>
-    </div>
+
+    
+
+
+    chartData.active ? (
+      // If active, display the SVG container and its content
+      <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: '450px' }}>
+        <svg ref={svgRef}></svg>
+      </div>
+    ) : (
+      // If not active, display an inactive message
+      <div style={{ width: '100%', height: '100%', minHeight: '450px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p>{`Plot ${chartData.plotNumber} is ${chartData.active}`}</p>
+      </div>
+    )
   );
 };
 

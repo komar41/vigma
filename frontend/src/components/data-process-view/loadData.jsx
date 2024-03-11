@@ -9,7 +9,6 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 
-//import FolderFileList from "./subComponents/FolderFileList";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -24,14 +23,7 @@ const MenuProps = {
 export const LoadData = (props) => {
   const [formData, setFormData] = useState({
     temp1FileLocation: "",
-    temp2FileLocation: "",
     file1Location: "",
-    file2Location: "",
-    patientId: "",
-    trialIdx: "",
-    dataType: "",
-    trialGroup1: [],
-    trialGroup2: [],
     group1SelectedFiles: [],
     group2SelectedFiles: [],
     group1Label: "",
@@ -80,27 +72,9 @@ export const LoadData = (props) => {
     
   }, [formData.file1Location]);
 
-  useEffect(() => {
-    const fetchFolders = async () => {
-      if (formData.file2Location) {
-        try {
-          const response = await axios.post('http://localhost:5000/send-data', { fileLocation: formData.file2Location });
-          NodeService.updateData(response.data);
-          // Retrieve the updated tree structure
-          NodeService.getTreeNodes().then((data) => setNodesGroup2(data));
-        } catch (error) {
-          console.error('Error sending data to backend:', error);
-        }
-      }
-    };
-    fetchFolders();
-    
-  }, [formData.file2Location]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    console.log("Name",name);
-    console.log("Value",value);
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
@@ -118,9 +92,7 @@ export const LoadData = (props) => {
 };
 
 
-  
-
-  const handleFormSubmitChild = async (e) => {
+const handleFormSubmitChild = async (e) => {
     e.preventDefault();
     try {
 
@@ -131,23 +103,10 @@ export const LoadData = (props) => {
       };
     
       console.log("Form Data Child", updatedFormData);
-    
-      // Now use updatedFormData instead of formData
       await props.handleFormSubmitParent(updatedFormData);
 
 
-      // setFormData((prevState) => ({
-      //   ...prevState,
-      //   "group1SelectedFiles": selectedNodeKeysGroup1,
-      // }));
-  
-      // setFormData((prevState) => ({
-      //   ...prevState,
-      //   "group2SelectedFiles": selectedNodeKeysGroup2,
-      // }));
 
-      // console.log("Form Data Child",formData);
-      // await props.handleFormSubmitParent(formData); // Call parent function with form data
     } catch (error) {
       console.error('Error sending form data to parent:', error);
     }
@@ -179,31 +138,6 @@ export const LoadData = (props) => {
           </Button>
         </Grid>
 
-
-
-      {/* <Grid item xs={10} >
-        <TextField
-          name="temp2FileLocation"
-          placeholder="Group2 file location"
-          label="Group 2 File Location"
-          variant="filled"
-          fullWidth
-          value={formData.temp2FileLocation}
-          onChange={handleChange}
-          size="small"
-        />
-      </Grid>
-      <Grid item xs={2}>
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => setFormData({ ...formData, file2Location: formData.temp2FileLocation })}
-        >
-          Set
-        </Button>
-      </Grid> */}
-      
-        
         <Grid item xs={6}  style={{ paddingTop: '30px' }} >
         <span className="p-float-label w-full">
         <TreeSelect
@@ -413,7 +347,3 @@ export const LoadData = (props) => {
     </>
   );
 };
-
-// <Grid item xs={12} md={6} style={directGridItemStyle}>
-// <FolderFileList paths={paths} />
-// </Grid>

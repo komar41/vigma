@@ -4,6 +4,8 @@ import './lineChart.css';
 
 const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spread, group2Spread, group1Footing, group2Footing  }) => {
   const svgRef = useRef();
+  const containerRef = useRef(); // Ref for the container
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 }); // State for dimensions
   const mfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_m' : 'Lfoot_m';
   const lfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
   const ufootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
@@ -14,42 +16,75 @@ const LineChart = ({ group1Data, group2Data, group1Label, group2Label, group1Spr
 
 
   useEffect(() => {
-    if (!group1Data)
+    // Resize observer for the container
+    const observeTarget = containerRef.current;
+    const resizeObserver = new ResizeObserver(entries => {
+      entries.forEach(entry => {
+        setDimensions({ width: entry.contentRect.width, height: entry.contentRect.height });
+      });
+    });
+
+    if (observeTarget) {
+      resizeObserver.observe(observeTarget);
+    }
+
+    // Cleanup for the observer
+    return () => {
+      if (observeTarget) {
+        resizeObserver.unobserve(observeTarget);
+      }
+    };
+  }, []); 
+
+  useEffect(() => {
+    if (!group1Data  || dimensions.width === 0 || dimensions.height === 0)
      return;
 
     d3.select(svgRef.current).selectAll("*").remove();
     // set the dimensions and margins of the graph
-    const margin = { top: 40, right: 30, bottom: 70, left: 60 },
-      width = 460 - margin.left - margin.right,
-      height = 460 - margin.top - margin.bottom;
+    // const margin = { top: 40, right: 30, bottom: 70, left: 60 },
+    //   width = 460 - margin.left - margin.right,
+    //   height = 460 - margin.top - margin.bottom;
+
+   const dynamicMargin = { top: dimensions.height * 0.05, right: dimensions.width * 0.05, bottom: dimensions.height * 0.05, left: dimensions.width * 0.10 };
+   const dynamicWidth = dimensions.width - dynamicMargin.left - dynamicMargin.right;
+   const dynamicHeight = dimensions.height - dynamicMargin.top - dynamicMargin.bottom;
+  
 
     // append the svg object to the body of the page
     const svg = d3.select(svgRef.current)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("width", dynamicWidth  + dynamicMargin.left + dynamicMargin.right)
+      .attr("height", dynamicHeight + dynamicMargin.top + dynamicMargin.bottom)
       .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      .attr("transform", `translate(${dynamicMargin.left},${dynamicMargin.top})`);
+
+  // append the svg object to the body of the page
+  // const svg = d3.select(svgRef.current)
+  // .attr("width", dimensions.width)
+  // .attr("height", dimensions.height)
+  // .append("g")
+  // .attr("transform", `translate(${dynamicMargin.left},${dynamicMargin.top})`);
 
     // Add X axis --> it is a date format
     var x = d3.scaleLinear()
       .domain([1, 100])
-      .range([0, width]);
+      .range([0,  dynamicWidth]);
     svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
+      .attr("transform", "translate(0," +  dynamicHeight + ")")
       .call(d3.axisBottom(x));
 
     // Add Y axis
     var y = d3.scaleLinear()
       .domain([-100,50])
-      .range([height, 0]);
+      .range([ dynamicHeight, 0]);
 
 
       // Add X grid lines
 svg.append("g")
 .attr("class", "grid")
-.attr("transform", "translate(0," + height + ")")
+.attr("transform", "translate(0," +  dimensions.height  - dynamicMargin.top - dynamicMargin.bottom + ")")
 .call(d3.axisBottom(x)
-    .tickSize(-height)
+    .tickSize( dimensions.height - dynamicMargin.top - dynamicMargin.bottom)
     .tickFormat("")
 );
 
@@ -57,7 +92,7 @@ svg.append("g")
 svg.append("g")
 .attr("class", "grid")
 .call(d3.axisLeft(y)
-    .tickSize(-width)
+    .tickSize(- dimensions.width + dynamicMargin.right + dynamicMargin.left)
     .tickFormat("")
 );
 
@@ -95,8 +130,8 @@ svg.append("g")
 
     // Add title
     svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", -margin.top / 2)
+      .attr("x",  dimensions.width / 2)
+      .attr("y", -dynamicMargin.top / 2)
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("text-decoration", "underline")
@@ -104,15 +139,15 @@ svg.append("g")
 
     // Add x-axis label
     svg.append("text")
-      .attr("transform", `translate(${width / 4}, ${height + margin.bottom / 2})`)
+      .attr("transform", `translate(${dimensions.width / 4}, ${dimensions.height + dynamicMargin.bottom / 2})`)
       .style("text-anchor", "middle")
       .text("Gait Cycle (%)");
 
     // Add y-axis label
     svg.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", -margin.left)
-      .attr("x", -height / 2)
+      .attr("y", -dynamicMargin.left)
+      .attr("x", -dimensions.height / 2)
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .text("Angle (deg)");
@@ -129,8 +164,6 @@ svg.append("g")
           .x(function (d) { return x(d.time) })
           .y(function (d) { return y(d[mfootKeyGroup2]) })
         );
-
-
 
       if (group2Spread) {
 
@@ -149,18 +182,16 @@ svg.append("g")
     //const legendYPosition = height + margin.bottom - 20;
             // Add legends
     const legendData = [
-      { color: "red", text: group1Label, x : 0, y : 0, textX : 22, textY : 9},
-      { color: "black", text: group2Label, x : 75, y : 0, textX : 97, textY : 9}
+      { color: "red", text: group1Label, x : dynamicMargin.left, y : 0, textX : 1.5*dynamicMargin.left, textY : 0 + 9},
+      { color: "black", text: group2Label, x : dynamicMargin.left, y : dynamicMargin.bottom, textX : 1.5*dynamicMargin.left , textY : dynamicMargin.bottom + 9}
     ];
-
-    const legendYPosition = height + margin.bottom - 20; // Adjust this based on your SVG dimensions and preferences
 
     const legend = svg.selectAll(".legend")
       .data(legendData)
       .enter().append("g")
       .attr("class", "legend")
       // Position each legend group horizontally based on its index and vertically using the calculated legendYPosition
-      .attr("transform", (d, i) => `translate(${i * 120},${legendYPosition})`); // Adjust spacing by changing '120'
+      // .attr("transform", (d, i) => `translate(${i * 120},${legendYPosition})`); // Adjust spacing by changing '120'
     
     legend.append("rect")
       .attr("x", d => d.x) // Rectangles start at the new origin of each legend item
@@ -181,9 +212,13 @@ svg.append("g")
       console.log("No group2Data");
     }
 
-  }, [group1Data,group2Data, group1Label, group2Label, group1Spread, group2Spread]);
+  }, [group1Data,group2Data, group1Label, group2Label, group1Spread, group2Spread, dimensions.width, dimensions.height, group1Footing, group2Footing]);
 
-  return <svg ref={svgRef}></svg>;
+  return (
+    <div ref={containerRef} style={{ width: '100%', height: '100%'  ,minHeight: '450px'}}> {/* This div is the container for your SVG */}
+      <svg ref={svgRef}></svg>
+    </div>
+  );
 };
 
 export default LineChart;

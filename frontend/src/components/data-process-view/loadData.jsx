@@ -61,8 +61,9 @@ const [submitFormData, setSubmitFormData] = useState({
 
 
   const panelOptions = [1, 2, 3, 4, 5]; 
-  const parameterOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx']; 
-  const footingOptions = ["left","right"]; // Assuming 'names' are used for multiple selects
+  const parameterOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT'];
+  const [dynamicFootingOptions, setDynamicFootingOptions] = useState(["left", "right"]);
+  const [isFootingDisabled, setIsFootingDisabled] = useState(false);
   const gaitCycleOptions = ["left","right"]; // Assuming 'names' are used for multiple selects
 
 
@@ -156,6 +157,17 @@ const handleProcessSubmit = async (e) => {
           group1SelectedFiles: selectedNodeKeysGroup1,
           group2SelectedFiles: selectedNodeKeysGroup2,
       };
+
+      if (['AP', 'ML', 'VT'].includes(updatedFormData.parameter)) {
+        setDynamicFootingOptions(["left", "right", "average"]);
+        setIsFootingDisabled(false);
+    } else if (['trunk', 'hipx'].includes(updatedFormData.parameter)) {
+        setDynamicFootingOptions([]);
+        setIsFootingDisabled(true);
+    } else {
+        setDynamicFootingOptions(["left", "right"]);
+        setIsFootingDisabled(false);
+    }
       // Process the data (similar to your existing functionality)
       console.log("Process Form Data", updatedFormData);
       // Assuming you want to keep similar functionality but for different purposes
@@ -305,12 +317,13 @@ const handleSubmitForm = async (e) => {
               value={submitFormData.group1Footing}
               onChange={handleSubmitChange}
               MenuProps={MenuProps}
+              disabled={isFootingDisabled}
             >
-              {footingOptions.map((name) => (
-                <MenuItem key={name} value={name}>
-                  {name}
-                </MenuItem>
-              ))}
+   {dynamicFootingOptions.map((option) => (
+      <MenuItem key={option} value={option}>
+        {option}
+      </MenuItem>
+    ))}
             </Select>
           </FormControl>
         </Grid>
@@ -324,12 +337,13 @@ const handleSubmitForm = async (e) => {
               value={submitFormData.group2Footing}
               onChange={handleSubmitChange}
               MenuProps={MenuProps}
+              disabled={isFootingDisabled}
             >
-              {footingOptions.map((name) => (
-                <MenuItem key={name} value={name}>
-                  {name}
-                </MenuItem>
-              ))}
+   {dynamicFootingOptions.map((option) => (
+      <MenuItem key={option} value={option}>
+        {option}
+      </MenuItem>
+    ))}
             </Select>
           </FormControl>
         </Grid>

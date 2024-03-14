@@ -6,8 +6,11 @@ const LineChart =
 ({ chartData }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
+  const tooltipRef = useRef(); // Ref for the tooltip
+
+
   // console.log("Line chart data inside the plot component",chartData);
-  const active = chartData.active;
+  const [active, setActive] = useState(chartData.active);
   const plotNumber = chartData.plotNumber;
   const group1Data = chartData.group1Data;
   const group2Data = chartData.group2Data;
@@ -19,9 +22,19 @@ const LineChart =
   const group2Footing = chartData.group2Footing;
   const group1Cycle = chartData.group1GaitCycle;
   const group2Cycle = chartData.group2GaitCycle;
+
+
+  console.log("Chart Data inside Line Chart",chartData);
   
   const [dimensions, setDimensions] = useState({ width: 450, height: 450 }); // State for dimensions
   const [dimensionsInitialized, setDimensionsInitialized] = useState(false);
+
+
+
+  // New Tooltip states
+  const [tooltipContent, setTooltipContent] = useState('');
+  const [tooltipVisibility, setTooltipVisibility] = useState('hidden');
+  const [tooltipPosition, setTooltipPosition] = useState({ left: 0, top: 0 });
 
   const mfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_m' : 'Lfoot_m';
   const lfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
@@ -31,34 +44,12 @@ const LineChart =
   const lfootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
   const ufootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
 
-  const Tooltip = ({ text, x, y }) => (
-    <div
-      style={{
-        position: 'absolute',
-        textAlign: 'center',
-        width: 'auto',
-        padding: '8px',
-        fontSize: '12px',
-        background: 'lightsteelblue',
-        border: '0px',
-        borderRadius: '8px',
-        left: `${x}px`,
-        top: `${y}px`,
-        pointerEvents: 'none', // Ensure the tooltip doesn't interfere with mouse events.
-      }}
-    >
-      {text}
-    </div>
-  );
-  
+  useEffect(() => {
+    // Synchronize active state with chartData.active
+    setActive(chartData.active);
+  }, [chartData.active]); // Only re-run the effect if chartData.active changes
 
-  const [tooltip, setTooltip] = useState({
-    visible: false,
-    text: '',
-    x: 0,
-    y: 0,
-  });
-  
+
 
 
   useEffect(() => {
@@ -89,16 +80,10 @@ const LineChart =
     // };
   }, []); 
 
+
   useEffect(() => {
-    // console.log("Line chart data inside the plot component",chartData);
-    if (!group1Data  || dimensions.width === 0 || dimensions.height === 0)
-    {
-      console.log("group1 Data",group1Data);
-      console.log("dimensions.width",dimensions.width);
-      console.log("dimensions.height",    dimensions.height)
-      console.log("No data or dimensions");
-     return;
-    }
+
+    if (!active) return;
     // console.log("Line chart data inside the plot component",group1Data);
     d3.select(svgRef.current).selectAll("*").remove();
     // set the dimensions and margins of the graph
@@ -113,6 +98,8 @@ const LineChart =
       .attr("height", dynamicHeight + dynamicMargin.top + dynamicMargin.bottom)
       .append("g")
       .attr("transform", `translate(${dynamicMargin.left},${dynamicMargin.top})`);
+
+
 
     // Add X axis --> it is a date format
     var x = d3.scaleLinear()
@@ -174,7 +161,8 @@ const LineChart =
     .attr("d", d3.line()
       .x(function (d) { return x(d.time) })
       .y(function (d) { return y(d[mfootKeyGroup1]) })
-    ) ; // Adapt this as well
+    )
+
 
     // Add title
     svg.append("text")
@@ -199,6 +187,7 @@ const LineChart =
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .text("Angle (deg)");
+
 
 
     if (group2Data) {
@@ -227,6 +216,127 @@ const LineChart =
           .y1(function (d) { return y(d[ufootKeyGroup2]) })
         );
       }
+
+
+
+      // Circles for highlighting points
+    const circle1 = svg.append('circle')
+    .attr('r', 5)
+    .attr('fill', 'red')
+    .style('opacity', 0); 
+
+  const circle2 = svg.append('circle')
+    .attr('r', 5)
+    .attr('fill', 'green')  // Change to match your line color
+    .style('opacity', 0); 
+
+
+    // Initialize text for highlighting points, keep them hidden initially
+const text1 = svg.append('text')
+.attr('fill', 'red') // Match the first line color or choose a visible color
+.style('opacity', 0)
+.attr('text-anchor', 'middle'); // Center the text on its x position
+
+const text2 = svg.append('text')
+.attr('fill', '#114232') // Match the second line color or choose a visible color
+.style('opacity', 0)
+.attr('text-anchor', 'middle'); // Center the text on its x position
+
+// Before your mousemove event handler
+const rectWidth = 60;  // Width of the rectangle, adjust as needed
+const rectHeight = 60; // Height of the rectangle, adjust based on text
+
+
+
+
+
+
+  // Tooltip and mouse tracking logic
+  const mouseG = svg.append("g")
+    .attr("class", "mouse-over-effects");
+
+
+
+
+  mouseG.append("rect")
+    .attr("width", dynamicWidth)
+    .attr("height", dynamicHeight)
+    .attr("fill", "none")
+    .attr("pointer-events", "all")
+    .on("mousemove", (event) => {
+      const mouseX = d3.pointer(event)[0];
+      const x0 = x.invert(mouseX);
+      const bisectDate = d3.bisector(d => d.time).left;
+      const i1 = bisectDate(group1Data, x0, 1);
+      const i2 = bisectDate(group2Data, x0, 1);
+      const d1 = group1Data[Math.max(0, i1 - 1)];
+      const d2 = group2Data[Math.max(0, i2 - 1)];
+  
+      if (d1 && d2) {
+        const y1 = y(d1[mfootKeyGroup1]);
+        const y2 = y(d2[mfootKeyGroup2]);
+
+        // Set circle positions
+        circle1.attr('cx', x(d1.time)).attr('cy', y1).style('opacity', 1);
+        circle2.attr('cx', x(d2.time)).attr('cy', y2).style('opacity', 1);
+
+        // Define offsets and height adjustments
+        const lineSpacing = 15; // Space between lines of text
+        const textHeight = 3 * lineSpacing; // Adjust based on number of lines
+        const offset = 30; // Adjust based on spacing from circle
+
+        // Define text content for each data point
+        let textY1 = y1 < y2 ? y1 - offset - textHeight : y1 + offset;
+        let textY2 = y1 < y2 ? y2 + offset : y2 - offset - textHeight;
+
+
+
+        // Update text elements for d1
+        text1.selectAll('*').remove(); // Clear previous text
+        const tspan1_1 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1);
+        const tspan1_2 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1 + lineSpacing);
+        const tspan1_3 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1 + 2 * lineSpacing);
+        tspan1_1.text(`M: ${Number(d1[mfootKeyGroup1]).toFixed(2)}`);
+        tspan1_2.text(`L: ${Number(d1[lfootKeyGroup1]).toFixed(2)}`);
+        tspan1_3.text(`U: ${Number(d1[ufootKeyGroup1]).toFixed(2)}`);
+        text1.style('opacity', 1);
+
+        // Update text elements for d2
+        text2.selectAll('*').remove(); // Clear previous text
+        const tspan2_1 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2);
+        const tspan2_2 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2 + lineSpacing);
+        const tspan2_3 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2 + 2 * lineSpacing);
+        tspan2_1.text(`M: ${Number(d2[mfootKeyGroup2]).toFixed(2)}`);
+        tspan2_2.text(`L: ${Number(d2[lfootKeyGroup2]).toFixed(2)}`);
+        tspan2_3.text(`U: ${Number(d2[ufootKeyGroup2]).toFixed(2)}`);
+        text2.style('opacity', 1);
+
+
+                //         // Assuming textY1 and textY2 have been set based on your logic
+                //         textBg1.attr('x', x(d1.time) - rectWidth / 2)
+                //         .attr('y', textY1 - rectHeight + (offset+5)) // Adjust Y position to fit text
+                //         .attr('width', rectWidth)
+                //         .attr('height', rectHeight)
+                //         .style('opacity', 0.5);  // Make rectangle visible
+         
+                //  textBg2.attr('x', x(d2.time) - rectWidth / 2)
+                //         .attr('y', textY2 - rectHeight +( offset + 5)) // Adjust Y position to fit text
+                //         .attr('width', rectWidth)
+                //         .attr('height', rectHeight)
+                //         .style('opacity', 0.5);  // Make rectangle visible
+
+    }
+
+
+  })  
+    .on("mouseout", () => {
+      circle1.style('opacity', 0);
+      circle2.style('opacity', 0);
+      text1.style('opacity', 0);
+      text2.style('opacity', 0);
+    });
+
+    // Add legends
     //const legendYPosition = height + margin.bottom - 20;
             // Add legends
     const legendData = [
@@ -260,22 +370,33 @@ const LineChart =
       console.log("No group2Data");
     }
 
-  }, [chartData, group2Data, group2Label, group1Spread, group2Spread, group1Footing, group2Footing, mfootKeyGroup1, lfootKeyGroup1, ufootKeyGroup1, mfootKeyGroup2, lfootKeyGroup2, ufootKeyGroup2]);
+  }, [chartData, dimensions, active]);
 
   return (
-
-    
-
-
-    chartData.active ? (
+    {active} ? (
       // If active, display the SVG container and its content
       <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: '450px' }}>
         <svg ref={svgRef}></svg>
+        <div 
+            ref={tooltipRef}
+            className="tooltip" 
+            style={{ 
+              opacity: tooltipVisibility === 'visible' ? 1 : 0,
+              position: 'absolute',
+              left: `${tooltipPosition.left}px`,
+              top: `${tooltipPosition.top}px`,
+              pointerEvents: 'none',
+              backgroundColor: 'white',
+              padding: '5px',
+              border: '1px solid black'
+            }}>
+            {tooltipContent}
+          </div>
       </div>
     ) : (
       // If not active, display an inactive message
-      <div style={{ width: '100%', height: '100%', minHeight: '450px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>{`Plot ${chartData.plotNumber} is ${chartData.active}`}</p>
+      <div style={{ width: '100%', height: '100%',  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p>{`Plot ${chartData.plotNumber} is ${active}`}</p>
       </div>
     )
   );

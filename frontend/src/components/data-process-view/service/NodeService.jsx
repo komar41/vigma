@@ -1,165 +1,75 @@
-// NodeService.jsx (or wherever your service is defined)
 const NodeService = {
-  getTreeNodesData: () => {
-      // This will be overridden dynamically
-  },
-  getTreeNodes: function() {
+    getTreeNodesData: function() {
+      // Initially, return an empty array.
+      return [];
+    },
+    getTreeNodes: function() {
       return Promise.resolve(this.getTreeNodesData());
-  },
-  updateData: function(dataObject) {
-    this.getTreeNodesData = () => {
-        console.log("Entered updateData", dataObject);
-        const treeData = Object.entries(dataObject).map(([folderName, insideFolders]) => ({
-            key: folderName,
-            label: folderName,
-            data: `${folderName} Folder`,
-            children: Object.entries(insideFolders).map(([insideFolderName, files]) => ({
-                key: `${folderName}-${insideFolderName}`,
-                label: insideFolderName,
-                data: `${insideFolderName} in ${folderName} Folder`,
-                children: files.map(file => ({
-                    key: `${folderName}-${insideFolderName}-${file}`,
-                    label: file,
-                    data: `${file} in ${insideFolderName} Folder`
-                }))
-            }))
-        }));
-        return treeData;
-    };
-}
+    },
 
-
-//   updateData: function(dataObject) {
+    updateData: function(dataObject) {
+        this.getTreeNodesData = () => {
+            console.log("Entered updateData", dataObject);
+            return Object.entries(dataObject).map(([folderName, insideFolders]) => {
+                return {
+                    key: folderName,
+                    label: folderName,
+                    data: `${folderName} Folder`,
+                    children: Object.entries(insideFolders).map(([insideFolderName, files]) => {
+                        // Create a map to group files by trial number
+                        const trialMap = {};
+                        files.forEach(file => {
+                            let trialKey;
+                            if (file.includes('step')) {
+                                trialKey = 'step'; // Special key for step files, but we won't use it to create a separate node
+                            } else {
+                                const match = file.match(/_(\d+)_/); // Extracts trial number
+                                trialKey = match ? `Trial ${match[1]}` : 'Unknown';
+                            }
     
-//       this.getTreeNodesData = () => {
-//         console.log("Entered updateData", dataObject);
-//           const treeData = Object.entries(dataObject).map(([folderName, files]) => ({
-//               key: folderName,
-//               label: folderName,
-//               data: `${folderName} Folder`,
-//               children: files.map(file => ({
-//                   key: `${folderName}-${file}`,
-//                   label: file,
-//                   data: `${file} in ${folderName} Folder`
-//               }))
-//           }));
-//           return treeData;
-//       };
-//   }
-};
-
-export default NodeService;
-
-
-
-// export const NodeService = {
-//     getTreeNodesData() {
-//       return [
-//         {
-//           key: '0',
-//           label: 'Documents',
-//           data: 'Documents Folder',
-//           children: [
-//             {
-//               key: '0-0',
-//               label: 'Work',
-//               data: 'Work Folder',
-//               children: [
-//                 {
-//                   key: '0-0-0',
-//                   label: 'Expenses.doc',
-//                   data: 'Expenses Document',
-//                 },
-//                 {
-//                   key: '0-0-1',
-//                   label: 'Resume.doc',
-//                   data: 'Resume Document',
-//                 },
-//               ],
-//             },
-//             {
-//               key: '0-1',
-//               label: 'Home',
-//               data: 'Home Folder',
-
-//               children: [
-//                 {
-//                   key: '0-1-0',
-//                   label: 'Invoices.txt',
-//                   data: 'Invoices for this month',
-//                 },
-//               ],
-//             },
-//           ],
-//         },
-//         {
-//           key: '1',
-//           label: 'Events',
-//           data: 'Events Folder',
-//           children: [
-//             {
-//               key: '1-0',
-//               label: 'Meeting',
-//               data: 'Meeting',
-//             },
-//             {
-//               key: '1-1',
-//               label: 'Product Launch',
-//               data: 'Product Launch',
-//             },
-//             {
-//               key: '1-2',
-//               label: 'Report Review',
-//               data: 'Report Review',
-//             },
-//           ],
-//         },
-//         {
-//           key: '2',
-//           label: 'Movies',
-//           data: 'Movies Folder',
-//           children: [
-//             {
-//               key: '2-0',
-//               label: 'Al Pacino',
-//               data: 'Pacino Movies',
-//               children: [
-//                 {
-//                   key: '2-0-0',
-//                   label: 'Scarface',
-//                   data: 'Scarface Movie',
-//                 },
-//                 {
-//                   key: '2-0-1',
-//                   label: 'Serpico',
-//                   data: 'Serpico Movie',
-//                 },
-//               ],
-//             },
-//             {
-//               key: '2-1',
-//               label: 'Robert De Niro',
-//               data: 'De Niro Movies',
-//               children: [
-//                 {
-//                   key: '2-1-0',
-//                   label: 'Goodfellas',
-//                   data: 'Goodfellas Movie',
-//                 },
-//                 {
-//                   key: '2-1-1',
-//                   label: 'Untouchables',
-//                   data: 'Untouchables Movie',
-//                 },
-//               ],
-//             },
-//           ],
-//         },
-//       ];
-//     },
+                            if (!trialMap[trialKey]) {
+                                trialMap[trialKey] = {
+                                    jnt: null,
+                                    grf: null,
+                                    step: null // Now includes step as part of trial
+                                };
+                            }
+    
+                            if (file.endsWith('jnt.csv')) {
+                                trialMap[trialKey].jnt = file;
+                            } else if (file.endsWith('grf.csv')) {
+                                trialMap[trialKey].grf = file;
+                            } else if (file.includes('step')) {
+                                // Assign the 'step' file to the trial, but don't create a separate node for it
+                                trialMap[trialKey].step = file; 
+                            }
+                        });
+    
+                        // Convert the map into a tree structure, excluding standalone 'step' nodes
+                        return {
+                            key: `${folderName}-${insideFolderName}`,
+                            label: insideFolderName,
+                            data: `${insideFolderName} in ${folderName} Folder`,
+                            children: Object.entries(trialMap).filter(([trialName]) => trialName !== 'step').map(([trialName, { jnt, grf }]) => {
+                                const children = [];
+                                if (jnt) children.push({ key: `${folderName}-${insideFolderName}-${jnt}`, label: 'JNT', data: jnt });
+                                if (grf) children.push({ key: `${folderName}-${insideFolderName}-${grf}`, label: 'GRF', data: grf });
+                                return {
+                                    key: `${folderName}-${insideFolderName}-${trialName}`,
+                                    label: trialName,
+                                    data: `${trialName} in ${insideFolderName} Folder`,
+                                    children
+                                };
+                            })
+                        };
+                    })
+                };
+            });
+        };
+    }
+    
+    
+  };
   
-//     getTreeNodes() {
-//       return Promise.resolve(this.getTreeNodesData());
-//     },
-//   };
-  
+  export default NodeService;
+

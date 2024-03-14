@@ -12,6 +12,7 @@ const LineChart =
   // console.log("Line chart data inside the plot component",chartData);
   const [active, setActive] = useState(chartData.active);
   const plotNumber = chartData.plotNumber;
+  const parameter = chartData.parameter;
   const group1Data = chartData.group1Data;
   const group2Data = chartData.group2Data;
   const group1Label = chartData.group1Label;
@@ -26,7 +27,7 @@ const LineChart =
 
   console.log("Chart Data inside Line Chart",chartData);
   
-  const [dimensions, setDimensions] = useState({ width: 450, height: 450 }); // State for dimensions
+  const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
   const [dimensionsInitialized, setDimensionsInitialized] = useState(false);
 
 
@@ -36,13 +37,13 @@ const LineChart =
   const [tooltipVisibility, setTooltipVisibility] = useState('hidden');
   const [tooltipPosition, setTooltipPosition] = useState({ left: 0, top: 0 });
 
-  const mfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_m' : 'Lfoot_m';
-  const lfootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
-  const ufootKeyGroup1 = group1Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
+  const mfootKeyGroup1 = group1Footing === 'Right' ? 'Rfoot_m' : 'Lfoot_m';
+  const lfootKeyGroup1 = group1Footing === 'Right' ? 'Rfoot_l' : 'Lfoot_l';
+  const ufootKeyGroup1 = group1Footing === 'Right' ? 'Rfoot_u' : 'Lfoot_u';
 
-  const mfootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_m' : 'Lfoot_m';
-  const lfootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_l' : 'Lfoot_l';
-  const ufootKeyGroup2 = group2Footing === 'right' ? 'Rfoot_u' : 'Lfoot_u';
+  const mfootKeyGroup2 = group2Footing === 'Right' ? 'Rfoot_m' : 'Lfoot_m';
+  const lfootKeyGroup2 = group2Footing === 'Right' ? 'Rfoot_l' : 'Lfoot_l';
+  const ufootKeyGroup2 = group2Footing === 'Right' ? 'Rfoot_u' : 'Lfoot_u';
 
   useEffect(() => {
     // Synchronize active state with chartData.active
@@ -72,12 +73,12 @@ const LineChart =
     }
 
     // Cleanup for the observer
-    // return () => {
-    //   if (observeTarget) {
-    //     resizeObserver.unobserve(observeTarget);
-    //   }
-    //   setDimensionsInitialized(false); // Reset on cleanup
-    // };
+    return () => {
+      if (observeTarget) {
+        resizeObserver.unobserve(observeTarget);
+      }
+      setDimensionsInitialized(false); // Reset on cleanup
+    };
   }, []); 
 
 
@@ -171,7 +172,7 @@ const LineChart =
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("text-decoration", "underline")
-      .text(`Group 1: ${group1Footing} ${group1Cycle} and Group2 ${group2Footing} ${group2Cycle}  `);
+      .text(`${parameter} `);
 
     // Add x-axis label
     svg.append("text")
@@ -231,25 +232,16 @@ const LineChart =
     .style('opacity', 0); 
 
 
-    // Initialize text for highlighting points, keep them hidden initially
-const text1 = svg.append('text')
-.attr('fill', 'red') // Match the first line color or choose a visible color
-.style('opacity', 0)
-.attr('text-anchor', 'middle'); // Center the text on its x position
+      // Initialize text for highlighting points, keep them hidden initially
+  const text1 = svg.append('text')
+  .attr('fill', 'red') // Match the first line color or choose a visible color
+  .style('opacity', 0)
+  .attr('text-anchor', 'middle'); // Center the text on its x position
 
-const text2 = svg.append('text')
-.attr('fill', '#114232') // Match the second line color or choose a visible color
-.style('opacity', 0)
-.attr('text-anchor', 'middle'); // Center the text on its x position
-
-// Before your mousemove event handler
-const rectWidth = 60;  // Width of the rectangle, adjust as needed
-const rectHeight = 60; // Height of the rectangle, adjust based on text
-
-
-
-
-
+  const text2 = svg.append('text')
+  .attr('fill', '#114232') // Match the second line color or choose a visible color
+  .style('opacity', 0)
+  .attr('text-anchor', 'middle'); // Center the text on its x position
 
   // Tooltip and mouse tracking logic
   const mouseG = svg.append("g")
@@ -288,6 +280,38 @@ const rectHeight = 60; // Height of the rectangle, adjust based on text
         // Define text content for each data point
         let textY1 = y1 < y2 ? y1 - offset - textHeight : y1 + offset;
         let textY2 = y1 < y2 ? y2 + offset : y2 - offset - textHeight;
+        
+
+        //mouseX already declared.
+        const mouseY = d3.pointer(event)[1];
+        // Your existing mousemove logic...
+      
+        // Check for tooltip and legends overlap
+        legendData.forEach((_, i) => {
+          const legend = svg.select(`#legend-${i}`);
+          const legendBox = legend.node().getBBox(); // Get the bounding box of the legend
+      
+          const tooltipWidth = tooltipRef.current.offsetWidth; // Assume you have the tooltip ref correctly set
+          const tooltipHeight = tooltipRef.current.offsetHeight;
+      
+          // Calculate tooltip position (you might need to adjust this based on how you set the position)
+          const tooltipX = x(d1.time); // Assuming this is how you calculate tooltip X position
+          const tooltipY = mouseY; // Directly from mouse Y position
+      
+          // Check if there is an overlap
+          const overlap = !(tooltipX > legendBox.x + legendBox.width ||
+                            tooltipX + tooltipWidth < legendBox.x
+                            // ||
+                            // tooltipY > legendBox.y + legendBox.height 
+                             //||
+                            // tooltipY + tooltipHeight < legendBox.y
+                            
+                            );
+      
+          // Set legend opacity based on overlap
+          legend.style('opacity', overlap ? 0 : 1);
+        });
+
 
 
 
@@ -296,9 +320,9 @@ const rectHeight = 60; // Height of the rectangle, adjust based on text
         const tspan1_1 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1);
         const tspan1_2 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1 + lineSpacing);
         const tspan1_3 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1 + 2 * lineSpacing);
-        tspan1_1.text(`M: ${Number(d1[mfootKeyGroup1]).toFixed(2)}`);
-        tspan1_2.text(`L: ${Number(d1[lfootKeyGroup1]).toFixed(2)}`);
-        tspan1_3.text(`U: ${Number(d1[ufootKeyGroup1]).toFixed(2)}`);
+        tspan1_2.text(`M: ${Number(d1[mfootKeyGroup1]).toFixed(2)}`);
+        tspan1_3.text(`L: ${Number(d1[lfootKeyGroup1]).toFixed(2)}`);
+        tspan1_1.text(`U: ${Number(d1[ufootKeyGroup1]).toFixed(2)}`);
         text1.style('opacity', 1);
 
         // Update text elements for d2
@@ -306,24 +330,14 @@ const rectHeight = 60; // Height of the rectangle, adjust based on text
         const tspan2_1 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2);
         const tspan2_2 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2 + lineSpacing);
         const tspan2_3 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2 + 2 * lineSpacing);
-        tspan2_1.text(`M: ${Number(d2[mfootKeyGroup2]).toFixed(2)}`);
-        tspan2_2.text(`L: ${Number(d2[lfootKeyGroup2]).toFixed(2)}`);
-        tspan2_3.text(`U: ${Number(d2[ufootKeyGroup2]).toFixed(2)}`);
+        tspan2_2.text(`M: ${Number(d2[mfootKeyGroup2]).toFixed(2)}`);
+        tspan2_3.text(`L: ${Number(d2[lfootKeyGroup2]).toFixed(2)}`);
+        tspan2_1.text(`U: ${Number(d2[ufootKeyGroup2]).toFixed(2)}`);
         text2.style('opacity', 1);
 
 
-                //         // Assuming textY1 and textY2 have been set based on your logic
-                //         textBg1.attr('x', x(d1.time) - rectWidth / 2)
-                //         .attr('y', textY1 - rectHeight + (offset+5)) // Adjust Y position to fit text
-                //         .attr('width', rectWidth)
-                //         .attr('height', rectHeight)
-                //         .style('opacity', 0.5);  // Make rectangle visible
-         
-                //  textBg2.attr('x', x(d2.time) - rectWidth / 2)
-                //         .attr('y', textY2 - rectHeight +( offset + 5)) // Adjust Y position to fit text
-                //         .attr('width', rectWidth)
-                //         .attr('height', rectHeight)
-                //         .style('opacity', 0.5);  // Make rectangle visible
+
+
 
     }
 
@@ -340,14 +354,15 @@ const rectHeight = 60; // Height of the rectangle, adjust based on text
     //const legendYPosition = height + margin.bottom - 20;
             // Add legends
     const legendData = [
-      { color: "red", text: group1Label, x : dynamicMargin.left, y : 10, textX : 1.5*dynamicMargin.left, textY : 0 + 19},
-      { color: "#114232", text: group2Label, x : dynamicMargin.left, y : 10 + dynamicMargin.bottom/2, textX : 1.5*dynamicMargin.left , textY : dynamicMargin.bottom/2 + 19}
+      { color: "red", text: group1Label + " " + group1Footing + " Limb " + group1Cycle + " Cycle", x : dynamicMargin.left, y : 10, textX : 1.5*dynamicMargin.left, textY : 0 + 19},
+      { color: "#114232", text: group2Label + " " + group2Footing + " Limb " + group2Cycle + " Cycle", x : dynamicMargin.left, y : 10 + dynamicMargin.bottom/2, textX : 1.5*dynamicMargin.left , textY : dynamicMargin.bottom/2 + 19}
     ];
 
     const legend = svg.selectAll(".legend")
       .data(legendData)
       .enter().append("g")
       .attr("class", "legend")
+      .attr("id", (d, i) => `legend-${i}`); // Create unique IDs for each legend group
       // Position each legend group horizontally based on its index and vertically using the calculated legendYPosition
       // .attr("transform", (d, i) => `translate(${i * 120},${legendYPosition})`); // Adjust spacing by changing '120'
     

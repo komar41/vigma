@@ -12,9 +12,6 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-# Configuration parameters
-#app.config['FOLDER_DIRECTORY'] = 'data/'
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -368,7 +365,6 @@ def receive_data():
         print("Folder doesn't exist")
         return jsonify([])
 
-#CSV_URL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_IC.csv"
 
 def fetch_csv_data(file_location):
     # Load CSV data from the file location
@@ -446,17 +442,7 @@ def process_form_data():
     path = generate_images(group1FileLocationOld, group2FileLocationOld, grp_1_filesOld, grp_2_filesOld, cols)
 
     zipFilePath = create_zip_with_csv(path, 'output.zip')
-    #print("CSV Data12",csv_data)
-    # if csv_data:
-    #     # Serve CSV file as a response
-    #     #print("CSV Data 33",csv_data) 
-    #     return Response(
-    #         csv_data,
-    #         mimetype="text/csv",
-    #         headers={"Content-disposition":
-    #                  "attachment; filename=data_IC.csv"})
-    # else:
-    #     return "Failed to fetch CSV data from the URL"
+
     return send_file(zipFilePath,
                     mimetype='application/zip',
                     as_attachment=True,

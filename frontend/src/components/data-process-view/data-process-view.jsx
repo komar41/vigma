@@ -58,8 +58,8 @@ export const DataProcessView = (props) => {
       console.log("Group 2 Cycle", formData.group2GaitCycle);
 
       const filenames = [
-        `df_${formData.group1Footing === "left" ? "L_" : "R_"}${formData.group1GaitCycle === "left" ? "Lcycle_1.csv" : "Rcycle_1.csv"}`,
-        `df_${formData.group2Footing === "left" ? "L_" : "R_"}${formData.group2GaitCycle === "left" ? "Lcycle_2.csv" : "Rcycle_2.csv"}`,
+        `df_${formData.group1Footing === "Left" ? "L_" : "R_"}${formData.group1GaitCycle === "Left" ? "Lcycle_1.csv" : "Rcycle_1.csv"}`,
+        `df_${formData.group2Footing === "Left" ? "L_" : "R_"}${formData.group2GaitCycle === "Left" ? "Lcycle_2.csv" : "Rcycle_2.csv"}`,
         // Add more filenames based on your requirements //         df_L_Rcycle_2.csv
     ];
 
@@ -89,6 +89,7 @@ export const DataProcessView = (props) => {
         const newChartData = { ...newData[chartIndex] }; // Create a copy of the chart data object to modify
         // Assume you have processed the formData and have the new data ready
         newChartData.active = true; // Set the chart as active
+        newChartData.parameter = formData.parameter;
         newChartData.group1Data = processedGroup1Data; // Replace with actual processed data
         newChartData.group2Data = processedGroup2Data;
         newChartData.group1Spread = formData.isGroup1Checked;
@@ -118,7 +119,7 @@ export const DataProcessView = (props) => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} md={6} lg={4} style={{  padding: '40px', height: '50%' }}>
+      <Grid item xs={12} md={6} lg={4} style={{  padding: '40px', height: '45%' }}>
 
            <LoadData style={{  padding: '20px' }}
            handleFormSubmitParent={handleFormDataSubmit}
@@ -128,7 +129,7 @@ export const DataProcessView = (props) => {
 
 
   {lineChartsData.map((chartData, index) => (
-    <Grid item xs={12} md={6} lg={4} key={index} style={{ padding: '40px' , height: '50%' }}>
+    <Grid item xs={12} md={6} lg={4} key={index} style={{ padding: '40px' , height: '45%' }}>
       <LineChart chartData={chartData} />
     </Grid>
   ))}

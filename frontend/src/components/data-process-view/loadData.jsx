@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Button, TextField, FormControl, Select, MenuItem, InputLabel, FormControlLabel, Checkbox } from '@mui/material';
+import { Grid, Button, TextField, FormControl, Select, MenuItem, InputLabel, FormControlLabel, Checkbox, Dialog, DialogTitle, DialogActions  } from '@mui/material';
 import axios from 'axios';
 
 import { TreeSelect } from "primereact/treeselect";
@@ -9,35 +9,18 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width:250,
-    },
-  },
-};
+// const ITEM_HEIGHT = 48;
+// const ITEM_PADDING_TOP = 8;
+// const MenuProps = {
+//   PaperProps: {
+//     style: {
+//       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+//       width:250,
+//     },
+//   },
+// };
 
 export const LoadData = (props) => {
-//   const [formData, setFormData] = useState({
-//     temp1FileLocation: "",
-//     file1Location: "",
-//     group1SelectedFiles: [],
-//     group2SelectedFiles: [],
-//     group1Label: "",
-//     group2Label: "",
-//     panelOptions: "",
-//     parameter: "",
-//     group1Footing: "",
-//     group1GaitCycle: "",
-//     group2Footing: "",
-//     group2GaitCycle: "",
-//     isGroup1Checked: false,
-//     isGroup2Checked: false,
-//   });
-
 const [processFormData, setProcessFormData] = useState({
   temp1FileLocation: "",
   file1Location: "",
@@ -47,6 +30,7 @@ const [processFormData, setProcessFormData] = useState({
 });
 
 const [submitFormData, setSubmitFormData] = useState({
+  parameter: "",
   group1Label: "",
   group2Label: "",
   group1Footing: "",
@@ -61,10 +45,10 @@ const [submitFormData, setSubmitFormData] = useState({
 
 
   const panelOptions = [1, 2, 3, 4, 5]; 
-  const parameterOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT'];
-  const [dynamicFootingOptions, setDynamicFootingOptions] = useState(["left", "right"]);
+  const parameterOptions = ['Foot', 'Shank', 'Thigh', 'Trunk', 'Hipx', 'AP', 'ML', 'VT'];
+  const [dynamicFootingOptions, setDynamicFootingOptions] = useState(["Left", "Right"]);
   const [isFootingDisabled, setIsFootingDisabled] = useState(false);
-  const gaitCycleOptions = ["left","right"]; // Assuming 'names' are used for multiple selects
+  const gaitCycleOptions = ["Left","Right"]; // Assuming 'names' are used for multiple selects
 
 
   const [nodesGroup1, setNodesGroup1] = useState(null);
@@ -73,6 +57,10 @@ const [submitFormData, setSubmitFormData] = useState({
   
   const [nodesGroup2, setNodesGroup2] = useState(null);
   const [selectedNodeKeysGroup2, setSelectedNodeKeysGroup2] = useState(null);
+
+
+  const [openDialog, setOpenDialog] = React.useState(false);
+const [errorMessage, setErrorMessage] = React.useState('');
 
   
   useEffect(() => {
@@ -94,15 +82,6 @@ const [submitFormData, setSubmitFormData] = useState({
     
   }, [processFormData.file1Location]);
 
-
-  // const handleChange = (event) => {
-  //   const { name, value } = event.target;
-  //   setFormData((prevState) => ({
-  //     ...prevState,
-  //     [name]: value,
-  //   }));
-  //   console.log("Form Data",formData);
-  // };
 
   const handleProcessChange = (event) => {
     const { name, value } = event.target;
@@ -129,29 +108,47 @@ const handleSubmitChange = (event) => {
 };
 
 
-// const handleFormSubmitChild = async (e) => {
-//     e.preventDefault();
-//     try {
-
-//       const updatedFormData = {
-//         ...formData,
-//         group1SelectedFiles: selectedNodeKeysGroup1,
-//         group2SelectedFiles: selectedNodeKeysGroup2,
-//       };
-    
-//       console.log("Form Data Child", updatedFormData);
-//       await props.handleFormSubmitParent(updatedFormData);
-
-
-
-//     } catch (error) {
-//       console.error('Error sending form data to parent:', error);
-//     }
-//   };
-
 const handleProcessSubmit = async (e) => {
   e.preventDefault();
   try {
+    if (!processFormData.temp1FileLocation) {
+      setErrorMessage('File location is not entered');
+      setOpenDialog(true);
+      return;
+  }
+
+  console.log("Group 1 Files", selectedNodeKeysGroup1);
+  console.log("Group 1 Files Length", selectedNodeKeysGroup1.length);
+  console.log("Group 2 Files", selectedNodeKeysGroup2);
+
+    // Checking if Group 1 files are selected
+    if (!selectedNodeKeysGroup1 || Object.keys(selectedNodeKeysGroup1).length === 0) {
+      setErrorMessage('Group 1 files are not selected');
+      setOpenDialog(true);
+      return;
+  }
+
+
+      // Checking if Group 1 files are selected
+      if (!selectedNodeKeysGroup2 || Object.keys(selectedNodeKeysGroup2).length === 0) {
+        setErrorMessage('Group 2 files are not selected');
+        setOpenDialog(true);
+        return;
+    }
+  
+
+
+
+
+
+if (!processFormData.parameter) {
+  setErrorMessage('Parameter is not selected');
+  setOpenDialog(true);
+  return;
+}
+
+submitFormData.parameter = processFormData.parameter;
+
       const updatedFormData = {
           ...processFormData,
           group1SelectedFiles: selectedNodeKeysGroup1,
@@ -159,13 +156,13 @@ const handleProcessSubmit = async (e) => {
       };
 
       if (['AP', 'ML', 'VT'].includes(updatedFormData.parameter)) {
-        setDynamicFootingOptions(["left", "right", "average"]);
+        setDynamicFootingOptions(["Left", "Right", "Average"]);
         setIsFootingDisabled(false);
     } else if (['trunk', 'hipx'].includes(updatedFormData.parameter)) {
         setDynamicFootingOptions([]);
         setIsFootingDisabled(true);
     } else {
-        setDynamicFootingOptions(["left", "right"]);
+        setDynamicFootingOptions(["Left", "Right"]);
         setIsFootingDisabled(false);
     }
       // Process the data (similar to your existing functionality)
@@ -182,6 +179,50 @@ const handleSubmitForm = async (e) => {
   try {
       // Similar structure to handleProcessSubmit
       console.log("Submit Form Data", submitFormData);
+
+      if (!submitFormData.group1Label) {
+        setErrorMessage('Group 1 label is not entered');
+        setOpenDialog(true);
+        return;
+    }
+
+    if (!submitFormData.group2Label) {
+      setErrorMessage('Group 2 label is not entered');
+      setOpenDialog(true);
+      return;
+  }
+
+  if ( !isFootingDisabled & !submitFormData.group1Footing) {
+    setErrorMessage('Group 1 footing is not selected');
+    setOpenDialog(true);
+    return;
+}
+
+if ( !isFootingDisabled & !submitFormData.group2Footing) {
+  setErrorMessage('Group 2 footing is not selected');
+  setOpenDialog(true);
+  return;
+}
+
+if (!submitFormData.group1GaitCycle) {
+  setErrorMessage('Group 1 gait cycle is not selected');
+  setOpenDialog(true);
+  return;
+}
+
+if (!submitFormData.group2GaitCycle) {
+  setErrorMessage('Group 2 gait cycle is not selected');
+  setOpenDialog(true);
+  return;
+}
+
+if (!submitFormData.panelOptions) {
+  setErrorMessage('Panel option is not selected');
+  setOpenDialog(true);
+  return;
+}
+
+
       // Send the data (you can pass this to another component or perform another action)
       await props.handleFormSubmitParent2(submitFormData);
   } catch (error) {
@@ -259,7 +300,7 @@ const handleSubmitForm = async (e) => {
               id="parameter-select"
               value={processFormData.parameter}
               onChange={handleProcessChange}
-              MenuProps={MenuProps}
+              // MenuProps={MenuProps}
             >
               {parameterOptions.map((number) => (
                 <MenuItem key={number} value={number}>
@@ -276,7 +317,22 @@ const handleSubmitForm = async (e) => {
             Process
           </Button>
         </Grid>
-      </Grid>       
+      </Grid>   
+
+      <Dialog
+  open={openDialog}
+  onClose={() => setOpenDialog(false)}
+  aria-labelledby="alert-dialog-title"
+>
+  <DialogTitle id="alert-dialog-title">{"Missing Input"}</DialogTitle>
+  <div style={{ padding: '20px' }}>{errorMessage}</div>
+  <DialogActions>
+    <Button onClick={() => setOpenDialog(false)} color="primary" autoFocus>
+      Okay
+    </Button>
+  </DialogActions>
+</Dialog>
+    
 
       <Grid container spacing={1} style={{ paddingTop: '10px' }}>
 
@@ -316,7 +372,7 @@ const handleSubmitForm = async (e) => {
               id="group1-footing-select"
               value={submitFormData.group1Footing}
               onChange={handleSubmitChange}
-              MenuProps={MenuProps}
+              // MenuProps={MenuProps}
               disabled={isFootingDisabled}
             >
    {dynamicFootingOptions.map((option) => (
@@ -336,7 +392,7 @@ const handleSubmitForm = async (e) => {
               id="group2-footing-select"
               value={submitFormData.group2Footing}
               onChange={handleSubmitChange}
-              MenuProps={MenuProps}
+              // MenuProps={MenuProps}
               disabled={isFootingDisabled}
             >
    {dynamicFootingOptions.map((option) => (
@@ -356,7 +412,7 @@ const handleSubmitForm = async (e) => {
               id="group1-gait-cycle-select"
               value={submitFormData.group1GaitCycle}
               onChange={handleSubmitChange}
-              MenuProps={MenuProps}
+              // MenuProps={MenuProps}
             >
               {gaitCycleOptions.map((name) => (
                 <MenuItem key={name} value={name}>
@@ -375,7 +431,7 @@ const handleSubmitForm = async (e) => {
               id="group2-gait-cycle-select"
               value={submitFormData.group2GaitCycle}
               onChange={handleSubmitChange}
-              MenuProps={MenuProps}
+              // MenuProps={MenuProps}
             >
               {gaitCycleOptions.map((name) => (
                 <MenuItem key={name} value={name}>

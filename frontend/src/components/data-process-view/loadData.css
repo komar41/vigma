@@ -1,0 +1,5 @@
+.responsive-tree-select {
+    max-width: 100%; /* Ensures the component does not exceed the width of its container */
+    max-height: 200px; /* Adjust this value based on your preference */
+    overflow-y: auto; /* Enables vertical scrolling within the component */
+}

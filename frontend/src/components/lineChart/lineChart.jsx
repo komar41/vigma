@@ -11,7 +11,6 @@ const LineChart =
 
   // console.log("Line chart data inside the plot component",chartData);
   const [active, setActive] = useState(chartData.active);
-  const plotNumber = chartData.plotNumber;
   const parameter = chartData.parameter;
   const group1Data = chartData.group1Data;
   const group2Data = chartData.group2Data;
@@ -28,7 +27,6 @@ const LineChart =
   console.log("Chart Data inside Line Chart",chartData);
   
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
-  const [dimensionsInitialized, setDimensionsInitialized] = useState(false);
 
 
 
@@ -64,7 +62,6 @@ const LineChart =
         console.log("Dimensions",dimensions);
         setDimensions({ width : width, height : height });
         console.log("Dimensions",dimensions);
-        setDimensionsInitialized(true);
     }
     });
 
@@ -77,7 +74,6 @@ const LineChart =
       if (observeTarget) {
         resizeObserver.unobserve(observeTarget);
       }
-      setDimensionsInitialized(false); // Reset on cleanup
     };
   }, []); 
 
@@ -88,7 +84,7 @@ const LineChart =
     // console.log("Line chart data inside the plot component",group1Data);
     d3.select(svgRef.current).selectAll("*").remove();
     // set the dimensions and margins of the graph
-   const dynamicMargin = { top: dimensions.height * 0.05, right: dimensions.width * 0.05, bottom: dimensions.height * 0.10, left: dimensions.width * 0.10 };
+   const dynamicMargin = { top: dimensions.height * 0.10, right: dimensions.width * 0.05, bottom: dimensions.height * 0.15, left: dimensions.width * 0.10 };
    const dynamicWidth = dimensions.width - dynamicMargin.left - dynamicMargin.right;
    const dynamicHeight = dimensions.height - dynamicMargin.top - dynamicMargin.bottom;
   
@@ -133,8 +129,26 @@ const LineChart =
         .tickFormat("")
     );
 
-    svg.append("g")
-      .call(d3.axisLeft(y));
+    const isNarrowScreen = dynamicWidth < 405;
+  // Adjusting the y-axis ticks based on SVG width
+  let yAxis = d3.axisLeft(y);
+  if (isNarrowScreen) {
+    const yDomain = y.domain();
+    const customTickValues = [
+      yDomain[0], // Min value
+      yDomain[0] + (yDomain[1] - yDomain[0]) * 0.125, // 25% up
+      yDomain[0] + (yDomain[1] - yDomain[0]) * 0.25, // 25% up
+      yDomain[1] - (yDomain[1] - yDomain[0]) * 0.25, // 75% up
+      yDomain[1] - (yDomain[1] - yDomain[0]) * 0.125, // 75% up
+      yDomain[1], // Max value
+    ];
+    yAxis.tickValues(customTickValues);
+  }
+  
+  
+  // Apply the y-axis to the SVG
+  svg.append("g")
+    .call(yAxis);
     // console.log("Line chart data",group1Data);
 
     if (group1Spread) {
@@ -176,7 +190,7 @@ const LineChart =
 
     // Add x-axis label
     svg.append("text")
-      .attr("transform", `translate(${dynamicWidth /2 }, ${dimensions.height - dynamicMargin.bottom / 1.5 })`)
+      .attr("transform", `translate(${dynamicWidth /2 }, ${dimensions.height - dynamicMargin.bottom/1.25 })`)
       .style("text-anchor", "middle")
       .text("Gait Cycle (%)");
 
@@ -184,7 +198,7 @@ const LineChart =
     svg.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", -dynamicMargin.left / 1.1)
-      .attr("x", -dimensions.height / 2)
+      .attr("x", -dimensions.height / 2.5)
       .attr("dy", "1em")
       .style("text-anchor", "middle")
       .text("Angle (deg)");
@@ -275,7 +289,7 @@ const LineChart =
         // Define offsets and height adjustments
         const lineSpacing = 15; // Space between lines of text
         const textHeight = 3 * lineSpacing; // Adjust based on number of lines
-        const offset = 30; // Adjust based on spacing from circle
+        const offset = 12; // Adjust based on spacing from circle
 
         // Define text content for each data point
         let textY1 = y1 < y2 ? y1 - offset - textHeight : y1 + offset;
@@ -348,37 +362,49 @@ const LineChart =
       circle2.style('opacity', 0);
       text1.style('opacity', 0);
       text2.style('opacity', 0);
+      d3.selectAll(".legend").style('opacity', 1);
     });
 
-    // Add legends
-    //const legendYPosition = height + margin.bottom - 20;
-            // Add legends
+    // Legends setup
+    const legendX = dynamicMargin.left; // Adjust this value as needed, to position legends from the right side
+    const legendYStart =  dynamicMargin.top/6; // Start position for the first legend, adjust as needed
+    const legendSpacing = 20; // Space between each legend item
+
     const legendData = [
-      { color: "red", text: group1Label + " " + group1Footing + " Limb " + group1Cycle + " Cycle", x : dynamicMargin.left, y : 10, textX : 1.5*dynamicMargin.left, textY : 0 + 19},
-      { color: "#114232", text: group2Label + " " + group2Footing + " Limb " + group2Cycle + " Cycle", x : dynamicMargin.left, y : 10 + dynamicMargin.bottom/2, textX : 1.5*dynamicMargin.left , textY : dynamicMargin.bottom/2 + 19}
+      {
+        color: "red",
+        text: `${group1Label} ${group1Footing} Limb ${group1Cycle} Cycle`,
+        x: legendX,
+        y: legendYStart,
+      },
+      {
+        color: "#114232",
+        text: `${group2Label} ${group2Footing} Limb ${group2Cycle} Cycle`,
+        x: legendX,
+        y: legendYStart + legendSpacing,
+      }
     ];
 
+    // Legends drawing code (remains the same)
     const legend = svg.selectAll(".legend")
       .data(legendData)
       .enter().append("g")
       .attr("class", "legend")
-      .attr("id", (d, i) => `legend-${i}`); // Create unique IDs for each legend group
-      // Position each legend group horizontally based on its index and vertically using the calculated legendYPosition
-      // .attr("transform", (d, i) => `translate(${i * 120},${legendYPosition})`); // Adjust spacing by changing '120'
-    
+      .attr("id", (_, i) => `legend-${i}`);
+
     legend.append("rect")
-      .attr("x", d => d.x) // Rectangles start at the new origin of each legend item
-      .attr("y", d => d.y) // Adjust y position based on your layout
+      .attr("x", d => d.x)
+      .attr("y", d => d.y)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", d => d.color);
-    
+
     legend.append("text")
-      .attr("x", d => d.textX) // Position text to the right of the rectangle
-      .attr("y", d => d.textY) // Align text vertically with the rectangle
-      .attr("dy", ".35em")
-      .style("text-anchor", "start") // Align text starting from its beginning
+      .attr("x", d => d.x + 22) // Position text slightly right of the rectangle
+      .attr("y", d => d.y + 15) // Center text vertically with the rectangle
+      .style("text-anchor", "start")
       .text(d => d.text);
+
     }
 
     else {
@@ -390,8 +416,8 @@ const LineChart =
   return (
     {active} ? (
       // If active, display the SVG container and its content
-      <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: '450px' }}>
-        <svg ref={svgRef}></svg>
+      <div ref={containerRef} style={{ width: '100%', height: '100%', display: 'block' }}>
+        <svg ref={svgRef} style={{ width: '100%', height: '100%' }}></svg>
         <div 
             ref={tooltipRef}
             className="tooltip" 

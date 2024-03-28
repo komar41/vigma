@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { LoadData } from "./loadData";
-//import { LineChart } from "../line-chart/line-chart";
-import  LineChart  from "../lineChart/lineChart";
 import { Grid } from '@mui/material';
+import {Paper} from '@mui/material';
 import axios from 'axios';
-
+import  LineChart  from '../lineChart/lineChart';
 import JSZip from 'jszip';
 import Papa from 'papaparse';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
 
 
 export const DataProcessView = (props) => {
@@ -115,26 +117,118 @@ export const DataProcessView = (props) => {
 
     console.log("Line Chart Data", lineChartsData);
     };
+
+    const theme = useTheme();
+  const isLgOrLarger = useMediaQuery(theme.breakpoints.up('lg'));
+
+  const loadDataStyle = {
+    height: isLgOrLarger ? '66vh' : 'auto', // Applies '66vh' height for 'md' and larger screens, 'auto' for smaller
+  };
+
+  const boxPlotStyle = {
+    height: isLgOrLarger ? '33vh' : 'auto', // Applies '33vh' height for 'md' and larger screens, 'auto' for smaller
+  };
+
+  const isMdOrLarger = useMediaQuery(theme.breakpoints.up('md'));
+
+  const grid1Height = isLgOrLarger ? '66vh' : 'auto'; // Applies '30%' height for 'md' and larger screens, 'auto' for smaller
+
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'));
+
+  
     
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={6} lg={4} style={{  padding: '40px', height: '45%' }}>
-
-           <LoadData style={{  padding: '20px' }}
-           handleFormSubmitParent={handleFormDataSubmit}
-           handleFormSubmitParent2={handleFormDataSubmit3}
-          /> 
-        </Grid>
 
 
-  {lineChartsData.map((chartData, index) => (
-    <Grid item xs={12} md={6} lg={4} key={index} style={{ padding: '40px' , height: '45%' }}>
-      <LineChart chartData={chartData} />
+
+<Grid container>
+  <Grid item xs={12} md={6} lg={4} style={loadDataStyle}>
+         <LoadData     
+             handleFormSubmitParent={handleFormDataSubmit}
+             handleFormSubmitParent2={handleFormDataSubmit3}
+           /> 
+  </Grid>
+  
+  <Grid item xs={12} md={6} lg={4} container   direction={isMdOrLarger ? "column" : "row" }>
+    <Grid item xs={12} sm={6} style={{ height: isMdOrLarger ? '50%' : '33vh' }}>
+    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[0]} />
     </Grid>
-  ))}
+    <Grid item xs={12} sm={6} style={{ height: isMdOrLarger ? '50%' : '33vh' }}>
+
+    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[1]} />
+    </Grid>
+  </Grid>
+
+  <Grid item xs={12} sm = {12} lg={4} container direction={isLgOrLarger ? "column" : "row" } >
+  <Grid item xs={12} sm={6} style={{ height: isLgOrLarger ? '50%' : '33vh' }}>
+    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[0]} />
+    </Grid>
+    <Grid item xs={12} sm={6} style={{ height: isLgOrLarger ? '50%' : '33vh' }}>
+
+    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[1]} />
+    </Grid>
+  </Grid>
+
+  <Grid item container style={boxPlotStyle}>
+  <Grid item xs ={12} lg={8} >
+    <Paper style={{ height: '100%',margin: '1%', boxSizing: 'border-box' }}>
+      Box Plot
+    </Paper>
+  </Grid>
+  <Grid item xs ={12} lg={4} >
+    <Paper style={{ height: '100%', margin: '1%', boxSizing: 'border-box' }}>
+      Spider Plot
+    </Paper>
+  </Grid>
+  </Grid>
+</Grid>
 
 
-      </Grid>
+
     );
 };
+
+
+
+// Working Code
+
+{/* <Grid container spacing={2}>
+  {/* First Column *\/}
+  <Grid item xs={4} style={{  height: '66vh'}}>
+         <LoadData     
+             handleFormSubmitParent={handleFormDataSubmit}
+             handleFormSubmitParent2={handleFormDataSubmit3}
+           /> 
+  </Grid>
+  
+  <Grid item xs={4} container direction="column" spacing={2}>
+    <Grid item xs={6}>
+    <LineChart  style={{ height: '30%', marginBottom: '1%', padding: '5px', boxSizing: 'border-box' }} chartData={lineChartsData[0]} />
+    </Grid>
+    <Grid item xs={6}>
+    <LineChart  style={{ height: '30%', marginBottom: '1%', padding: '5px', boxSizing: 'border-box' }} chartData={lineChartsData[2]} />
+    </Grid>
+  </Grid>
+
+  <Grid item xs={4} container direction="column" spacing={2}>
+    <Grid item xs={6}>
+      <LineChart  style={{ height: '30%', marginBottom: '1%', padding: '5px', boxSizing: 'border-box' }} chartData={lineChartsData[1]} />
+    </Grid>
+    <Grid item xs={6}>
+      <LineChart  style={{ height: '30%', marginBottom: '1%', padding: '5px', boxSizing: 'border-box' }} chartData={lineChartsData[3]} />
+    </Grid>
+  </Grid>
+
+
+  <Grid item xs={8} style={{ height: '33vh' }}>
+    <Paper style={{ height: '100%', padding: '20px', boxSizing: 'border-box' }}>
+      Box Plot
+    </Paper>
+  </Grid>
+  <Grid item xs={4} style={{ height: '33vh' }}>
+    <Paper style={{ height: '100%', padding: '20px', boxSizing: 'border-box' }}>
+      Spider Plot
+    </Paper>
+  </Grid>
+</Grid> */}

@@ -5,22 +5,17 @@ import axios from 'axios';
 import { TreeSelect } from "primereact/treeselect";
 import  NodeService  from "./service/NodeService";
 
+import {Paper} from '@mui/material';
+
+
 import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 
-// const ITEM_HEIGHT = 48;
-// const ITEM_PADDING_TOP = 8;
-// const MenuProps = {
-//   PaperProps: {
-//     style: {
-//       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-//       width:250,
-//     },
-//   },
-// };
 
 export const LoadData = (props) => {
+
+
 const [processFormData, setProcessFormData] = useState({
   temp1FileLocation: "",
   file1Location: "",
@@ -233,14 +228,14 @@ if (!submitFormData.panelOptions) {
 
 
   return (
-    <>
-      <Grid container spacing={1}>
+    <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '2vh', paddingLeft: '1vh', paddingRight: '1vh' }}>
+    <Grid container spacing={0}  >
       <Grid item xs={10}>
           <TextField
             name="temp1FileLocation"
             placeholder="Group1 file location"
             label="File Location"
-            variant="filled"
+            variant="standard"
             fullWidth
             value={processFormData.temp1FileLocation}
             onChange={handleProcessChange}
@@ -256,9 +251,9 @@ if (!submitFormData.panelOptions) {
             Set
           </Button>
         </Grid>
-
-        <Grid item xs={6}  style={{ paddingTop: '30px' }} >
-        <span className="p-float-label w-full">
+     <Grid item xs={12} sm = {6}  style={{ paddingTop: '30px' }} >
+        <span className="p-float-label">
+        
         <TreeSelect
             value={selectedNodeKeysGroup1}
             onChange={(e) => setSelectedNodeKeysGroup1(e.value)}
@@ -271,10 +266,10 @@ if (!submitFormData.panelOptions) {
           ></TreeSelect>
           <label htmlFor="treeselect">Group 1 Files</label>
           </span>
-        </Grid>
+        </Grid> 
 
-        <Grid item xs={6}  style={{ paddingTop: '30px' }}>
-        <span className="p-float-label w-full">
+        <Grid item xs={12} sm = {6}  style={{ paddingTop: '30px' }}>
+        <span className="p-float-label">
 
         <TreeSelect
             value={selectedNodeKeysGroup2}
@@ -291,7 +286,7 @@ if (!submitFormData.panelOptions) {
           </span>
       </Grid>
 
-        <Grid item xs={6} >
+        <Grid item xs={12} sm ={6}  >
           <FormControl  variant="standard" fullWidth>
             <InputLabel id="parameter-label">Select Parameter</InputLabel>
             <Select
@@ -300,7 +295,6 @@ if (!submitFormData.panelOptions) {
               id="parameter-select"
               value={processFormData.parameter}
               onChange={handleProcessChange}
-              // MenuProps={MenuProps}
             >
               {parameterOptions.map((number) => (
                 <MenuItem key={number} value={number}>
@@ -310,14 +304,14 @@ if (!submitFormData.panelOptions) {
             </Select>
           </FormControl>
         </Grid>
-      <Grid item xs={6} style={{ paddingTop: '10px' }}>
+      <Grid item xs={12} sm ={6}  style={{ paddingTop: '10px' }}>
           <Button variant="contained" size="small"
           onClick={(e) => handleProcessSubmit(e)}
           >
             Process
           </Button>
         </Grid>
-      </Grid>   
+        </Grid>
 
       <Dialog
   open={openDialog}
@@ -334,11 +328,11 @@ if (!submitFormData.panelOptions) {
 </Dialog>
     
 
-      <Grid container spacing={1} style={{ paddingTop: '10px' }}>
+      <Grid container spacing={1} style={{ paddingTop: '10px'}}>
 
 
 
-        <Grid item xs={6} >
+        <Grid item xs={12} sm ={6}  >
         <TextField
             name="group1Label"
             placeholder="group 1 label"
@@ -350,7 +344,7 @@ if (!submitFormData.panelOptions) {
           />
         </Grid>
 
-        <Grid item xs={6} >
+        <Grid item xs={12} sm ={6}  >
       <TextField
           name="group2Label"
           placeholder="group 2 label"
@@ -363,7 +357,7 @@ if (!submitFormData.panelOptions) {
       </Grid>
 
 
-        <Grid item xs={6} >
+        <Grid item xs={6}  >
           <FormControl variant="standard" fullWidth>
             <InputLabel id="group1-footing-label">Group 1 Footing</InputLabel>
             <Select
@@ -383,7 +377,7 @@ if (!submitFormData.panelOptions) {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6} >
+        <Grid item xs={6}  >
           <FormControl variant="standard" fullWidth>
             <InputLabel id="group2-footing-label">Group 2 Footing</InputLabel>
             <Select
@@ -403,7 +397,7 @@ if (!submitFormData.panelOptions) {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6} >
+        <Grid item xs={6}  >
           <FormControl  variant="standard" fullWidth>
             <InputLabel id="group1-gait-cycle-label">Group 1 Gait Cycle</InputLabel>
             <Select
@@ -422,7 +416,7 @@ if (!submitFormData.panelOptions) {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6} >
+        <Grid item xs={6}  >
           <FormControl  variant="standard" fullWidth>
             <InputLabel id="group2-gait-cycle-label">Group 2 Gait Cycle</InputLabel>
             <Select
@@ -454,7 +448,7 @@ if (!submitFormData.panelOptions) {
           />
         </Grid>
  
-        <Grid item xs={6} >
+        <Grid item xs={6}  >
           <FormControl  variant="standard" fullWidth>
             <InputLabel id="panel-options-label">Select plot No:</InputLabel>
             <Select
@@ -479,7 +473,15 @@ if (!submitFormData.panelOptions) {
             Submit
           </Button>
         </Grid>
+        {props.lgMatch && (
+        <Grid item style={{ width: '100%', height: '100%' }}>
+          <Paper>
+            {/* You can put additional content here or leave it empty */}
+          </Paper>
         </Grid>
-    </>
+      )}
+        </Grid>
+
+    </div>
   );
 };

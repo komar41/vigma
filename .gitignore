@@ -2,13 +2,15 @@
 frontend/node_modules
 **/.pnp
 **.pnp.js
-Backend/envs
-Backend/data
-Backend/__pycache__
-Backend/.DS_Store
+backend/envs
+backend/data
+backend/__pycache__
+backend/.DS_Store
 
-data
+data-processed
+data-raw
 
+lib_processing/__pycache__
 lib_processing/envs
 
 # Build files

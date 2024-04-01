@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Form</title>
+    <script>
+        window.onload = function() {
+            document.getElementById("dataForm").onsubmit = function(e) {
+                e.preventDefault(); // Prevent the default form submission
+
+                // Collect form data
+                const formData = {
+                    fileLocation: document.getElementById('fileLocation').value,
+                    group1SelectedFiles: document.getElementById('group1SelectedFiles').value.split(','),
+                    group2SelectedFiles: document.getElementById('group2SelectedFiles').value.split(','),
+                    selectedColumn: document.getElementById('selectedColumn').value,
+                    selectedFooting: document.getElementById('selectedFooting').value,
+                    selectedCycle: document.getElementById('selectedCycle').value
+                };
+
+                // Send the form data as JSON
+                fetch('{{ url_for("process_form_data") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                }).then(data => {
+                    // Handle the response data (data.df1 and data.df2)
+                    const resultsDiv = document.getElementById('results');
+                    
+                    // Example of rendering: Creating a simple JSON string to display.
+                    // You could instead generate table rows or divs for each entry.
+                    resultsDiv.innerHTML = '<h2>Results</h2>' +
+                        '<h3>DF 1:</h3><pre>' + JSON.stringify(data.df1, null, 2) + '</pre>' +
+                        '<h3>DF 2:</h3><pre>' + JSON.stringify(data.df2, null, 2) + '</pre>';
+                }).catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+            };
+        };
+    </script>
+</head>
+<body>
+
+<form id="dataForm" method="POST">
+    <label for="fileLocation">File Location:</label>
+    <input type="text" id="fileLocation" name="fileLocation"><br><br>
+    
+    <label for="group1SelectedFiles">Group 1 Selected Files (comma-separated):</label>
+    <input type="text" id="group1SelectedFiles" name="group1SelectedFiles"><br><br>
+    
+    <label for="group2SelectedFiles">Group 2 Selected Files (comma-separated):</label>
+    <input type="text" id="group2SelectedFiles" name="group2SelectedFiles"><br><br>
+    
+    <label for="selectedColumn">Selected Column:</label>
+    <input type="text" id="selectedColumn" name="selectedColumn"><br><br>
+    
+    <label for="selectedFooting">Selected Footing:</label>
+    <input type="text" id="selectedFooting" name="selectedFooting"><br><br>
+    
+    <label for="selectedCycle">Selected Cycle:</label>
+    <input type="text" id="selectedCycle" name="selectedCycle"><br><br>
+    
+    <button type="submit">Submit</button>
+</form>
+
+
+<div id="results"></div>
+</body>
+</html>

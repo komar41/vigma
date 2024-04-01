@@ -266,7 +266,7 @@ def process_form_data():
     group1Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group1Files]
     group2Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group2Files]
 
-    df_1, df_2 = None, None
+    df_1, df_2, df_1_mnmx, df_2_mnmx = None, None, None, None
 
     if(col=='STP'):
         df_1 = get_stp_params(group1Files_loc)
@@ -317,6 +317,9 @@ def process_form_data():
     
     # else: 
     #     return render_template('index.html')
+
+# df: time, l, m, u
+# df: sid, trial, RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -11,17 +11,17 @@ const LineChart =
 
   // console.log("Line chart data inside the plot component",chartData);
   const [active, setActive] = useState(chartData.active);
-  const parameter = chartData.parameter;
+  const selectedColumn = chartData.parameter;
   const group1Data = chartData.group1Data;
   const group2Data = chartData.group2Data;
   const group1Label = chartData.group1Label;
   const group2Label  = chartData.group2Label;
   const group1Spread  = chartData.group1Spread;
   const group2Spread  = chartData.group2Spread;
-  const group1Footing  = chartData.group1Footing;
-  const group2Footing = chartData.group2Footing;
-  const group1Cycle = chartData.group1GaitCycle;
-  const group2Cycle = chartData.group2GaitCycle;
+  const selectedFooting1  = chartData.selectedFooting1;
+  const selectedFooting2 = chartData.selectedFooting2;
+  const group1Cycle = chartData.selectedCycle1;
+  const group2Cycle = chartData.selectedCycle2;
 
 
   console.log("Chart Data inside Line Chart",chartData);
@@ -34,14 +34,6 @@ const LineChart =
   const [tooltipContent, setTooltipContent] = useState('');
   const [tooltipVisibility, setTooltipVisibility] = useState('hidden');
   const [tooltipPosition, setTooltipPosition] = useState({ left: 0, top: 0 });
-
-  const mfootKeyGroup1 = group1Footing === 'Right' ? 'Rfoot_m' : 'Lfoot_m';
-  const lfootKeyGroup1 = group1Footing === 'Right' ? 'Rfoot_l' : 'Lfoot_l';
-  const ufootKeyGroup1 = group1Footing === 'Right' ? 'Rfoot_u' : 'Lfoot_u';
-
-  const mfootKeyGroup2 = group2Footing === 'Right' ? 'Rfoot_m' : 'Lfoot_m';
-  const lfootKeyGroup2 = group2Footing === 'Right' ? 'Rfoot_l' : 'Lfoot_l';
-  const ufootKeyGroup2 = group2Footing === 'Right' ? 'Rfoot_u' : 'Lfoot_u';
 
   useEffect(() => {
     // Synchronize active state with chartData.active
@@ -106,9 +98,24 @@ const LineChart =
       .attr("transform", "translate(0," +  dynamicHeight + ")")
       .call(d3.axisBottom(x));
 
+// Find min and max values
+const group1Min = d3.min(group1Data, d => d.l);
+const group1Max = d3.max(group1Data, d => d.u);
+console.log("Group1 Min and Max",group1Min,group1Max);
+
+const group2Min = d3.min(group2Data, d => d.l);
+const group2Max = d3.max(group2Data, d => d.u);
+console.log("Group2 Min and Max",group2Min,group2Max);
+
+
+// Calculate overall min and max
+const overallMin = Math.min(group1Min, group2Min);
+const overallMax = Math.max(group1Max, group2Max);
+console.log("Overall Min and Max",overallMin,overallMax);
+
     // Add Y axis
     var y = d3.scaleLinear()
-      .domain([-100,50])
+      .domain([overallMin, overallMax])
       .range([ dimensions.height  - dynamicMargin.top - dynamicMargin.bottom, 0]);
 
 
@@ -160,8 +167,8 @@ const LineChart =
       .attr("opacity", 0.5)
       .attr("d", d3.area()
         .x(function (d) { return x(d.time) })
-        .y0(function (d) { return y(d[lfootKeyGroup1]) })
-        .y1(function (d) { return y(d[ufootKeyGroup1]) })
+        .y0(function (d) { return y(d.l) })
+        .y1(function (d) { return y(d.u) })
       );
 
 
@@ -175,7 +182,7 @@ const LineChart =
     .attr("stroke", "red")
     .attr("d", d3.line()
       .x(function (d) { return x(d.time) })
-      .y(function (d) { return y(d[mfootKeyGroup1]) })
+      .y(function (d) { return y(d.m) })
     )
 
 
@@ -186,7 +193,7 @@ const LineChart =
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("text-decoration", "underline")
-      .text(`${parameter} `);
+      .text(`${selectedColumn} `);
 
     // Add x-axis label
     svg.append("text")
@@ -214,7 +221,7 @@ const LineChart =
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
           .x(function (d) { return x(d.time) })
-          .y(function (d) { return y(d[mfootKeyGroup2]) })
+          .y(function (d) { return y(d.m) })
         );
 
       if (group2Spread) {
@@ -227,8 +234,8 @@ const LineChart =
         .attr("opacity", 0.3 )
         .attr("d", d3.area()
           .x(function (d) { return x(d.time) })
-          .y0(function (d) { return y(d[lfootKeyGroup2]) })
-          .y1(function (d) { return y(d[ufootKeyGroup2]) })
+          .y0(function (d) { return y(d.l) })
+          .y1(function (d) { return y(d.u) })
         );
       }
 
@@ -279,8 +286,8 @@ const LineChart =
       const d2 = group2Data[Math.max(0, i2 - 1)];
   
       if (d1 && d2) {
-        const y1 = y(d1[mfootKeyGroup1]);
-        const y2 = y(d2[mfootKeyGroup2]);
+        const y1 = y(d1.m);
+        const y2 = y(d2.m);
 
         // Set circle positions
         circle1.attr('cx', x(d1.time)).attr('cy', y1).style('opacity', 1);
@@ -334,9 +341,9 @@ const LineChart =
         const tspan1_1 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1);
         const tspan1_2 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1 + lineSpacing);
         const tspan1_3 = text1.append("tspan").attr('x', x(d1.time)).attr('y', textY1 + 2 * lineSpacing);
-        tspan1_2.text(`M: ${Number(d1[mfootKeyGroup1]).toFixed(2)}`);
-        tspan1_3.text(`L: ${Number(d1[lfootKeyGroup1]).toFixed(2)}`);
-        tspan1_1.text(`U: ${Number(d1[ufootKeyGroup1]).toFixed(2)}`);
+        tspan1_2.text(`M: ${Number(d1.m).toFixed(2)}`);
+        tspan1_3.text(`L: ${Number(d1.l).toFixed(2)}`);
+        tspan1_1.text(`U: ${Number(d1.u).toFixed(2)}`);
         text1.style('opacity', 1);
 
         // Update text elements for d2
@@ -344,9 +351,9 @@ const LineChart =
         const tspan2_1 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2);
         const tspan2_2 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2 + lineSpacing);
         const tspan2_3 = text2.append("tspan").attr('x', x(d2.time)).attr('y', textY2 + 2 * lineSpacing);
-        tspan2_2.text(`M: ${Number(d2[mfootKeyGroup2]).toFixed(2)}`);
-        tspan2_3.text(`L: ${Number(d2[lfootKeyGroup2]).toFixed(2)}`);
-        tspan2_1.text(`U: ${Number(d2[ufootKeyGroup2]).toFixed(2)}`);
+        tspan2_2.text(`M: ${Number(d2.m).toFixed(2)}`);
+        tspan2_3.text(`L: ${Number(d2.l).toFixed(2)}`);
+        tspan2_1.text(`U: ${Number(d2.u).toFixed(2)}`);
         text2.style('opacity', 1);
 
 
@@ -373,13 +380,13 @@ const LineChart =
     const legendData = [
       {
         color: "red",
-        text: `${group1Label} ${group1Footing} Limb ${group1Cycle} Cycle`,
+        text: `${group1Label} ${selectedFooting1} Limb ${group1Cycle} Cycle`,
         x: legendX,
         y: legendYStart,
       },
       {
         color: "#114232",
-        text: `${group2Label} ${group2Footing} Limb ${group2Cycle} Cycle`,
+        text: `${group2Label} ${selectedFooting2} Limb ${group2Cycle} Cycle`,
         x: legendX,
         y: legendYStart + legendSpacing,
       }

@@ -11,6 +11,9 @@ const NodeService = {
         this.getTreeNodesData = () => {
             console.log("Entered updateData", dataObject);
             return Object.entries(dataObject).map(([folderName, insideFolders]) => {
+
+                console.log("Folder Name", folderName);
+                console.log("Inside Folders", insideFolders);
                 return {
                     key: folderName,
                     label: folderName,
@@ -24,7 +27,7 @@ const NodeService = {
                                 trialKey = 'step'; // Special key for step files, but we won't use it to create a separate node
                             } else {
                                 const match = file.match(/_(\d+)_/); // Extracts trial number
-                                trialKey = match ? `Trial ${match[1]}` : 'Unknown';
+                                trialKey = match ? `${match[1]}` : 'Unknown';
                             }
     
                             if (!trialMap[trialKey]) {
@@ -52,10 +55,9 @@ const NodeService = {
                             data: `${insideFolderName} in ${folderName} Folder`,
                             children: Object.entries(trialMap).filter(([trialName]) => trialName !== 'step').map(([trialName, { jnt, grf }]) => {
                                 const children = [];
-                                if (jnt) children.push({ key: `${folderName}-${insideFolderName}-${jnt}`, label: 'JNT', data: jnt });
-                                if (grf) children.push({ key: `${folderName}-${insideFolderName}-${grf}`, label: 'GRF', data: grf });
+
                                 return {
-                                    key: `${folderName}-${insideFolderName}-${trialName}`,
+                                    key: `${folderName}/${insideFolderName}_${trialName}`,
                                     label: trialName,
                                     data: `${trialName} in ${insideFolderName} Folder`,
                                     children

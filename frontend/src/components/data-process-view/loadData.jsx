@@ -16,31 +16,30 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 export const LoadData = (props) => {
 
 
-const [processFormData, setProcessFormData] = useState({
+
+const [formData, setFormData] = useState({
   temp1FileLocation: "",
-  file1Location: "",
+  fileLocation: "",
   group1SelectedFiles: [],
   group2SelectedFiles: [],
-  parameter: "",
-});
-
-const [submitFormData, setSubmitFormData] = useState({
-  parameter: "",
+  selectedColumn: "",
   group1Label: "",
   group2Label: "",
-  group1Footing: "",
-  group1GaitCycle: "",
-  group2Footing: "",
-  group2GaitCycle: "",
+  selectedFooting1: "",
+  selectedCycle1: "",
+  selectedFooting2: "",
+  selectedCycle2: "",
   isGroup1Checked: false,
   isGroup2Checked: false,
   panelOptions: "",
+  // Any other fields you might have
 });
+
 
 
 
   const panelOptions = [1, 2, 3, 4, 5]; 
-  const parameterOptions = ['Foot', 'Shank', 'Thigh', 'Trunk', 'Hipx', 'AP', 'ML', 'VT'];
+  const selectedColumnOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT'];
   const [dynamicFootingOptions, setDynamicFootingOptions] = useState(["Left", "Right"]);
   const [isFootingDisabled, setIsFootingDisabled] = useState(false);
   const gaitCycleOptions = ["Left","Right"]; // Assuming 'names' are used for multiple selects
@@ -60,9 +59,9 @@ const [errorMessage, setErrorMessage] = React.useState('');
   
   useEffect(() => {
     const fetchFolders = async () => {
-      if (processFormData.file1Location) {
+      if (formData.fileLocation) {
         try {
-          const response = await axios.post('http://localhost:5000/send-data', { fileLocation: processFormData.file1Location });
+          const response = await axios.post('http://localhost:5000/send-data', { fileLocation: formData.fileLocation });
           console.log("Flask Response",response.data); // Handle response from Flask backend
           NodeService.updateData(response.data);
           // Retrieve the updated tree structure
@@ -75,46 +74,78 @@ const [errorMessage, setErrorMessage] = React.useState('');
     };
     fetchFolders();
     
-  }, [processFormData.file1Location]);
+  }, [formData.fileLocation]);
 
 
-  const handleProcessChange = (event) => {
-    const { name, value } = event.target;
-    setProcessFormData((prevState) => ({
+
+  const handleChange = (event) => {
+    const { name, value, checked, type } = event.target;
+    console.log("Name", name);
+    console.log("Value", value);
+    console.log("Checked", checked);
+    console.log("Type", type);
+
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
-};
 
-const handleSubmitChange = (event) => {
-    const { name, value } = event.target;
-    setSubmitFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-};
+    console.log("Form Data", formData);
+    console.log(name=== 'selectedColumn');
+    if (name === 'selectedColumn') {
+
+    if (['AP', 'ML', 'VT'].includes(value)) {
+        setDynamicFootingOptions(["Left", "Right", "Aggregate"]);
+        setIsFootingDisabled(false);
+    } else if (['trunk', 'hipx'].includes(value)) {
+        setDynamicFootingOptions([]);
+        setIsFootingDisabled(true);
+    } else {
+        setDynamicFootingOptions(["Left", "Right"]);
+        setIsFootingDisabled(false);
+    }
+}
+  };
+  
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target; // Destructure name and checked from the event target
-    setSubmitFormData((prevState) => ({
+    setFormData((prevState) => ({
       ...prevState,
       [name]: checked, // Use computed property name based on the checkbox name
     }));
 };
 
 
-const handleProcessSubmit = async (e) => {
+
+function getCheckedFileTitles(selectedNodeKeys) {
+  // Regex to match the specific format (folderName/insideFolder_trialNumber)
+  const regex = /\/.+\_.+$/;
+
+  // Filter entries based on the regex and the checked status, then extract the keys
+  const checkedFileTitles = Object.entries(selectedNodeKeys)
+    .filter(([key, value]) => {
+      // Check both the key format and the `checked` status
+      return regex.test(key) && value.checked === true && value.partialChecked === false;
+    })
+    .map(([key, _]) => key); // Extract just the titles (keys)
+
+  console.log("Checked Files", checkedFileTitles);
+  return checkedFileTitles;
+}
+
+
+
+const handleSubmitForm = async (e) => {
+
   e.preventDefault();
   try {
-    if (!processFormData.temp1FileLocation) {
+    if (!formData.temp1FileLocation) {
       setErrorMessage('File location is not entered');
       setOpenDialog(true);
       return;
   }
 
-  console.log("Group 1 Files", selectedNodeKeysGroup1);
-  console.log("Group 1 Files Length", selectedNodeKeysGroup1.length);
-  console.log("Group 2 Files", selectedNodeKeysGroup2);
 
     // Checking if Group 1 files are selected
     if (!selectedNodeKeysGroup1 || Object.keys(selectedNodeKeysGroup1).length === 0) {
@@ -133,93 +164,99 @@ const handleProcessSubmit = async (e) => {
   
 
 
+      if (!formData.selectedColumn) {
+        setErrorMessage('selectedColumn is not selected');
+        setOpenDialog(true);
+        return;
+      }
 
 
 
-if (!processFormData.parameter) {
-  setErrorMessage('Parameter is not selected');
-  setOpenDialog(true);
-  return;
-}
-
-submitFormData.parameter = processFormData.parameter;
-
-      const updatedFormData = {
-          ...processFormData,
-          group1SelectedFiles: selectedNodeKeysGroup1,
-          group2SelectedFiles: selectedNodeKeysGroup2,
-      };
-
-      if (['AP', 'ML', 'VT'].includes(updatedFormData.parameter)) {
-        setDynamicFootingOptions(["Left", "Right", "Average"]);
-        setIsFootingDisabled(false);
-    } else if (['trunk', 'hipx'].includes(updatedFormData.parameter)) {
-        setDynamicFootingOptions([]);
-        setIsFootingDisabled(true);
-    } else {
-        setDynamicFootingOptions(["Left", "Right"]);
-        setIsFootingDisabled(false);
-    }
-      // Process the data (similar to your existing functionality)
-      console.log("Process Form Data", updatedFormData);
-      // Assuming you want to keep similar functionality but for different purposes
-      await props.handleFormSubmitParent(updatedFormData);
-  } catch (error) {
-      console.error('Error processing data:', error);
-  }
-};
-
-const handleSubmitForm = async (e) => {
-  e.preventDefault();
-  try {
-      // Similar structure to handleProcessSubmit
-      console.log("Submit Form Data", submitFormData);
-
-      if (!submitFormData.group1Label) {
+      if (!formData.group1Label) {
         setErrorMessage('Group 1 label is not entered');
         setOpenDialog(true);
         return;
     }
 
-    if (!submitFormData.group2Label) {
+    if (!formData.group2Label) {
       setErrorMessage('Group 2 label is not entered');
       setOpenDialog(true);
       return;
   }
 
-  if ( !isFootingDisabled & !submitFormData.group1Footing) {
+  if ( !isFootingDisabled & !formData.selectedFooting1) {
     setErrorMessage('Group 1 footing is not selected');
     setOpenDialog(true);
     return;
-}
+    }
 
-if ( !isFootingDisabled & !submitFormData.group2Footing) {
-  setErrorMessage('Group 2 footing is not selected');
-  setOpenDialog(true);
-  return;
-}
+    if ( !isFootingDisabled & !formData.selectedFooting2) {
+      setErrorMessage('Group 2 footing is not selected');
+      setOpenDialog(true);
+      return;
+    }
 
-if (!submitFormData.group1GaitCycle) {
-  setErrorMessage('Group 1 gait cycle is not selected');
-  setOpenDialog(true);
-  return;
-}
+    if (!formData.selectedCycle1) {
+      setErrorMessage('Group 1 gait cycle is not selected');
+      setOpenDialog(true);
+      return;
+    }
 
-if (!submitFormData.group2GaitCycle) {
-  setErrorMessage('Group 2 gait cycle is not selected');
-  setOpenDialog(true);
-  return;
-}
+    if (!formData.selectedCycle2) {
+      setErrorMessage('Group 2 gait cycle is not selected');
+      setOpenDialog(true);
+      return;
+    }
 
-if (!submitFormData.panelOptions) {
-  setErrorMessage('Panel option is not selected');
-  setOpenDialog(true);
-  return;
-}
+    if (!formData.panelOptions) {
+      setErrorMessage('Panel option is not selected');
+      setOpenDialog(true);
+      return;
+    }
 
 
+    const convertFootingValue = (Value) => {
+      if(isFootingDisabled){
+        return 'NA';
+      }
+
+      switch (Value) {
+        case 'Left': return 'L';
+        case 'Right': return 'R';
+        case 'Aggregate': return 'Agg';
+        default: return 'NA'; // Just in case there are other unhandled values
+      }
+    };
+
+
+    const convertCycleValue = (Value) => {
+
+      switch (Value) {
+        case 'Left': return 'L';
+        case 'Right': return 'R';
+
+        default: return 'NA'; // Just in case there are other unhandled values
+      }
+    };
+
+    const newForm = {
+      ...formData, // Spread the existing formData to copy its properties
+      // Apply conversions
+      selectedFooting1: convertFootingValue(formData.selectedFooting1),
+      selectedFooting2: convertFootingValue(formData.selectedFooting2),
+      selectedCycle1: convertCycleValue(formData.selectedCycle1),
+      selectedCycle2: convertCycleValue(formData.selectedCycle2),
+      // Ensure getCheckedFileTitles function is defined and accessible here
+      group1SelectedFiles: getCheckedFileTitles(selectedNodeKeysGroup1),
+      group2SelectedFiles: getCheckedFileTitles(selectedNodeKeysGroup2),
+
+      fileLocation: formData.fileLocation.replace(/\\/g, "/"),
+      temp1FileLocation: formData.temp1FileLocation.replace(/\\/g, "/"),
+    };
+
+    console.log('New Form Data:', newForm);
       // Send the data (you can pass this to another component or perform another action)
-      await props.handleFormSubmitParent2(submitFormData);
+      await props.handleFormSubmitParent(newForm);
   } catch (error) {
       console.error('Error submitting data:', error);
   }
@@ -237,8 +274,8 @@ if (!submitFormData.panelOptions) {
             label="File Location"
             variant="standard"
             fullWidth
-            value={processFormData.temp1FileLocation}
-            onChange={handleProcessChange}
+            value={formData.temp1FileLocation}
+            onChange={handleChange}
             size="small"
           />
         </Grid>
@@ -246,7 +283,7 @@ if (!submitFormData.panelOptions) {
           <Button
             variant="contained"
             size="small"
-            onClick={() => setProcessFormData({ ...processFormData, file1Location: processFormData.temp1FileLocation })}
+            onClick={() => setFormData({ ...formData, fileLocation: formData.temp1FileLocation })}
           >
             Set
           </Button>
@@ -288,15 +325,15 @@ if (!submitFormData.panelOptions) {
 
         <Grid item xs={12} sm ={6}  >
           <FormControl  variant="standard" fullWidth>
-            <InputLabel id="parameter-label">Select Parameter</InputLabel>
+            <InputLabel id="selectedColumn-label">Select selectedColumn</InputLabel>
             <Select
-              name="parameter"
-              labelId="parameter-label"
-              id="parameter-select"
-              value={processFormData.parameter}
-              onChange={handleProcessChange}
+              name="selectedColumn"
+              labelId="selectedColumn-label"
+              id="selectedColumn-select"
+              value={formData.selectedColumn}
+              onChange={handleChange}
             >
-              {parameterOptions.map((number) => (
+              {selectedColumnOptions.map((number) => (
                 <MenuItem key={number} value={number}>
                   {number}
                 </MenuItem>
@@ -304,13 +341,7 @@ if (!submitFormData.panelOptions) {
             </Select>
           </FormControl>
         </Grid>
-      <Grid item xs={12} sm ={6}  style={{ paddingTop: '10px' }}>
-          <Button variant="contained" size="small"
-          onClick={(e) => handleProcessSubmit(e)}
-          >
-            Process
-          </Button>
-        </Grid>
+
         </Grid>
 
       <Dialog
@@ -339,8 +370,8 @@ if (!submitFormData.panelOptions) {
             label="Group 1 Label"
             variant="standard"
             fullWidth
-            value={submitFormData.group1Label}
-            onChange={handleSubmitChange}
+            value={formData.group1Label}
+            onChange={handleChange}
           />
         </Grid>
 
@@ -351,8 +382,8 @@ if (!submitFormData.panelOptions) {
           label="Group 2 Label"
           variant="standard"
           fullWidth
-          value={submitFormData.group2Label}
-          onChange={handleSubmitChange}
+          value={formData.group2Label}
+          onChange={handleChange}
         />
       </Grid>
 
@@ -361,11 +392,11 @@ if (!submitFormData.panelOptions) {
           <FormControl variant="standard" fullWidth>
             <InputLabel id="group1-footing-label">Group 1 Footing</InputLabel>
             <Select
-              name="group1Footing"
+              name="selectedFooting1"
               labelId="group1-footing-label"
               id="group1-footing-select"
-              value={submitFormData.group1Footing}
-              onChange={handleSubmitChange}
+              value={formData.selectedFooting1}
+              onChange={handleChange}
               // MenuProps={MenuProps}
               disabled={isFootingDisabled}
             >
@@ -381,11 +412,11 @@ if (!submitFormData.panelOptions) {
           <FormControl variant="standard" fullWidth>
             <InputLabel id="group2-footing-label">Group 2 Footing</InputLabel>
             <Select
-              name="group2Footing"
+              name="selectedFooting2"
               labelId="group2-footing-label"
               id="group2-footing-select"
-              value={submitFormData.group2Footing}
-              onChange={handleSubmitChange}
+              value={formData.selectedFooting2}
+              onChange={handleChange}
               // MenuProps={MenuProps}
               disabled={isFootingDisabled}
             >
@@ -401,11 +432,11 @@ if (!submitFormData.panelOptions) {
           <FormControl  variant="standard" fullWidth>
             <InputLabel id="group1-gait-cycle-label">Group 1 Gait Cycle</InputLabel>
             <Select
-              name="group1GaitCycle"
+              name="selectedCycle1"
               labelId="group1-gait-cycle-label"
               id="group1-gait-cycle-select"
-              value={submitFormData.group1GaitCycle}
-              onChange={handleSubmitChange}
+              value={formData.selectedCycle1}
+              onChange={handleChange}
               // MenuProps={MenuProps}
             >
               {gaitCycleOptions.map((name) => (
@@ -420,11 +451,11 @@ if (!submitFormData.panelOptions) {
           <FormControl  variant="standard" fullWidth>
             <InputLabel id="group2-gait-cycle-label">Group 2 Gait Cycle</InputLabel>
             <Select
-              name="group2GaitCycle"
+              name="selectedCycle2"
               labelId="group2-gait-cycle-label"
               id="group2-gait-cycle-select"
-              value={submitFormData.group2GaitCycle}
-              onChange={handleSubmitChange}
+              value={formData.selectedCycle2}
+              onChange={handleChange}
               // MenuProps={MenuProps}
             >
               {gaitCycleOptions.map((name) => (
@@ -437,13 +468,13 @@ if (!submitFormData.panelOptions) {
         </Grid>
         <Grid item xs={6} >
           <FormControlLabel
-            control={<Checkbox checked={submitFormData.isGroup1Checked} onChange={handleCheckboxChange} name="isGroup1Checked" />}
+            control={<Checkbox checked={formData.isGroup1Checked} onChange={handleCheckboxChange} name="isGroup1Checked" />}
             label="Group1 Spread"
           />
         </Grid>
         <Grid item xs={6} >
           <FormControlLabel
-            control={<Checkbox checked={submitFormData.isGroup2Checked} onChange={handleCheckboxChange} name="isGroup2Checked" />}
+            control={<Checkbox checked={formData.isGroup2Checked} onChange={handleCheckboxChange} name="isGroup2Checked" />}
             label="Group2 Spread"
           />
         </Grid>
@@ -455,8 +486,8 @@ if (!submitFormData.panelOptions) {
               name="panelOptions"
               labelId="panel-options-label"
               id="panel-options-select"
-              value={submitFormData.panelOptions}
-              onChange={handleSubmitChange}
+              value={formData.panelOptions}
+              onChange={handleChange}
               // MenuProps={MenuProps}
               size="small"
             >

@@ -13,8 +13,6 @@ import BoxTitle from "../box-chart/box-title";
 
 export const DataProcessView = (props) => {
 
-  const [formDataP, setFormDataP] = useState({}); // To collect the form data and use in DataProcessView
-
   const [lineChartsData, setLineChartsData] = useState([
     { active: false,  plotNumber:2 , group1Data: [], group2Data: [], group1Spread: false, group2Spread: false, group1Label: '', group2Label: '', selectedFooting1: '', selectedFooting2: '' , selectedCycle1: '' , selectedCycle2 : '' }, // Chart 2
     { active: false,  plotNumber:1 , group1Data: [], group2Data: [], group1Spread: false, group2Spread: false, group1Label: '', group2Label: '', selectedFooting1: '', selectedFooting2: '' , selectedCycle1: '' , selectedCycle2 : '' }, // Chart 1
@@ -24,12 +22,11 @@ export const DataProcessView = (props) => {
     // Add more objects as neede for additional charts
   ]);
 
+  const [boxChartData, setBoxChartData] = useState({});
+
 
     const handleFormDataSubmit = async (formData) => {
       try {
-        // Perform PUT request with formData, responseType 'blob' is crucial for binary data
-        setFormDataP(formData);
-        console.log("Form Data", formDataP);
 
         const response = await axios.post('http://localhost:5000/process_form_data', formData);
 
@@ -42,7 +39,25 @@ export const DataProcessView = (props) => {
         console.log("Group1 Data", group1Data);
         console.log("Group2 Data", group2Data);
 
+        if (response.status !== 200) {
+          console.error('Error while processing form data:', response);
+          return;
+        }
 
+        if (formData.selectedColumn=== "STP"){
+
+
+          setBoxChartData(
+            {
+              response : response.data,
+            }
+          );
+  
+          console.log("Box Chart Data after setting", boxChartData);
+      } else {
+
+
+        
         setLineChartsData(currentData => {
           const newData = [...currentData]; // Create a shallow copy of the array
           const chartIndex = formData.panelOptions - 1; // Assuming panelOptions is 1-based
@@ -68,6 +83,8 @@ export const DataProcessView = (props) => {
         });
 
 
+      }
+
 
 
 
@@ -82,10 +99,6 @@ export const DataProcessView = (props) => {
 
   const loadDataStyle = {
     height: isLgOrLarger ? '66vh' : 'auto', // Applies '66vh' height for 'md' and larger screens, 'auto' for smaller
-  };
-
-  const boxPlotStyle = {
-    height:'33vh', // Applies '33vh' height for 'md' and larger screens, 'auto' for smaller
   };
 
   const isMdOrLarger = useMediaQuery(theme.breakpoints.up('md'));
@@ -126,27 +139,27 @@ export const DataProcessView = (props) => {
   <Grid item container  style={{marginTop : '1%'}}>
     <Grid item container xs={12} lg={8}>
       <Grid item xs={12} style={{ height:  '5vh' }} >
-        <BoxTitle></BoxTitle>
+        <BoxTitle title={"STP Distribution"}></BoxTitle>
       </Grid>
       <Grid item xs={12} sm={6} md={3} style={{ height:  '33vh' }} >
-        <BoxChart attribute={"LstepLength"}></BoxChart>
+        <BoxChart chartData = {boxChartData} attribute={"LstepLength"}></BoxChart>
       </Grid>
       <Grid item xs={12} sm={6} md={3}  style={{ height:  '33vh' }}>
-        <BoxChart attribute={"timeRgait"}></BoxChart>
+        <BoxChart chartData = {boxChartData} attribute={"timeRgait"}></BoxChart>
       </Grid>
       <Grid item xs={12} sm={6} md={3}   style={{ height:  '33vh' }}>
-        <BoxChart attribute={"RstepLength"}></BoxChart>
+        <BoxChart chartData = {boxChartData} attribute={"RstepLength"}></BoxChart>
       </Grid>
       <Grid item xs={12} sm={6} md={3}   style={{ height:  '33vh' }}>
-        <BoxChart attribute={"GaitSpeed"}></BoxChart>
+        <BoxChart chartData = {boxChartData} attribute={"GaitSpeed"}></BoxChart>
       </Grid>
     </Grid>
   <Grid item xs={12} lg={4} style={{ height:  '33vh'}} >
   <Grid item xs={12} style={{ height:  '5vh' }} >
-        <BoxTitle></BoxTitle>
+        <BoxTitle title={"STP Comparision"} chartData={boxChartData}></BoxTitle>
       </Grid>
   <Grid item xs ={12}  style={{ height:  '33vh', padding: '10px'}} >
-    <RadarChart    style={{ boxSizing: 'border-box' }}></RadarChart>
+    <RadarChart chartData={boxChartData}   style={{ boxSizing: 'border-box' }}></RadarChart>
   </Grid>
     </Grid>
   </Grid>

@@ -98,9 +98,11 @@ const sampleData = {
   "df2_mnmx": null
 };
 
-const BoxChart = ({ chartData = sampleData, attribute }) => {
+const BoxChart = ({ chartData , attribute }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
+  if (chartData)
+    chartData = chartData.response;
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
 
@@ -129,6 +131,8 @@ const BoxChart = ({ chartData = sampleData, attribute }) => {
   useEffect(() => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove(); // Clear SVG
+
+    if (!chartData) return;
 
     const margin = { top: 20, right: 20, bottom: 60, left: 40 }; // Adjusted for x-axis label
     const adjustedWidth = dimensions.width - margin.left - margin.right;
@@ -163,13 +167,17 @@ const BoxChart = ({ chartData = sampleData, attribute }) => {
      .append("text")
      .attr("class", "axis-label")
      .attr("x", adjustedWidth / 2)
-     .attr("y", margin.bottom / 1.5)
-     .style("text-anchor", "middle")
+     .attr("y", margin.bottom / 2)
+     .attr("text-anchor", "middle") // Ensure it's centered horizontally
+     .style("fill", "Black") // Text color
+     .style("font-size", `${Math.min(adjustedWidth / 20, 24)}px`) // Responsive font size
      .text(attribute);
 
     // Draw box plots for df1 and df2
     ["df1", "df2"].forEach((df, i) => {
       const { min, q1, median, q3, max } = stats[df];
+
+      const color = i === 0 ? "#ffb4a2" : "#87A922";
 
       // Box
       g.append("rect")
@@ -178,7 +186,7 @@ const BoxChart = ({ chartData = sampleData, attribute }) => {
        .attr("width", xScale.bandwidth())
        .attr("height", yScale(q1) - yScale(q3))
        .attr("stroke", "black")
-       .attr("fill", "#69b3a2");
+       .attr("fill", color);
 
       // Median line
       g.append("line")

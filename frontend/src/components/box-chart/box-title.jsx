@@ -1,36 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const sampleData = [
-    { // Dataset 1
-      label: "Healthy patients",
-      values: {
-        timeLSwing: 0.8,
-        timeRSwing: 0.7,
-        LstepLength: 0.9,
-        RstepLength: 0.85,
-        GaitSpeed: 0.9,
-        timeLgait: 0.75,
-        timeRgait: 0.8
-      }
-    },
-    { // Dataset 2
-      label: "Stroke Patients",
-      values: {
-        timeLSwing: 0.7,
-        timeRSwing: 0.65,
-        LstepLength: 0.8,
-        RstepLength: 0.75,
-        GaitSpeed: 0.85,
-        timeLgait: 0.7,
-        timeRgait: 0.75
-      }
-    }
-  ];
-
-
-
-const BoxTitle = ({ chartData }) => {
+const BoxTitle = ({ chartData, title }) => { // Accept title as a prop
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
 
@@ -52,20 +23,27 @@ const BoxTitle = ({ chartData }) => {
   useEffect(() => {
     if (!svgRef.current) return;
 
-    // Adjust the width to account for margins if needed
     const adjustedWidth = dimensions.width;
-    const adjustedHeight = dimensions.height ; // Similar adjustment for height if needed
+    const adjustedHeight = dimensions.height;
 
-    // Select the SVG using D3 and clear any existing content
     const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove(); // This ensures you're starting fresh on each render
+    svg.selectAll("*").remove();
 
-    // Append a 'rect' element to your SVG
+    // Append rectangle
     svg.append("rect")
-       .attr("width", adjustedWidth) // Use the adjusted width
-       .attr("height", adjustedHeight) // Use the adjusted height
-       .attr("fill", "steelblue"); // Fill color of the rectangle, change as needed
-}, [chartData, dimensions]); // Redraw when chartData or dimensions change
+       .attr("width", adjustedWidth)
+       .attr("height", adjustedHeight)
+       .attr("fill", "white");
+
+    // Append text
+    svg.append("text")
+       .attr("x", adjustedWidth / 2) // Center the text in the middle of the svg
+       .attr("y", adjustedHeight / 2) // Vertically center
+       .attr("text-anchor", "middle") // Ensure it's centered horizontally
+       .style("fill", "Black") // Text color
+       .style("font-size", `${Math.min(adjustedWidth / 10, 24)}px`) // Responsive font size
+       .text(title); // Use the title passed as prop
+}, [chartData, dimensions, title]); // Redraw when chartData, dimensions, or title change
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', display: 'block' }}>

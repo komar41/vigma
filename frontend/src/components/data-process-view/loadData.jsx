@@ -38,10 +38,12 @@ const [formData, setFormData] = useState({
 
 
 
-  const panelOptions = [1, 2, 3, 4, 5]; 
+  const panelOptions = [1, 2, 3, 4]; 
   const selectedColumnOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT', 'STP'];
   const [dynamicFootingOptions, setDynamicFootingOptions] = useState(["Left", "Right"]);
   const [isFootingDisabled, setIsFootingDisabled] = useState(false);
+  const [isCycleDisabled, setIsCycleDisabled] = useState(false);
+  const [isPanelDisabled, setIsPanelDisabled] = useState(false);
   const gaitCycleOptions = ["Left","Right"]; // Assuming 'names' are used for multiple selects
 
 
@@ -97,12 +99,28 @@ const [errorMessage, setErrorMessage] = React.useState('');
     if (['AP', 'ML', 'VT'].includes(value)) {
         setDynamicFootingOptions(["Left", "Right", "Aggregate"]);
         setIsFootingDisabled(false);
+        setIsCycleDisabled(false);
+        setIsPanelDisabled(false);
     } else if (['trunk', 'hipx'].includes(value)) {
         setDynamicFootingOptions([]);
         setIsFootingDisabled(true);
-    } else {
+        setIsCycleDisabled(false);
+        setIsPanelDisabled(false);
+    } else if (['STP'].includes(value)) {
+      
+      setDynamicFootingOptions([]);
+      setIsFootingDisabled(true);
+      setIsCycleDisabled(true);
+      setIsPanelDisabled(true);
+
+    }
+    
+
+    else {
         setDynamicFootingOptions(["Left", "Right"]);
         setIsFootingDisabled(false);
+        setIsCycleDisabled(false);
+        setIsPanelDisabled(false);
     }
 }
   };
@@ -196,19 +214,19 @@ const handleSubmitForm = async (e) => {
       return;
     }
 
-    if (!formData.selectedCycle1) {
+    if (!isCycleDisabled  & !formData.selectedCycle1) {
       setErrorMessage('Group 1 gait cycle is not selected');
       setOpenDialog(true);
       return;
     }
 
-    if (!formData.selectedCycle2) {
+    if (!isCycleDisabled & !formData.selectedCycle2) {
       setErrorMessage('Group 2 gait cycle is not selected');
       setOpenDialog(true);
       return;
     }
 
-    if (!formData.panelOptions) {
+    if (!isPanelDisabled & !formData.panelOptions) {
       setErrorMessage('Panel option is not selected');
       setOpenDialog(true);
       return;
@@ -436,6 +454,7 @@ const handleSubmitForm = async (e) => {
               labelId="group1-gait-cycle-label"
               id="group1-gait-cycle-select"
               value={formData.selectedCycle1}
+              disabled={isCycleDisabled}
               onChange={handleChange}
               // MenuProps={MenuProps}
             >
@@ -455,6 +474,7 @@ const handleSubmitForm = async (e) => {
               labelId="group2-gait-cycle-label"
               id="group2-gait-cycle-select"
               value={formData.selectedCycle2}
+              disabled={isCycleDisabled}
               onChange={handleChange}
               // MenuProps={MenuProps}
             >
@@ -488,6 +508,7 @@ const handleSubmitForm = async (e) => {
               id="panel-options-select"
               value={formData.panelOptions}
               onChange={handleChange}
+              disabled={isPanelDisabled}
               // MenuProps={MenuProps}
               size="small"
             >

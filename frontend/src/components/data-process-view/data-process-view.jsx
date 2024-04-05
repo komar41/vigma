@@ -8,7 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import RadarChart from "../radar-chart/radar-chart";
 import BoxChart from "../box-chart/box-chart";
-
+import BoxTitle from "../box-chart/box-title";
 
 
 export const DataProcessView = (props) => {
@@ -123,26 +123,32 @@ export const DataProcessView = (props) => {
     </Grid>
   </Grid>
 
-  <Grid item container style={{marginTop : '1%'}}>
-  <Grid item xs ={12} lg={8} style={{ height:  '33vh' }} >
-    <Grid container>
-      <Grid item xs={12} sm={6} md={3} style={boxPlotStyle}>
-        <BoxChart></BoxChart>
+  <Grid item container  style={{marginTop : '1%'}}>
+    <Grid item container xs={12} lg={8}>
+      <Grid item xs={12} style={{ height:  '5vh' }} >
+        <BoxTitle></BoxTitle>
       </Grid>
-      <Grid item xs={12} sm={6} md={3} style={boxPlotStyle}>
-        <BoxChart></BoxChart>
+      <Grid item xs={12} sm={6} md={3} style={{ height:  '33vh' }} >
+        <BoxChart attribute={"LstepLength"}></BoxChart>
       </Grid>
-      <Grid item xs={12} sm={6} md={3} style={boxPlotStyle}>
-        <BoxChart></BoxChart>
+      <Grid item xs={12} sm={6} md={3}  style={{ height:  '33vh' }}>
+        <BoxChart attribute={"timeRgait"}></BoxChart>
       </Grid>
-      <Grid item xs={12} sm={6} md={3} style={boxPlotStyle}>
-        <BoxChart></BoxChart>
+      <Grid item xs={12} sm={6} md={3}   style={{ height:  '33vh' }}>
+        <BoxChart attribute={"RstepLength"}></BoxChart>
       </Grid>
+      <Grid item xs={12} sm={6} md={3}   style={{ height:  '33vh' }}>
+        <BoxChart attribute={"GaitSpeed"}></BoxChart>
+      </Grid>
+    </Grid>
+  <Grid item xs={12} lg={4} style={{ height:  '33vh'}} >
+  <Grid item xs={12} style={{ height:  '5vh' }} >
+        <BoxTitle></BoxTitle>
+      </Grid>
+  <Grid item xs ={12}  style={{ height:  '33vh', padding: '10px'}} >
+    <RadarChart    style={{ boxSizing: 'border-box' }}></RadarChart>
   </Grid>
-  </Grid>
-  <Grid item xs ={12} lg={4} style={{ height:  '33vh'}} >
-    <RadarChart style={{ boxSizing: 'border-box' }}></RadarChart>
-  </Grid>
+    </Grid>
   </Grid>
 </Grid>
 

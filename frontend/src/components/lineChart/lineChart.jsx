@@ -18,10 +18,10 @@ const LineChart =
   const group2Label  = chartData.group2Label;
   const group1Spread  = chartData.group1Spread;
   const group2Spread  = chartData.group2Spread;
-  const selectedFooting1  = chartData.selectedFooting1;
-  const selectedFooting2 = chartData.selectedFooting2;
-  const group1Cycle = chartData.selectedCycle1;
-  const group2Cycle = chartData.selectedCycle2;
+  const selectedFooting1  = chartData.group1Footing;
+  const selectedFooting2 = chartData.group2Footing;
+  const group1Cycle = chartData.group1GaitCycle;
+  const group2Cycle = chartData.group2GaitCycle;
 
 
   console.log("Chart Data inside Line Chart",chartData);

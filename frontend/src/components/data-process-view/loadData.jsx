@@ -39,7 +39,7 @@ const [formData, setFormData] = useState({
 
 
   const panelOptions = [1, 2, 3, 4, 5]; 
-  const selectedColumnOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT'];
+  const selectedColumnOptions = ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT', 'STP'];
   const [dynamicFootingOptions, setDynamicFootingOptions] = useState(["Left", "Right"]);
   const [isFootingDisabled, setIsFootingDisabled] = useState(false);
   const gaitCycleOptions = ["Left","Right"]; // Assuming 'names' are used for multiple selects

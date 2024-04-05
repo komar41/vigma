@@ -52,7 +52,7 @@ const RadarChart = ({ chartData }) => {
   useEffect(() => {
     if (!svgRef.current) return;
 
-    dimensions.width = dimensions.width - 0.1 * dimensions.width;
+
 
     const parameters = ['timeLSwing', 'timeRSwing', 'LstepLength', 'RstepLength', 'GaitSpeed', 'timeLgait', 'timeRgait'];
     const numAxes = parameters.length;

@@ -6,9 +6,52 @@ import os
 from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
 import pandas as pd
+import json
 
 app = Flask(__name__)
 CORS(app)
+
+@app.route('/send-data', methods=['POST'])
+def receive_data():
+    # Get folder location from the frontend
+
+    data = request.json
+    folder_location = data.get('fileLocation')
+    
+    if folder_location and os.path.exists(folder_location):
+        # List all files inside the folder and its subfolders
+        file_list = []
+
+        folder_files = {}
+                # Iterate through the folders
+        for entry in os.listdir(folder_location):
+            print("Entry:", entry)
+            full_path = os.path.join(folder_location, entry)
+            if os.path.isdir(full_path):
+                print("Full Path:", full_path)
+                folder_files[entry] = {}
+                for sub_entry in os.listdir(full_path):
+                    sub_full_path = os.path.join(full_path, sub_entry)
+                    if os.path.isdir(sub_full_path):
+                        folder_files[entry][sub_entry] = []  # Initialize the list for this subfolder
+                        for file in os.listdir(sub_full_path):
+                            if file.startswith(sub_entry):  # Check if file name starts with subfolder name
+                                file_path = os.path.join(sub_full_path, file)
+                                if os.path.isfile(file_path):  # Make sure it's a file
+                                    # Add the file name to the list corresponding to this subfolder
+                                    folder_files[entry][sub_entry].append(file)
+
+        # Convert the dictionary to JSON format
+        json_output = json.dumps(folder_files, indent=4)
+        print("JSON Output",json_output)
+
+        # Return the list of files as JSON
+        return json_output
+    else:
+        # Return an empty JSON array if folder doesn't exist
+        print("Folder doesn't exist")
+        return jsonify([])
+
 
 def extract_stp(filepath, sid, trial):
     jnts = pd.read_csv(filepath + "_jnt.csv")
@@ -203,7 +246,37 @@ def process_data(file_location, data_files, col):
         df_Lcycle, df_Rcycle = get_ensembled_data(array_L_cycle, '%s'%col), get_ensembled_data(array_R_cycle, '%s'%col)
         return df_Lcycle, df_Rcycle
     
-def get_dfs(col, footing, cycle, **kwargs):
+def get_dfs(col, footing1, cycle1, footing2, cycle2, **kwargs):
+
+    def select_func(footing, cycle, group, options):
+
+        if(col == 'hipx' or col == 'trunk'):
+            if(cycle == 'L'):
+                df = options['df_Lcycle_%s'%group]
+            else:
+                df = options['df_Rcycle_%s'%group]
+
+        else:
+
+            if(footing == 'L'):
+                if(cycle == 'L'):
+                    df = options['df_L_Lcycle_%s'%group]
+                else:
+                    df = options['df_L_Rcycle_%s'%group]
+
+            elif(footing == 'R'):
+                if(cycle == 'L'):
+                    df = options['df_R_Lcycle_%s'%group]
+                else:
+                    df = options['df_R_Rcycle_%s'%group]
+
+            elif(footing == 'Agg'):
+                if(cycle == 'L'):
+                    df = options['df_agg_Lcycle_%s'%group]
+                else:
+                    df = options['df_agg_Rcycle_%s'%group]
+
+        return df
 
     options = {
         'df_L_Lcycle_1': None, 'df_L_Rcycle_1': None, 'df_R_Lcycle_1': None, 'df_R_Rcycle_1': None, 'df_agg_Lcycle_1': None, 'df_agg_Rcycle_1': None,
@@ -212,39 +285,8 @@ def get_dfs(col, footing, cycle, **kwargs):
     }
 
     options.update(kwargs)
-
-    if(col == 'hipx' or col == 'trunk'):
-        if(cycle == 'L'):
-            df_1 = options['df_Lcycle_1']
-            df_2 = options['df_Lcycle_2']
-        else:
-            df_1 = options['df_Rcycle_1']
-            df_2 = options['df_Rcycle_2']
-
-    else:
-        if(footing == 'L'):
-            if(cycle == 'L'):
-                df_1 = options['df_L_Lcycle_1']
-                df_2 = options['df_L_Lcycle_2']
-            else:
-                df_1 = options['df_L_Rcycle_1']
-                df_2 = options['df_L_Rcycle_2']
-
-        elif(footing == 'R'):
-            if(cycle == 'L'):
-                df_1 = options['df_R_Lcycle_1']
-                df_2 = options['df_R_Lcycle_2']
-            else:
-                df_1 = options['df_R_Rcycle_1']
-                df_2 = options['df_R_Rcycle_2']
-
-        elif(footing == 'Agg'):
-            if(cycle == 'L'):
-                df_1 = options['df_agg_Lcycle_1']
-                df_2 = options['df_agg_Lcycle_2']
-            else:
-                df_1 = options['df_agg_Rcycle_1']
-                df_2 = options['df_agg_Rcycle_2']
+    df_1 = select_func(footing1, cycle1, '1', options)
+    df_2 = select_func(footing2, cycle2, '2', options)
 
     return df_1, df_2
 
@@ -260,8 +302,10 @@ def process_form_data():
     group1Files = form_data.get('group1SelectedFiles') # [stroke_patients/011918ds_20,stroke_patients/012518cm_23,stroke_patients/081017bf_20]
     group2Files = form_data.get('group2SelectedFiles') # [healthy_controls/081517ap_8,healthy_controls/090717jg_42,healthy_controls/101217al_29]
     col = form_data.get('selectedColumn') # AP/ML/VT/hipx/trunk/foot/shank/thigh/STP
-    footing = form_data.get('selectedFooting') # L/R/Agg/NA
-    cycle = form_data.get('selectedCycle') # L/R/NA
+    footing1 = form_data.get('selectedFooting1') # L/R/Agg/NA
+    cycle1 = form_data.get('selectedCycle1') # L/R/NA
+    footing2 = form_data.get('selectedFooting2') # L/R/Agg/NA
+    cycle2 = form_data.get('selectedCycle') # L/R/NA
 
     group1Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group1Files]
     group2Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group2Files]
@@ -278,21 +322,21 @@ def process_form_data():
             group2FilesLoc = [file + '_grf.csv' for file in group2Files_loc]
             df_L_Lcycle_1, df_L_Rcycle_1, df_R_Lcycle_1, df_R_Rcycle_1, df_agg_Lcycle_1, df_agg_Rcycle_1 = process_data(fileLocation, group1FilesLoc, col)
             df_L_Lcycle_2, df_L_Rcycle_2, df_R_Lcycle_2, df_R_Rcycle_2, df_agg_Lcycle_2, df_agg_Rcycle_2 = process_data(fileLocation, group2FilesLoc, col)
-            df_1, df_2 = get_dfs(col, footing, cycle, df_L_Lcycle_1=df_L_Lcycle_1, df_L_Rcycle_1=df_L_Rcycle_1, df_R_Lcycle_1=df_R_Lcycle_1, df_R_Rcycle_1=df_R_Rcycle_1, df_agg_Lcycle_1=df_agg_Lcycle_1, df_agg_Rcycle_1=df_agg_Rcycle_1, df_L_Lcycle_2=df_L_Lcycle_2, df_L_Rcycle_2=df_L_Rcycle_2, df_R_Lcycle_2=df_R_Lcycle_2, df_R_Rcycle_2=df_R_Rcycle_2, df_agg_Lcycle_2=df_agg_Lcycle_2, df_agg_Rcycle_2=df_agg_Rcycle_2)
+            df_1, df_2 = get_dfs(col, footing1, cycle1, footing2, cycle2, df_L_Lcycle_1=df_L_Lcycle_1, df_L_Rcycle_1=df_L_Rcycle_1, df_R_Lcycle_1=df_R_Lcycle_1, df_R_Rcycle_1=df_R_Rcycle_1, df_agg_Lcycle_1=df_agg_Lcycle_1, df_agg_Rcycle_1=df_agg_Rcycle_1, df_L_Lcycle_2=df_L_Lcycle_2, df_L_Rcycle_2=df_L_Rcycle_2, df_R_Lcycle_2=df_R_Lcycle_2, df_R_Rcycle_2=df_R_Rcycle_2, df_agg_Lcycle_2=df_agg_Lcycle_2, df_agg_Rcycle_2=df_agg_Rcycle_2)
 
         elif(col!='hipx' and col!='trunk'):
             group1FilesLoc = [file + '_jnt.csv' for file in group1Files_loc]
             group2FilesLoc = [file + '_jnt.csv' for file in group2Files_loc]
             df_L_Lcycle_1, df_L_Rcycle_1, df_R_Lcycle_1, df_R_Rcycle_1 = process_data(fileLocation, group1FilesLoc, col)
             df_L_Lcycle_2, df_L_Rcycle_2, df_R_Lcycle_2, df_R_Rcycle_2 = process_data(fileLocation, group2FilesLoc, col)
-            df_1, df_2 = get_dfs(col, footing, cycle, df_L_Lcycle_1=df_L_Lcycle_1, df_L_Rcycle_1=df_L_Rcycle_1, df_R_Lcycle_1=df_R_Lcycle_1, df_R_Rcycle_1=df_R_Rcycle_1, df_L_Lcycle_2=df_L_Lcycle_2, df_L_Rcycle_2=df_L_Rcycle_2, df_R_Lcycle_2=df_R_Lcycle_2, df_R_Rcycle_2=df_R_Rcycle_2)
+            df_1, df_2 = get_dfs(col, footing1, cycle1, footing2, cycle2, df_L_Lcycle_1=df_L_Lcycle_1, df_L_Rcycle_1=df_L_Rcycle_1, df_R_Lcycle_1=df_R_Lcycle_1, df_R_Rcycle_1=df_R_Rcycle_1, df_L_Lcycle_2=df_L_Lcycle_2, df_L_Rcycle_2=df_L_Rcycle_2, df_R_Lcycle_2=df_R_Lcycle_2, df_R_Rcycle_2=df_R_Rcycle_2)
 
         else:
             group1FilesLoc = [file + '_jnt.csv' for file in group1Files_loc]
             group2FilesLoc = [file + '_jnt.csv' for file in group2Files_loc]
             df_Lcycle_1, df_Rcycle_1 = process_data(fileLocation, group1FilesLoc, col)
             df_Lcycle_2, df_Rcycle_2 = process_data(fileLocation, group2FilesLoc, col)
-            df_1, df_2 = get_dfs(col, footing, cycle, df_Lcycle_1=df_Lcycle_1, df_Rcycle_1=df_Rcycle_1, df_Lcycle_2=df_Lcycle_2, df_Rcycle_2=df_Rcycle_2)
+            df_1, df_2 = get_dfs(col, footing1, cycle1, footing2, cycle2, df_Lcycle_1=df_Lcycle_1, df_Rcycle_1=df_Rcycle_1, df_Lcycle_2=df_Lcycle_2, df_Rcycle_2=df_Rcycle_2)
 
         df_1.columns = ['time'] + [col[-1] for col in df_1.columns if col != 'time']
         df_2.columns = ['time'] + [col[-1] for col in df_2.columns if col != 'time']

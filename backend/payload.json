@@ -3,7 +3,9 @@
     "group1SelectedFiles": ["stroke_patients/011918ds_20", "stroke_patients/012518cm_23", "stroke_patients/081017bf_20"],
     "group2SelectedFiles": ["healthy_controls/081517ap_8", "healthy_controls/090717jg_42", "healthy_controls/101217al_29"],
     "selectedColumn": "STP",
-    "selectedFooting": "NA",
-    "selectedCycle": "NA"
+    "selectedFooting1": "NA",
+    "selectedCycle1": "NA",
+    "selectedFooting2": "NA",
+    "selectedCycle2": "NA"
 }
 

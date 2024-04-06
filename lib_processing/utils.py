@@ -1,10 +1,12 @@
 from fuzzywuzzy import fuzz
 import math
 import pandas as pd
+import numpy as np
+from scipy.signal import argrelextrema
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import os
-
+import plotly.graph_objects as go
 
 def closest_match(word, words_list):
     '''
@@ -195,109 +197,107 @@ def save_csv(df, file_name):
     return
 
 
-def plot_line(data, **kwargs):
+def plot(subject, trial, file_location, data_type):
+    df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (file_location, subject, subject, trial, data_type))
+    df_step = pd.read_csv('%s/%s/%sstep.csv' % (file_location, subject, subject))
 
-    if isinstance(data, pd.DataFrame):
-        df = data
-    elif isinstance(data, str):
-        df = pd.read_csv(data)
-
-    df = remove_empty_columns(df)
-
-    if ('cols' in kwargs):
-        cols = kwargs['cols']
-        cols.append('time')
-        df = df[cols]
-
-    if ('select' in kwargs):
-        select = kwargs['select']
-        df = select_df(df, select[0], select[1])
-
-    plt.style.use('seaborn-v0_8-deep')
-
-    colors = ['#274553', '#E77250',
-              '#CB3734', '#DE8220', '#6D468E', '#A06039', '#000000', '#408B85', 'yellow', 'red']
-
-    # create a figure and axis object
-    if ('figsize' in kwargs):
-        fig, ax = plt.subplots(figsize=kwargs['figsize'])
+    tdowns = df_step[df_step['trial'] == trial][['touch down', 'touch down.1', 'touch down.2', 'touch down.3']].values.tolist()[0]
+    toffs = df_step[df_step['trial'] == trial][['toe off', 'toe off.1', 'toe off.2', 'toe off.3']].values.tolist()[0]
+    
+    if(data_type=='grf'):
+        cols = ['AP', 'ML', 'VT']
     else:
-        fig, ax = plt.subplots(figsize=(10, 8))
+        cols = ['foot', 'shank', 'thigh', 'hipx', 'trunk']
 
-    # set the x-axis to the time column
-    x = df['time']
-    ax.set_xlabel('Time', fontsize=12)
+    jnt_col = ['hipx', 'trunk']
+    
+    traces = []
+    colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
+    i = 0
+    for col in cols:
+        if(col in jnt_col):
+            x_values = df['time'].to_list()
+            y_values = df['%s'%(col)].to_list()
 
-    # plot each column as a line chart
-    color_i = 0
-    for col in df.columns:
-        if col != 'time' and col != '#frame' and col != 'hipx':
-            y = df[col]
-            ax.plot(x, y, label=col, linestyle='-',
-                    linewidth=2, color=colors[color_i], alpha=0.8)
-            color_i += 1
+            trace = go.Scatter(
+                x=x_values,
+                y=y_values,
+                mode='lines',
+                name='%s'%(col),
+                text=x_values,  
+                hoverinfo='x',  
+                line=dict(width=2, color=colors[i]),  
+            )
+            i += 1
 
-    # set the y-axis label and legend
-    ax.set_ylabel('Values', fontsize=12)
-    # ax.legend(loc='upper left', fontsize=10)
+            traces.append(trace)
+            
+        else:
+            x_values = df['time'].to_list()
+            y_values1 = df['L-%s'%(col) if(data_type == 'grf') else 'L%s'%(col)].to_list()
+            y_values2 = df['R-%s' % (col) if(data_type == 'grf') else 'R%s'%(col)].to_list()
 
-    # add grid lines
-    ax.grid(True)
+            trace1 = go.Scatter(
+                x=x_values,
+                y=y_values1,
+                mode='lines',
+                name='L-%s'%(col),
+                text=x_values,  
+                hoverinfo='x',  
+                line=dict(width=2, color=colors[i]),  
+            )
+            i += 1
 
-    # set the font size of the tick labels
-    ax.tick_params(axis='both', which='major', labelsize=10)
+            trace2 = go.Scatter(
+                x=x_values,
+                y=y_values2,
+                mode='lines',  
+                name='R-%s'%(col),  
+                hoverinfo='x',  
+                line=dict(width=2, color=colors[i], dash='dash'),  
+            )
+            i += 1
 
-    if ('touch_downs' in kwargs):
-        touch_downs = kwargs['touch_downs']
-        # add vertical lines for touch-down and toe-off
+            traces.append(trace1)
+            traces.append(trace2)
 
-        for i in range(len(touch_downs)):
-            if (i % 2 == 0):
-                ax.axvline(x=touch_downs[i], linestyle='--', color='#0A9047')
+    layout = go.Layout(
+        xaxis=dict(title='time (s)'),
+        yaxis=dict(title='force (N)' if(data_type == 'grf') else 'angle (deg)'),
+    )
 
-            else:
-                ax.axvline(x=touch_downs[i] + 0.015,
-                           linestyle='--', color='#0A9047')
+    fig = go.Figure(data=traces, layout=layout)
 
-    if ('toe_offs' in kwargs):
-        toe_offs = kwargs['toe_offs']
-        for i in range(len(toe_offs)):
-            if (i % 2 == 0):
-                ax.axvline(x=toe_offs[i], linestyle='--', color='#6495ED')
+    numeric_df = df.select_dtypes(include=['number']).drop('time', axis=1, errors='ignore')
+    min_value = numeric_df.min().min()
+    max_value = numeric_df.max().max()
 
-            else:
-                ax.axvline(x=toe_offs[i], linestyle='--', color='#6495ED')
+    for i, tdown in enumerate(tdowns):
+        y_range = [min_value, max_value]
+        fig.add_trace(go.Scatter(
+            x=[tdown, tdown],
+            y=[y_range[0], y_range[1]],  # Use the determined or default y-range
+            mode="lines",
+            name='tdown',
+            legendgroup='tdown',
+            line=dict(color='RoyalBlue', width=2, dash='longdashdot'),
+            hoverinfo='x',
+            showlegend=(i==0)
+        ))
 
-    # create box legends
-    legends = [col for col in df.columns if col !=
-               'time' and col != 'hipx' and col != '#frame']
+    for i, toff in enumerate(toffs):
+        y_range = [min_value, max_value]
+        fig.add_trace(go.Scatter(
+            x=[toff, toff],
+            y=[y_range[0], y_range[1]],  # Use the determined or default y-range
+            mode="lines",
+            name='toff',
+            legendgroup='toff',
+            line=dict(color='rebeccapurple', width=2, dash='longdashdot'),
+            hoverinfo='x',
+            showlegend=(i==0)
+        ))
 
-    boxes = []
-    for i in range(len(legends)):
-        box = Rectangle((0, 0), 1, 1, color=colors[i], alpha=1)
-        boxes.append(box)
-
-    if ('touch_downs' in kwargs):
-        box = Rectangle((0, 0), 1, 1, color='#0A9047', alpha=1)
-        boxes.append(box)
-        legends.append('Touch Down')
-
-    if ('toe_offs' in kwargs):
-        box = Rectangle((0, 0), 1, 1, color='#6495ED', alpha=1)
-        boxes.append(box)
-        legends.append('Toe Off')
-
-    # add the box legends to the plot
-    ax.legend(boxes, legends, loc='upper center',
-              bbox_to_anchor=(0.5, -0.15), ncol=3, fontsize=10)
-
-    # legend = ax.legend(loc='upper center', bbox_to_anchor=(
-    #     0.5, -0.15), ncol=3, fontsize=10)
-
-    # adjust the figure margins
-    fig.tight_layout(pad=2)
-
-    # display the plot
-    plt.show()
+    fig.show()
 
     return

@@ -12,7 +12,7 @@ warnings.filterwarnings(
     "ignore", message="No analog data found in file.")
 
 
-def trcToCSV(file_dir):
+def trcToCSV(file_dir, patient_id, trial_no):
     """
     To get metadata from trc file:
     mocap_data = TRCData()
@@ -22,16 +22,17 @@ def trcToCSV(file_dir):
     #  'OrigDataStartFrame', 'OrigNumFrames', 'OrigNumMarkers'
     #  Ex: mocap_data['NumFrames']
     """
-
+    
+    file = file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.trc'
     # find the line number where the data starts
-    with open(file_dir, 'r') as f:
+    with open(file, 'r') as f:
         for line_count, line in enumerate(f, start=1):
             if any(word.lower() in line for word in ['frame#', 'time', 'head', 'ear', 'shoulder', 'elbow', 'wrist', 'hand', 'hip', 'knee', 'ankle', 'foot',
                                                      'toe', 'sacrum', 'scapula', 'tibia', 'g.trochanter', 'heel', 'mth', 'thigh', 'fixed', 'fix']):
                 break
 
     # skip the lines before the data starts and read the data
-    df = pd.read_csv(file_dir, delimiter="\t",
+    df = pd.read_csv(file, delimiter="\t",
                      skiprows=[i for i in range(line_count-1)], header=[0, 1])
 
     # drop a row if all values are NaN (in trc file, apparently they skip a line after column names)
@@ -58,23 +59,18 @@ def trcToCSV(file_dir):
     df_cols = pd.MultiIndex.from_tuples(col_tuples)
     df.columns = df_cols
 
-    # Extract filename using regex
-    regex = r"([^\\\/]+?)(?=\.trc)"
-    match = re.search(regex, file_dir)
-    filename = (match.group(1))
-
-    os.makedirs('data/output', exist_ok=True)
-    df.to_csv('data/output/' + filename + '.csv', index=False)
+    df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv', index=False)
 
     return df
 
 
-def matToCSV(file_dir):
+def matToCSV(file_dir, patient_id, trial_no):
     '''
     Read the MAT file into a Pandas dataframe.
     '''
 
-    annots = loadmat(file_dir, squeeze_me=True)
+    file = file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.mat'
+    annots = loadmat(file, squeeze_me=True)
     # struct = annots['qtm_022318xz0004']
     struct = annots[list(annots.keys())[3]]
 
@@ -112,20 +108,15 @@ def matToCSV(file_dir):
               column='time',
               value=col_time)
 
-    # Extract filename using regex
-    regex = r"([^\\\/]+?)(?=\.mat)"
-    match = re.search(regex, file_dir)
-    filename = (match.group(1))
-
-    os.makedirs('data/output', exist_ok=True)
-    df.to_csv('data/output/' + filename + '.csv', index=False)
+    df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv', index=False)
 
     return df
 
 
-def c3dToCSV(file_dir):
+def c3dToCSV(file_dir, patient_id, trial_no):
 
-    with open(file_dir, "rb") as handle:
+    file = file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.c3d'
+    with open(file, "rb") as handle:
         reader = c3d.Reader(handle)
         frames = []
 
@@ -159,12 +150,6 @@ def c3dToCSV(file_dir):
                   column='time',
                   value=col_time)
 
-        # Extract filename using regex
-        regex = r"([^\\\/]+?)(?=\.c3d)"
-        match = re.search(regex, file_dir)
-        filename = (match.group(1))
-
-        os.makedirs('data/output', exist_ok=True)
-        df.to_csv('data/output/' + filename + '.csv', index=False)
+        df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv', index=False)
 
         return df

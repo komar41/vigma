@@ -32,23 +32,23 @@ def motionToJointAngle(file_location, patient_id, trial, save = False):
     else:
         df = df.rename(columns=rename_cols)
 
-        df = extract_JNT_df(df)
+    df = extract_JNT_df(df)
 
-        # Extract filename using regex
-        # regex = r"([^\\\/]+?)(?=\.csv)"
-        # match = re.search(regex, file_dir)
-        # filename = (match.group(1))
+    # Extract filename using regex
+    # regex = r"([^\\\/]+?)(?=\.csv)"
+    # match = re.search(regex, file_dir)
+    # filename = (match.group(1))
 
-        # pattern = r".+\/(?=[^\/]+\.csv)"
-        # match = re.search(pattern, file_dir)
-        # filepath = match.group(0) if match else None
+    # pattern = r".+\/(?=[^\/]+\.csv)"
+    # match = re.search(pattern, file_dir)
+    # filepath = match.group(0) if match else None
 
-        if(save == True): df.to_csv(file_location + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '_jnt.csv', index=False)
+    if(save == True): df.to_csv(file_location + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '_jnt.csv', index=False)
 
-        # os.makedirs('data/output', exist_ok=True)
-        # df.to_csv('data/output/' + filename + '_jnt.csv', index=False)
+    # os.makedirs('data/output', exist_ok=True)
+    # df.to_csv('data/output/' + filename + '_jnt.csv', index=False)
 
-        return df
+    return df
     
 def extract_stp(filepath, pid, trial):
     jnts = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_jnt.csv")

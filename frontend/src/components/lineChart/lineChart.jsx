@@ -92,7 +92,7 @@ const LineChart =
 
     // Add X axis --> it is a date format
     var x = d3.scaleLinear()
-      .domain([1, 100])
+      .domain([0, 100])
       .range([0,  dynamicWidth]);
     svg.append("g")
       .attr("transform", "translate(0," +  dynamicHeight + ")")

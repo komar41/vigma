@@ -24,6 +24,8 @@ export const DataProcessView = (props) => {
 
   const [boxChartData, setBoxChartData] = useState({});
 
+  const [boxChartLabels, setBoxChartLabels] = useState({label1 : '', label2 : ''});
+
 
     const handleFormDataSubmit = async (formData) => {
       try {
@@ -52,6 +54,15 @@ export const DataProcessView = (props) => {
               response : response.data,
             }
           );
+
+
+          setBoxChartLabels(
+
+            {
+              label1 : formData.group1Label,
+              label2 : formData.group2Label
+            }
+          )
   
           console.log("Box Chart Data after setting", boxChartData);
       } else {
@@ -159,7 +170,7 @@ export const DataProcessView = (props) => {
         <BoxTitle title={"STP Comparision"} chartData={boxChartData}></BoxTitle>
       </Grid>
   <Grid item xs ={12}  style={{ height:  '33vh', padding: '10px'}} >
-    <RadarChart chartData={boxChartData}   style={{ boxSizing: 'border-box' }}></RadarChart>
+    <RadarChart chartData={boxChartData} labels = {boxChartLabels}  style={{ boxSizing: 'border-box' }}></RadarChart>
   </Grid>
     </Grid>
   </Grid>

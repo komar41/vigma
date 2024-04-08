@@ -1,102 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const sampleData = {
-  "df1": [
-    {
-      "GaitSpeed": 1.115111111111111, 
-      "LstepLength": 1.377823938937842, 
-      "RstepLength": 1.3441967706912497, 
-      "sid": "081517ap", 
-      "timeLgait": 1.1149999999999998, 
-      "timeLswing": 0.6932999999999998, 
-      "timeRgait": 1.12, 
-      "timeRswing": 0.7534000000000001, 
-      "trial": 8
-    }, 
-    {
-      "GaitSpeed": 1.1218153846153847, 
-      "LstepLength": 1.2208914062603842, 
-      "RstepLength": 1.5007110142427276, 
-      "sid": "081517ap", 
-      "timeLgait": 1.1150000000000002, 
-      "timeLswing": 0.75, 
-      "timeRgait": 1.0732999999999997, 
-      "timeRswing": 0.7416999999999998, 
-      "trial": 9
-    }, 
-    {
-      "GaitSpeed": 1.1503880597014924, 
-      "LstepLength": 1.3708086433917193, 
-      "RstepLength": 1.2928251600195417, 
-      "sid": "083117ji", 
-      "timeLgait": 1.1649999999999998, 
-      "timeLswing": 0.7183999999999997, 
-      "timeRgait": 1.1117, 
-      "timeRswing": 0.7782999999999998, 
-      "trial": 49
-    }, 
-    {
-      "GaitSpeed": 1.1882666666666666, 
-      "LstepLength": 1.425799440164638, 
-      "RstepLength": 1.4226670064093445, 
-      "sid": "083117ji", 
-      "timeLgait": 1.1517000000000002, 
-      "timeLswing": 0.7049999999999998, 
-      "timeRgait": 1.1150000000000002, 
-      "timeRswing": 0.7267000000000001, 
-      "trial": 50
-    }
-  ], 
-  "df1_mnmx": null, 
-  "df2": [
-    {
-      "GaitSpeed": 0.28706666666666675, 
-      "LstepLength": 0.11080278125096713, 
-      "RstepLength": 0.9576561174457618, 
-      "sid": "100417la", 
-      "timeLgait": 1.6393000000000004, 
-      "timeLswing": 1.3437000000000001, 
-      "timeRgait": 1.4933999999999994, 
-      "timeRswing": 1.0999999999999996, 
-      "trial": 21
-    }, 
-    {
-      "GaitSpeed": 0.31193617021276593, 
-      "LstepLength": 0.5489795787021097, 
-      "RstepLength": 0.5517020310655063, 
-      "sid": "100417la", 
-      "timeLgait": 1.5629, 
-      "timeLswing": 1.3238000000000003, 
-      "timeRgait": 1.7267000000000001, 
-      "timeRswing": 1.1983000000000006, 
-      "trial": 22
-    }, 
-    {
-      "GaitSpeed": 0.924447204968944, 
-      "LstepLength": 1.1808749465515682, 
-      "RstepLength": 1.152864804770647, 
-      "sid": "102617mm", 
-      "timeLgait": 1.3217, 
-      "timeLswing": 0.8634000000000002, 
-      "timeRgait": 1.3283, 
-      "timeRswing": 0.8799999999999999, 
-      "trial": 17
-    }, 
-    {
-      "GaitSpeed": 0.8966369426751594, 
-      "LstepLength": 1.2300000242773264, 
-      "RstepLength": 1.0370071997526973, 
-      "sid": "102617mm", 
-      "timeLgait": 1.335, 
-      "timeLswing": 0.9199999999999999, 
-      "timeRgait": 1.2933000000000003, 
-      "timeRswing": 0.8833000000000002, 
-      "trial": 18
-    }
-  ], 
-  "df2_mnmx": null
-};
 
 const BoxChart = ({ chartData , attribute }) => {
   const svgRef = useRef();
@@ -155,6 +59,22 @@ const BoxChart = ({ chartData , attribute }) => {
                      .range([0, adjustedWidth])
                      .padding(0.1);
 
+
+  // Create a tooltip
+  const tooltip = d3.select(containerRef.current)
+                    .append('div')
+                    .style('opacity', 0)
+                    .attr('class', 'tooltip')
+                    .style('background-color', 'white')
+                    .style('border', 'solid')
+                    .style('border-width', '2px')
+                    .style('border-radius', '5px')
+                    .style('padding', '5px')
+                    .style('position', 'absolute')
+                    .style('z-index', '10');
+                     
+                     
+
     // Y-axis
     g.append("g")
      .call(d3.axisLeft(yScale));
@@ -170,7 +90,7 @@ const BoxChart = ({ chartData , attribute }) => {
      .attr("y", margin.bottom / 2)
      .attr("text-anchor", "middle") // Ensure it's centered horizontally
      .style("fill", "Black") // Text color
-     .style("font-size", `${Math.min(adjustedWidth / 20, 24)}px`) // Responsive font size
+     .style("font-size", `${Math.min(adjustedWidth / 15, 24)}px`) // Responsive font size
      .text(attribute);
 
     // Draw box plots for df1 and df2
@@ -186,7 +106,14 @@ const BoxChart = ({ chartData , attribute }) => {
        .attr("width", xScale.bandwidth())
        .attr("height", yScale(q1) - yScale(q3))
        .attr("stroke", "black")
-       .attr("fill", color);
+       .attr("fill", color)
+       .on('mouseover', (event, d) => {
+        tooltip.style('opacity', 1)
+               .html(`Min: ${min.toFixed(2)}<br>Q1: ${q1.toFixed(2)}<br>Median: ${median.toFixed(2)}<br>Q3: ${q3.toFixed(2)}<br>Max: ${max.toFixed(2)}`)
+               .style('left', (event.pageX + 10) + 'px')
+               .style('top', (event.pageY + 10) + 'px');
+      })
+      .on('mouseout', () => tooltip.style('opacity', 0));
 
       // Median line
       g.append("line")
@@ -194,7 +121,8 @@ const BoxChart = ({ chartData , attribute }) => {
        .attr("x2", xScale(df) + xScale.bandwidth())
        .attr("y1", yScale(median))
        .attr("y2", yScale(median))
-       .attr("stroke", "black");
+       .attr("stroke", "black")
+
 
       // Whiskers
       g.selectAll(".whisker")
@@ -221,6 +149,7 @@ const BoxChart = ({ chartData , attribute }) => {
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
       <svg ref={svgRef} style={{ width: '100%', height: '100%' }}></svg>
+      
     </div>
   );
 };

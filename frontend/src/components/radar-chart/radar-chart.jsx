@@ -27,7 +27,14 @@ function calculateMeans(dataset) {
 }
 
 
-
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 
 const RadarChart = ({ chartData }) => {
@@ -40,18 +47,18 @@ const RadarChart = ({ chartData }) => {
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
 
-  const tooltip = d3.select(containerRef.current)
-  .append("div")
-  .style("opacity", 0)
-  .attr("class", "tooltip") // Add this class for styling
-  .style("background-color", "white")
-  .style("border", "solid")
-  .style("border-width", "2px")
-  .style("border-radius", "5px")
-  .style("padding", "5px")
-  .style("position", "absolute")
-  .style("z-index", "10")
-  .style("display", "none");
+  // Add this inside your RadarChart component, before the useEffect hooks
+const tooltip = d3.select("body").append("div")
+.attr("class", "radar-chart-tooltip")
+.style("position", "absolute")
+.style("background-color", "white")
+.style("border", "1px solid #ddd")
+.style("border-radius", "5px")
+.style("padding", "10px")
+.style("display", "none")
+.style("pointer-events", "none"); // to avoid interference with mouse events
+
+
 
   useEffect(() => {
     const observeTarget = containerRef.current;
@@ -91,6 +98,10 @@ const RadarChart = ({ chartData }) => {
     }
   ];
   
+
+
+  
+
 
   
   
@@ -141,6 +152,7 @@ const maxDataValue = Math.max(...allValues);
         .attr("y2", rScale(maxDataValue) * Math.sin(angle))
         .attr("stroke", "grey")
         .attr("stroke-width", "1px");
+
     });
 
     // Function to draw radar chart area
@@ -172,7 +184,11 @@ for (let i = 0; i <= levels; i++) {
     .attr("y", -rScale(rValue*0.88)) // Position text next to the circle it represents
     .attr("text-anchor", "end") // Right-align text to keep it from overlapping the chart
     .style("font-size", "10px")
-    .text(rValue.toFixed(2)); // Show the value, formatted to 2 decimal places
+    .text(rValue.toFixed(2))
+    
+    
+    
+    ; // Show the value, formatted to 2 decimal places
 }
 parameters.forEach((param, i) => {
     const sliceAngle = Math.PI * 2 / parameters.length;
@@ -204,26 +220,7 @@ parameters.forEach((param, i) => {
       .style("font-size", "12px");
 
 
-
-      radarGroup.append("rect")
-    .attr("x", 0)
-    .attr("y", -rScale(maxDataValue))
-    .attr("width", 2) // Thin rectangle; adjust width as necessary
-    .attr("height", rScale(maxDataValue))
-    .attr("transform", `rotate(${angle * 180 / Math.PI})`)
-    .style("opacity", 0) // Make it invisible
-    .on("mouseover", function(event, d) {
-      // Show tooltip on hover
-      tooltip.html(`Value for ${param}: <br> Healthy: ${meansDf1[param]}<br> Stroke: ${meansDf2[param]}`)
-        .style("left", (event.pageX + 10) + "px")
-        .style("top", (event.pageY + 10) + "px")
-        .style("display", "block")
-        .style("opacity", 1);
-    })
-    .on("mouseout", function() {
-      // Hide tooltip when not hovering
-      tooltip.style("display", "none").style("opacity", 0);
-    });
+;
   });
   
 console.log("updatedSampleData",updatedSampleData);
@@ -249,38 +246,42 @@ radarChartData.forEach((data, i) => {
     .style("stroke-width", "2px")
     .style("stroke", i === 0 ? "#ffb4a2" : "#87A922")
     .style("fill", i === 0 ? "#ffb4a2" : "#87A922")
-    .style("fill-opacity", 0.1);
+    .style("fill-opacity", 0.1)
+    
+
 });
 
-// // Plot the radar chart data
-// radarChartData.forEach((data, i) => {
-//     radarGroup.append("path")
-//       .datum(data.values.map(v => ({ value: v.value })))
-//       .attr("d", radarLine)
-//       .style("stroke-width", "2px")
-//       .style("stroke", i === 0 ? "#ffb4a2" : "#87A922")
-//       .style("fill", i === 0 ? "#ffb4a2" : "#87A922")
-//       .style("fill-opacity", 0.1);
-  
-//     // Add legend
-//     svg.append("text")
-//       .attr("x", dimensions.width / 8 - 10)
-//       .attr("y", dimensions.height /4 + 30  + (i * 20))
-//       .text(data.label)
-//       .style("font-family", "sans-serif")
-//       .style("font-size", "12px")
-//       .attr("alignment-baseline", "middle")
-//       .style("fill", i === 0 ?  "red" : "green");
-//   });
+// Adjust the arc generator setup
+const arcWidth = angleSlice * 0.99; // Determines the "thickness" of the arc segment
+const arcGenerator = d3.arc()
+  .innerRadius(0) // Start at the center
+  .outerRadius(rScale(maxDataValue)) // Extend to the outer edge of the chart
+  .startAngle(i => -angleSlice / 2 - arcWidth / 2 + i * angleSlice + Math.PI / 2) // Subtract π/2 to rotate correctly
+  .endAngle(i => -angleSlice / 2 + arcWidth / 2 + i * angleSlice + Math.PI / 2); // Subtract π/2 to rotate correctly
 
+// Draw invisible arcs for each axis
+parameters.forEach((param, i) => {
+  radarGroup.append("path")
+    .attr("d", arcGenerator(i))
+    .style("fill", "none")
+    .style("pointer-events", "all") // Make sure the arc can trigger mouse events
+    .on("mouseover", function(event) {
+      tooltip
+        .style("display", "inline")
+        .html(`Parameter:  ${param} <br> Healthy patients: ${meansDf1[param].toFixed(2)}<br>Stroke Patients: ${meansDf2[param].toFixed(2)}`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY + 10) + "px");
+    })
+    .on("mouseout", function() {
+      tooltip.style("display", "none");
+    });
+});
 
-
-  }, [chartData, dimensions]); // Redraw when chartData or dimensions change
+ }, [chartData, dimensions]); // Redraw when chartData or dimensions change
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', display: 'block' }}>
       <svg ref={svgRef} style={{ width: '100%', height: '100%' }}></svg>
-      <div id="radar-tooltip" style={{ display: 'none', position: 'absolute', backgroundColor: 'white', padding: '5px', border: '1px solid #000' }}>Tooltip</div>
 
     </div>
   );

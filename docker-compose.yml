@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  backend:
+    build: ./BackendFlask
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./BackendFlask/data:/app/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

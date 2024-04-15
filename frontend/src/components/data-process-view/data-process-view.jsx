@@ -129,39 +129,39 @@ export const DataProcessView = (props) => {
   
   <Grid item xs={12} md={6} lg={4} container   direction={isMdOrLarger ? "column" : "row" }>
     <Grid item xs={12} sm={6} style={{ height: isMdOrLarger ? '50%' : '33vh' }}>
-    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[0]} />
+    <LineChart  style={{ height: '100%', boxSizing: 'border-box' }} chartData={lineChartsData[0]} />
     </Grid>
     <Grid item xs={12} sm={6} style={{ height: isMdOrLarger ? '50%' : '33vh' }}>
 
-    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[1]} />
+    <LineChart  style={{ height: '100%', boxSizing: 'border-box' }} chartData={lineChartsData[1]} />
     </Grid>
   </Grid>
 
   <Grid item xs={12} sm = {12} lg={4} container direction={isLgOrLarger ? "column" : "row" } >
   <Grid item xs={12} sm={6} style={{ height: isLgOrLarger ? '50%' : '33vh' }}>
-    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[2]} />
+    <LineChart  style={{ height: '100%', boxSizing: 'border-box' }} chartData={lineChartsData[2]} />
     </Grid>
     <Grid item xs={12} sm={6} style={{ height: isLgOrLarger ? '50%' : '33vh' }}>
 
-    <LineChart  style={{ height: '100%', margin: '1%',  boxSizing: 'border-box' }} chartData={lineChartsData[3]} />
+    <LineChart  style={{ height: '100%', boxSizing: 'border-box' }} chartData={lineChartsData[3]} />
     </Grid>
   </Grid>
 
-  <Grid item container  style={{marginTop : '1%'}}>
+  <Grid item container >
     <Grid item container xs={12} lg={8}>
       <Grid item xs={12} style={{ height:  '5vh' }} >
         <BoxTitle title={"STP Distribution"}></BoxTitle>
       </Grid>
-      <Grid item xs={12} sm={6} md={3} style={{ height:  '33vh' }} >
+      <Grid item xs={12} sm={6} md={3} style={{ height:  '30vh' }} >
         <BoxChart chartData = {boxChartData} attribute={"LstepLength"}></BoxChart>
       </Grid>
-      <Grid item xs={12} sm={6} md={3}  style={{ height:  '33vh' }}>
+      <Grid item xs={12} sm={6} md={3}  style={{ height:  '30vh' }}>
         <BoxChart chartData = {boxChartData} attribute={"timeRgait"}></BoxChart>
       </Grid>
-      <Grid item xs={12} sm={6} md={3}   style={{ height:  '33vh' }}>
+      <Grid item xs={12} sm={6} md={3}   style={{ height:  '30vh' }}>
         <BoxChart chartData = {boxChartData} attribute={"RstepLength"}></BoxChart>
       </Grid>
-      <Grid item xs={12} sm={6} md={3}   style={{ height:  '33vh' }}>
+      <Grid item xs={12} sm={6} md={3}   style={{ height:  '30vh' }}>
         <BoxChart chartData = {boxChartData} attribute={"GaitSpeed"}></BoxChart>
       </Grid>
     </Grid>
@@ -169,7 +169,7 @@ export const DataProcessView = (props) => {
   <Grid item xs={12} style={{ height:  '5vh' }} >
         <BoxTitle title={"STP Comparision"} chartData={boxChartData}></BoxTitle>
       </Grid>
-  <Grid item xs ={12}  style={{ height:  '33vh', padding: '10px'}} >
+  <Grid item xs ={12}  style={{ height:  '30vh', padding: '10px'}} >
     <RadarChart chartData={boxChartData} labels = {boxChartLabels}  style={{ boxSizing: 'border-box' }}></RadarChart>
   </Grid>
     </Grid>

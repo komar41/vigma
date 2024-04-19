@@ -13,7 +13,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./BackendFlask/data:/app/data
+      - C:/Users/qshah/Documents/Spring 2024/eMoGis/data-processed:/app/data
     networks:
       - app-network
 

@@ -6,6 +6,8 @@ backend/envs
 backend/data
 backend/__pycache__
 backend/.DS_Store
+BackendFlask/envs
+BackendFlask/data
 
 # Build files
 frontend/build

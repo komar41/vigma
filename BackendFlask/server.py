@@ -16,7 +16,7 @@ def receive_data():
     # Get folder location from the frontend
 
     data = request.json
-    folder_location =   "/app/data"         # data.get('fileLocation')
+    folder_location =   data.get('fileLocation')        # data.get('fileLocation')
     
     if folder_location and os.path.exists(folder_location):
         # List all files inside the folder and its subfolders
@@ -301,7 +301,7 @@ def process_form_data():
         
         form_data = request.json
         print("form data",form_data)
-        fileLocation =  "/app/data/"     #form_data.get('fileLocation') # C:/Users/qshah/Documents/Spring 2024/eMoGis/data-processed
+        fileLocation =  form_data.get('fileLocation')     #form_data.get('fileLocation') # C:/Users/qshah/Documents/Spring 2024/eMoGis/data-processed
         group1Files = form_data.get('group1SelectedFiles') # [stroke_patients/011918ds_20,stroke_patients/012518cm_23,stroke_patients/081017bf_20]
         group2Files = form_data.get('group2SelectedFiles') # [healthy_controls/081517ap_8,healthy_controls/090717jg_42,healthy_controls/101217al_29]
         col = form_data.get('selectedColumn') # AP/ML/VT/hipx/trunk/foot/shank/thigh/STP

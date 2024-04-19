@@ -1,15 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import React, { useState, useEffect, useRef } from "react";
+import * as d3 from "d3";
 
-const BoxTitle = ({ chartData, title }) => { // Accept title as a prop
+const BoxTitle = ({ chartData, labels, title }) => {
+  // Accept title as a prop
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
 
   useEffect(() => {
+    console.log("BoxTitle useEffect");
+    console.log("chartData", chartData);
+    console.log("labels", labels);
+    console.log("title", title);
     const observeTarget = containerRef.current;
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
       if (width > 10 && height > 10) {
         setDimensions({ width, height });
@@ -30,24 +35,32 @@ const BoxTitle = ({ chartData, title }) => { // Accept title as a prop
     svg.selectAll("*").remove();
 
     // Append rectangle
-    svg.append("rect")
-       .attr("width", adjustedWidth)
-       .attr("height", adjustedHeight)
-       .attr("fill", "white");
+    svg
+      .append("rect")
+      .attr("width", adjustedWidth)
+      .attr("height", adjustedHeight)
+      .attr("fill", "white");
 
     // Append text
-    svg.append("text")
-       .attr("x", adjustedWidth / 2) // Center the text in the middle of the svg
-       .attr("y", adjustedHeight / 2) // Vertically center
-       .attr("text-anchor", "middle") // Ensure it's centered horizontally
-       .style("fill", "Black") // Text color
-       .style("font-size", `${Math.min(adjustedWidth / 10, 24)}px`) // Responsive font size
-       .text(title); // Use the title passed as prop
-}, [chartData, dimensions, title]); // Redraw when chartData, dimensions, or title change
+    svg
+      .append("text")
+      .attr("x", adjustedWidth / 2) // Center the text in the middle of the svg
+      .attr("y", adjustedHeight / 2) // Vertically center
+      .attr("text-anchor", "middle") // Ensure it's centered horizontally
+      .style("fill", "Black") // Text color
+      .style("font-size", `${Math.min(adjustedWidth / 10, 24)}px`) // Responsive font size
+      .text(title) // Use the title passed as prop
+      .style("font-weight", "bold") // Make the text bold roboto
+      .style("font-family", "Roboto, sans-serif")
+      .style("font-size", "20px");
+  }, [chartData, dimensions, title]); // Redraw when chartData, dimensions, or title change
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%', display: 'block' }}>
-      <svg ref={svgRef} style={{ width: '100%', height: '100%' }}></svg>
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height: "100%", display: "block" }}
+    >
+      <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
     </div>
   );
 };

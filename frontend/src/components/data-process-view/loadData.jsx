@@ -511,7 +511,7 @@ export const LoadData = (props) => {
         </Grid>
         <Grid item xs={2} lg={2}>
           <Button
-            style={{ marginTop: "1vh" }}
+            style={{ marginTop: "1.3vh" }}
             variant="contained"
             size="small"
             fullWidth

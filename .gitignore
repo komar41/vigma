@@ -12,6 +12,7 @@ BackendFlask/data
 # Build files
 frontend/build
 frontend/dist
+frontend/node_modules
 
 # Cache files
 **/.cache
@@ -39,5 +40,5 @@ yarn-error.log*
 
 frontend/misc
 
-
-
+notebooks/envs
+notebooks/__pycache__

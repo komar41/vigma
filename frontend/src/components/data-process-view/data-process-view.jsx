@@ -233,7 +233,10 @@ export const DataProcessView = (props) => {
       <Grid item container>
         <Grid item container xs={12} lg={8}>
           <Grid item xs={12} style={{ height: "5vh" }}>
-            <BoxTitle title={"Spatiotemporal Distributions"}></BoxTitle>
+            <BoxTitle
+              title={"Spatiotemporal Distributions"}
+              chartData={boxChartData}
+            ></BoxTitle>
           </Grid>
           <Grid item xs={12} sm={6} md={3} style={{ height: "30vh" }}>
             <BoxChart
@@ -267,8 +270,7 @@ export const DataProcessView = (props) => {
         <Grid item xs={12} lg={4} style={{ height: "33vh" }}>
           <Grid item xs={12} style={{ height: "5vh" }}>
             <BoxTitle
-              title={"Spatiotemporal Comparision"}
-              labels={boxChartLabels}
+              title="Spatiotemporal Comparison"
               chartData={boxChartData}
             ></BoxTitle>
           </Grid>

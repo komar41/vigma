@@ -20,7 +20,7 @@ const LineChart = ({ chartData }) => {
   const group1Cycle = chartData.group1GaitCycle;
   const group2Cycle = chartData.group2GaitCycle;
 
-  const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
+  const [dimensions, setDimensions] = useState({ width: 450, height: 300 }); // State for dimensions
 
   // New Tooltip states
   const [tooltipContent, setTooltipContent] = useState("");
@@ -157,21 +157,22 @@ const LineChart = ({ chartData }) => {
         // .tickValues(y.ticks().filter(function(d) { return d <10; }))
       );
 
-    // const isNarrowScreen = dynamicWidth < 405;
+    const isNarrowScreen = dynamicWidth < 405;
     // Adjusting the y-axis ticks based on SVG width
     let yAxis = d3.axisLeft(y).ticks(7);
-    // if (isNarrowScreen) {
-    //   const yDomain = y.domain();
-    //   const customTickValues = [
-    //     yDomain[0], // Min value
-    //     yDomain[0] + (yDomain[1] - yDomain[0]) * 0.125, // 25% up
-    //     yDomain[0] + (yDomain[1] - yDomain[0]) * 0.25, // 25% up
-    //     yDomain[1] - (yDomain[1] - yDomain[0]) * 0.25, // 75% up
-    //     yDomain[1] - (yDomain[1] - yDomain[0]) * 0.125, // 75% up
-    //     yDomain[1], // Max value
-    //   ];
-    //   yAxis.tickValues(customTickValues);
-    // }
+    if (isNarrowScreen) {
+      // console.log(y.ticks(7), "**", selectedColumn);
+      const yDomain = y.domain();
+      const customTickValues = [
+        y.ticks(7)[0],
+        y.ticks(7)[1],
+        y.ticks(7)[2],
+        y.ticks(7)[y.ticks(7).length - 3],
+        y.ticks(7)[y.ticks(7).length - 2],
+        y.ticks(7)[y.ticks(7).length - 1],
+      ];
+      yAxis.tickValues(customTickValues);
+    }
 
     // console.log(y.domain())
 
@@ -186,8 +187,8 @@ const LineChart = ({ chartData }) => {
       svg
         .append("path")
         .datum(group1Data)
-        .attr("fill", "#ffb4a2")
-        .attr("stroke", "none")
+        .attr("fill", "#fc8d62")
+        .attr("stroke", "#fc8d62")
         .attr("opacity", 0.5)
         .attr(
           "d",
@@ -206,11 +207,12 @@ const LineChart = ({ chartData }) => {
     }
 
     // Add the line
+    // #fc8d62, #66c2a5
     svg
       .append("path")
       .datum(group1Data)
       .attr("fill", "none")
-      .attr("stroke", "#d95f02")
+      .attr("stroke", "#fc8d62")
       .attr(
         "d",
         d3
@@ -227,9 +229,9 @@ const LineChart = ({ chartData }) => {
     svg
       .append("text")
       .attr("x", dynamicWidth / 2)
-      .attr("y", -dynamicMargin.top / 2)
+      .attr("y", -dynamicMargin.top / 3)
       .attr("text-anchor", "middle")
-      .style("font-size", "20px")
+      .style("font-size", "18px")
       .style("font-family", "Roboto, sans-serif")
       .style("font-weight", "bold")
       // .style("text-decoration", "underline")
@@ -272,7 +274,7 @@ const LineChart = ({ chartData }) => {
         .append("path")
         .datum(group2Data)
         .attr("fill", "none")
-        .attr("stroke", "#1b9e77") //green line
+        .attr("stroke", "#66c2a5") //green line
         .attr("stroke-width", 1.5)
         .attr(
           "d",
@@ -290,8 +292,8 @@ const LineChart = ({ chartData }) => {
         svg
           .append("path")
           .datum(group2Data)
-          .attr("fill", "#87A922") //green spread
-          .attr("stroke", "#87A922")
+          .attr("fill", "#66c2a5") //green spread
+          .attr("stroke", "#66c2a5")
           .attr("opacity", 0.3)
           .attr(
             "d",
@@ -313,13 +315,13 @@ const LineChart = ({ chartData }) => {
       const circle1 = svg
         .append("circle")
         .attr("r", 3)
-        .attr("fill", "#d95f02")
+        .attr("fill", "#fc8d62")
         .style("opacity", 0);
 
       const circle2 = svg
         .append("circle")
         .attr("r", 3)
-        .attr("fill", "green") // Change to match your line color
+        .attr("fill", "#66c2a5") // Change to match your line color
         .style("opacity", 0);
 
       // Initialize text for highlighting points, keep them hidden initially
@@ -459,9 +461,10 @@ const LineChart = ({ chartData }) => {
       const legendSpacing = 20; // Space between each legend item
 
       // `${group1Label} ${selectedFooting1} ${group1Cycle !== "NA" ? "Limb " + group1Cycle + " Cycle" : ""}`
+
       const legendData = [
         {
-          color: "#d95f02",
+          color: "#fc8d62",
           text: `${group1Label} [${
             selectedFooting1 !== "NA" ? " Limb: " + selectedFooting1 + "," : ""
           } Cycle: ${group1Cycle} ]`,
@@ -469,7 +472,7 @@ const LineChart = ({ chartData }) => {
           y: legendYStart,
         },
         {
-          color: "#1b9e77",
+          color: "#66c2a5",
           text: `${group2Label} [${
             selectedFooting2 !== "NA" ? " Limb: " + selectedFooting2 + "," : ""
           } Cycle: ${group2Cycle} ]`,
@@ -511,7 +514,7 @@ const LineChart = ({ chartData }) => {
     // If active, display the SVG container and its content
     <div
       ref={containerRef}
-      style={{ width: "100%", height: "100%", display: "block" }}
+      style={{ width: "100%", height: "95%", display: "block" }}
     >
       <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
       <div

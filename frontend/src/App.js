@@ -4,11 +4,7 @@ import "./App.css";
 function App() {
   return (
     <>
-      <div
-        className="tab-content"
-        id="nav-tabContent"
-        style={{ height: "100vh" }}
-      >
+      <div>
         <DataProcessView />
       </div>
     </>

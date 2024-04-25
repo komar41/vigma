@@ -4,7 +4,7 @@ import * as d3 from "d3";
 // Function to calculate mean values for each measurement across a dataset
 function calculateMeans(dataset) {
   const totals = {};
-  console.log("dataset", dataset);
+  // console.log("dataset", dataset);
   let count = dataset.length;
 
   // Initialize totals
@@ -34,7 +34,7 @@ function getRandomColor() {
   return color;
 }
 
-const RadarChart = ({ chartData }) => {
+const RadarChart = ({ chartData, labels }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
 
@@ -73,23 +73,23 @@ const RadarChart = ({ chartData }) => {
     chartData = chartData.response;
 
     if (!chartData) return;
-    console.log("radar chartData", chartData);
+    // console.log("radar chartData", chartData);
     const meansDf1 = calculateMeans(chartData.df1);
     const meansDf2 = calculateMeans(chartData.df2);
 
     // Map the means back into a structure similar to sampleData
     const updatedSampleData = [
       {
-        label: "Healthy patients",
+        label: labels["label1"],
         values: meansDf1,
       },
       {
-        label: "Stroke Patients",
+        label: labels["label2"],
         values: meansDf2,
       },
     ];
 
-    console.log("updated Log", updatedSampleData);
+    // console.log("updated Log", updatedSampleData);
 
     const parameters = [
       "timeLswing",
@@ -220,11 +220,11 @@ const RadarChart = ({ chartData }) => {
         .style("font-family", "Roboto, sans-serif");
     });
 
-    console.log("updatedSampleData", updatedSampleData);
+    // console.log("updatedSampleData", updatedSampleData);
 
-    console.log("maxDataValue", maxDataValue);
-    console.log("radarChartData");
-    console.log(radarChartData);
+    // console.log("maxDataValue", maxDataValue);
+    // console.log("radarChartData");
+    // console.log(radarChartData);
 
     // Ensure consistent use of angle when plotting radar chart data
     radarChartData.forEach((data, i) => {
@@ -278,9 +278,11 @@ const RadarChart = ({ chartData }) => {
           tooltip
             .style("display", "inline")
             .html(
-              `Parameter:  ${param} <br> Healthy patients: ${meansDf1[
+              `Parameter:  ${param} <br> ${labels["label1"]}: ${meansDf1[
                 param
-              ].toFixed(2)}<br>Stroke Patients: ${meansDf2[param].toFixed(2)}`
+              ].toFixed(2)}<br>${labels["label2"]}: ${meansDf2[param].toFixed(
+                2
+              )}`
             )
             .style("left", event.pageX + 10 + "px")
             .style("top", event.pageY + 10 + "px");

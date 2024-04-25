@@ -65,7 +65,7 @@ const BoxChart = ({ chartData, attribute, labels }) => {
       .padding(0.1);
 
     // change x labels to labels[0] and labels[1]
-    console.log(labels["label1"], labels["label2"]);
+    // console.log(labels["label1"], labels["label2"]);
 
     // Create a tooltip
     const tooltip = d3
@@ -104,7 +104,7 @@ const BoxChart = ({ chartData, attribute, labels }) => {
       .append("text")
       .attr("class", "axis-label")
       .attr("x", adjustedWidth / 2)
-      .attr("y", margin.bottom / 2)
+      .attr("y", margin.bottom / 1.5)
       .attr("text-anchor", "middle") // Ensure it's centered horizontally
       .style("fill", "Black") // Text color
       .style("font-size", "14px")

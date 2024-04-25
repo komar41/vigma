@@ -157,7 +157,7 @@ export const DataProcessView = (props) => {
   };
 
   const isMdOrLarger = useMediaQuery(theme.breakpoints.up("md"));
-
+  console.log(isMdOrLarger, "isMdOrLarger");
   return (
     <Grid container>
       <Grid item xs={12} md={6} lg={3} style={loadDataStyle}>
@@ -230,57 +230,81 @@ export const DataProcessView = (props) => {
         </Grid>
       </Grid>
 
-      <Grid item container>
-        <Grid item container xs={12} lg={8}>
-          <Grid item xs={12} style={{ height: "5vh" }}>
-            <BoxTitle
-              title={"Spatiotemporal Distributions"}
-              chartData={boxChartData}
-            ></BoxTitle>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3} style={{ height: "30vh" }}>
-            <BoxChart
-              chartData={boxChartData}
-              attribute={"LstepLength"}
-              labels={boxChartLabels}
-            ></BoxChart>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3} style={{ height: "30vh" }}>
-            <BoxChart
-              chartData={boxChartData}
-              attribute={"timeRgait"}
-              labels={boxChartLabels}
-            ></BoxChart>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3} style={{ height: "30vh" }}>
-            <BoxChart
-              chartData={boxChartData}
-              attribute={"RstepLength"}
-              labels={boxChartLabels}
-            ></BoxChart>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3} style={{ height: "30vh" }}>
-            <BoxChart
-              chartData={boxChartData}
-              attribute={"GaitSpeed"}
-              labels={boxChartLabels}
-            ></BoxChart>
-          </Grid>
+      <Grid item container xs={10} lg={8}>
+        <Grid item xs={12} style={{ height: "10vh", padding: 0, margin: 0 }}>
+          <BoxTitle
+            title={"Spatiotemporal Distributions"}
+            labels={boxChartLabels}
+            chartData={boxChartData}
+          ></BoxTitle>
         </Grid>
-        <Grid item xs={12} lg={4} style={{ height: "33vh" }}>
-          <Grid item xs={12} style={{ height: "5vh" }}>
-            <BoxTitle
-              title="Spatiotemporal Comparison"
-              chartData={boxChartData}
-            ></BoxTitle>
-          </Grid>
-          <Grid item xs={12} style={{ height: "30vh", padding: "10px" }}>
-            <RadarChart
-              chartData={boxChartData}
-              labels={boxChartLabels}
-              style={{ boxSizing: "border-box" }}
-            ></RadarChart>
-          </Grid>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+          style={{ height: "26vh", marginTop: "-30px" }}
+        >
+          <BoxChart
+            chartData={boxChartData}
+            attribute={"LstepLength"}
+            labels={boxChartLabels}
+          ></BoxChart>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+          style={{ height: "26vh", marginTop: "-30px" }}
+        >
+          <BoxChart
+            chartData={boxChartData}
+            attribute={"timeRgait"}
+            labels={boxChartLabels}
+          ></BoxChart>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+          style={{ height: "26vh", marginTop: "-30px" }}
+        >
+          <BoxChart
+            chartData={boxChartData}
+            attribute={"RstepLength"}
+            labels={boxChartLabels}
+          ></BoxChart>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={3}
+          style={{ height: "26vh", marginTop: "-30px" }}
+        >
+          <BoxChart
+            chartData={boxChartData}
+            attribute={"GaitSpeed"}
+            labels={boxChartLabels}
+          ></BoxChart>
+        </Grid>
+      </Grid>
+      <Grid item xs={12} lg={4}>
+        <Grid item xs={12} style={{ height: "10vh" }}>
+          <BoxTitle
+            title="Spatiotemporal Comparison"
+            labels={boxChartLabels}
+            chartData={boxChartData}
+          ></BoxTitle>
+        </Grid>
+        <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
+          <RadarChart
+            chartData={boxChartData}
+            labels={boxChartLabels}
+            style={{ boxSizing: "border-box" }}
+          ></RadarChart>
         </Grid>
       </Grid>
     </Grid>

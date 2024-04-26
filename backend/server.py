@@ -345,6 +345,7 @@ def process_form_data():
             df_1.columns = ['time'] + [col[-1] for col in df_1.columns if col != 'time']
             df_2.columns = ['time'] + [col[-1] for col in df_2.columns if col != 'time']
 
+
             # Add Local, global minima and maxima to the charts
             l_minima_1 = argrelextrema(df_1['m'].values, np.less)[0].tolist()
             l_maxima_1 = argrelextrema(df_1['m'].values, np.greater)[0].tolist()

@@ -89,14 +89,33 @@ export const DataProcessView = (props) => {
   // console.log(selectedColumn)
 
   const [boxChartData, setBoxChartData] = useState({});
+  const [boxChartParams, setBoxChartParams] = useState({});
+
+  // convert boxChartParams to array named definedParams
+  const definedAttributes = Object.values(boxChartParams);
 
   const [boxChartLabels, setBoxChartLabels] = useState({
     label1: "",
     label2: "",
   });
+  // Define base grid size for the container and items
+  const containerGridSize = {
+    xs: 12,
+    sm: 12,
+    md: 12,
+    justifyContent: definedAttributes.length <= 3 ? "center" : "flex-start",
+  };
+
+  const chartGridSize = {
+    xs: 12 / Math.max(definedAttributes.length, 1), // Fallback to full width if there's one or no chart
+    sm: definedAttributes.length <= 2 ? undefined : 6,
+    md:
+      definedAttributes.length <= 2 ? undefined : 12 / definedAttributes.length,
+  };
 
   const handleFormDataSubmit = async (formData) => {
     try {
+      // console.log("Form data submitted:", formData);
       const response = await axios.post(
         "http://localhost:5000/process_form_data",
         formData
@@ -113,6 +132,8 @@ export const DataProcessView = (props) => {
         setBoxChartData({
           response: response.data,
         });
+
+        setBoxChartParams(formData.stpparams);
 
         setBoxChartLabels({
           label1: formData.group1Label,
@@ -157,7 +178,6 @@ export const DataProcessView = (props) => {
   };
 
   const isMdOrLarger = useMediaQuery(theme.breakpoints.up("md"));
-  console.log(isMdOrLarger, "isMdOrLarger");
   return (
     <Grid container>
       <Grid item xs={12} md={6} lg={3} style={loadDataStyle}>
@@ -230,7 +250,13 @@ export const DataProcessView = (props) => {
         </Grid>
       </Grid>
 
-      <Grid item container xs={10} lg={8}>
+      <Grid
+        item
+        container
+        {...containerGridSize}
+        lg={8}
+        style={{ display: "flex" }}
+      >
         <Grid item xs={12} style={{ height: "10vh", padding: 0, margin: 0 }}>
           <BoxTitle
             title={"Spatiotemporal Distributions"}
@@ -238,58 +264,25 @@ export const DataProcessView = (props) => {
             chartData={boxChartData}
           ></BoxTitle>
         </Grid>
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          md={3}
-          style={{ height: "26vh", marginTop: "-30px" }}
-        >
-          <BoxChart
-            chartData={boxChartData}
-            attribute={"LstepLength"}
-            labels={boxChartLabels}
-          ></BoxChart>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          md={3}
-          style={{ height: "26vh", marginTop: "-30px" }}
-        >
-          <BoxChart
-            chartData={boxChartData}
-            attribute={"timeRgait"}
-            labels={boxChartLabels}
-          ></BoxChart>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          md={3}
-          style={{ height: "26vh", marginTop: "-30px" }}
-        >
-          <BoxChart
-            chartData={boxChartData}
-            attribute={"RstepLength"}
-            labels={boxChartLabels}
-          ></BoxChart>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          sm={6}
-          md={3}
-          style={{ height: "26vh", marginTop: "-30px" }}
-        >
-          <BoxChart
-            chartData={boxChartData}
-            attribute={"GaitSpeed"}
-            labels={boxChartLabels}
-          ></BoxChart>
-        </Grid>
+        {definedAttributes.map((attribute, index) => (
+          <Grid
+            key={index}
+            item
+            {...chartGridSize}
+            style={{
+              height: "26vh",
+              marginTop: "-30px",
+              maxWidth: definedAttributes.length <= 3 ? "300px" : "none", // Set a max width if 1 or 2 charts
+              flexGrow: 0, // Prevent stretching
+            }}
+          >
+            <BoxChart
+              chartData={boxChartData}
+              attribute={attribute}
+              labels={boxChartLabels}
+            ></BoxChart>
+          </Grid>
+        ))}
       </Grid>
       <Grid item xs={12} lg={4}>
         <Grid item xs={12} style={{ height: "10vh" }}>

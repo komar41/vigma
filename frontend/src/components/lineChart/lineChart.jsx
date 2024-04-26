@@ -510,43 +510,43 @@ const LineChart = ({ chartData }) => {
     }
   }, [chartData, dimensions, active]);
 
-  return { active } ? (
+  console.log(active, "active");
+
+  return (
     // If active, display the SVG container and its content
     <div
       ref={containerRef}
       style={{ width: "100%", height: "95%", display: "block" }}
     >
-      <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
-      <div
-        ref={tooltipRef}
-        className="tooltip"
-        style={{
-          opacity: tooltipVisibility === "visible" ? 1 : 0,
-          position: "absolute",
-          left: `${tooltipPosition.left}px`,
-          top: `${tooltipPosition.top}px`,
-          pointerEvents: "none",
-          backgroundColor: "white",
-          padding: "5px",
-          border: "1px solid black",
-          // roboto font
-        }}
-      >
-        {tooltipContent}
-      </div>
-    </div>
-  ) : (
-    // If not active, display an inactive message
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <p>{`Plot ${chartData.plotNumber} is ${active}`}</p>
+      {active ? (
+        <>
+          <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
+          <div
+            ref={tooltipRef}
+            className="tooltip"
+            style={{
+              opacity: tooltipVisibility === "visible" ? 1 : 0,
+              position: "absolute",
+              left: `${tooltipPosition.left}px`,
+              top: `${tooltipPosition.top}px`,
+              pointerEvents: "none",
+              backgroundColor: "white",
+              padding: "5px",
+              border: "1px solid black",
+              // roboto font
+            }}
+          >
+            {tooltipContent}
+          </div>
+        </>
+      ) : (
+        /* <img
+          src="/placeholder.png"
+          alt="Placeholder"
+          style={{ width: "80%", height: "80%", marginTop: "10px" }}
+        /> */
+        <div className="no-data"></div>
+      )}
     </div>
   );
 };

@@ -1,51 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-// Dropdown checkbox
-import {
-  OutlinedInput,
-  InputLabel,
-  MenuItem,
-  FormControl,
-  ListItemText,
-  Select,
-  Checkbox,
-  Grid,
-} from "@mui/material";
 import * as d3 from "d3";
-
-const ITEM_HEIGHT = 30;
-const ITEM_PADDING_TOP = 3;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
-const names = [
-  "RstepLength",
-  "LstepLength",
-  "timeRswing",
-  "timeLswing",
-  "timeRgait",
-  "timeLgait",
-  "GaitSpeed",
-];
 
 const BoxTitle = ({ chartData, labels, title }) => {
   // Accept title as a prop
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
-
-  const [personName, setPersonName] = useState([]); // State for selected names
-
-  const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setPersonName(typeof value === "string" ? value.split(",") : value);
-  };
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
 
@@ -131,38 +90,11 @@ const BoxTitle = ({ chartData, labels, title }) => {
   }, [chartData, dimensions, title]); // Redraw when chartData, dimensions, or title change
 
   return (
-    <div style={{ width: "100%", height: "100%", display: "block" }}>
-      <Grid container spacing={0}>
-        <Grid item xs={4} lg={7} ref={containerRef}>
-          <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
-        </Grid>
-        <Grid item xs={8} lg={2}>
-          {title === "Spatiotemporal Distributions" && (
-            <FormControl
-              style={{ minWidth: 250, maxWidth: 200, maxHeight: 50 }}
-            >
-              <InputLabel id="demo-mutiple-checkbox-label">Select</InputLabel>
-              <Select
-                labelId="demo-mutiple-checkbox-label"
-                id="demo-mutiple-checkbox"
-                multiple
-                value={personName}
-                onChange={handleChange}
-                input={<OutlinedInput label="Names" />}
-                renderValue={(selected) => selected.join(", ")}
-                MenuProps={MenuProps}
-              >
-                {names.map((name) => (
-                  <MenuItem key={name} value={name}>
-                    <Checkbox checked={personName.indexOf(name) > -1} />
-                    <ListItemText primary={name} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Grid>
-      </Grid>
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height: "100%", display: "block" }}
+    >
+      <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
     </div>
   );
 };

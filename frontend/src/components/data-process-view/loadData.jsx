@@ -13,6 +13,8 @@ import {
   Dialog,
   DialogTitle,
   DialogActions,
+  ListItemText,
+  Input,
 } from "@mui/material";
 import axios from "axios";
 
@@ -25,7 +27,46 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 
+const names = [
+  "RstepLength",
+  "LstepLength",
+  "timeRswing",
+  "timeLswing",
+  "timeRgait",
+  "timeLgait",
+  "GaitSpeed",
+];
+
+const dictStpParam = {
+  RstepLength: "Step Length (R)",
+  LstepLength: "Step Length (L)",
+  timeRswing: "Swing Time (R)",
+  timeLswing: "Swing Time (L)",
+  timeRgait: "Gait Time (R)",
+  timeLgait: "Gait Time (L)",
+  GaitSpeed: "Gait Speed",
+};
+
 export const LoadData = (props) => {
+  const [personName, setPersonName] = useState([]); // State for selected names
+  console.log(personName);
+
+  const handleStpParam = (event) => {
+    const {
+      target: { value },
+    } = event;
+
+    const selectedNames = typeof value === "string" ? value.split(",") : value;
+
+    if (selectedNames.length > 4) {
+      setErrorMessage("You can select up to 4 parameters");
+      setOpenDialog(true);
+      return;
+    }
+
+    setPersonName(selectedNames);
+  };
+
   const [formData, setFormData] = useState({
     temp1FileLocation: "",
     fileLocation: "",
@@ -76,6 +117,7 @@ export const LoadData = (props) => {
   const [isCycleDisabled, setIsCycleDisabled] = useState(false);
   const [isSpreadDisabled, setIsSpreadDisabled] = useState(false);
   const [isPanelDisabled, setIsPanelDisabled] = useState(false);
+  const [isStpOptionDisabled, setIsStpOptionDisabled] = useState(true);
   const gaitCycleOptions = ["Left", "Right"]; // Assuming 'names' are used for multiple selects
 
   const [nodesGroup1, setNodesGroup1] = useState(null);
@@ -87,31 +129,29 @@ export const LoadData = (props) => {
   const [openDialog, setOpenDialog] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
 
-  function PlotOption({ isPanelDisabled, formData, handleChange }) {
+  function PlotOption() {
     let content;
 
     if (!isPanelDisabled) {
       // Prepare the JSX content for rendering if the panel is not disabled
       content = (
-        <Grid item xs={12} lg={6} style={{ paddingTop: "10px" }}>
-          <FormControl variant="standard" fullWidth>
-            <InputLabel id="panel-options-label">Plot no</InputLabel>
-            <Select
-              name="panelOptions"
-              labelId="panel-options-label"
-              id="panel-options-select"
-              value={formData.panelOptions}
-              onChange={handleChange}
-              // Optional: MenuProps={MenuProps}, size="small" for further customization
-            >
-              {panelOptions.map((number) => (
-                <MenuItem key={number} value={number}>
-                  {number}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
+        <FormControl variant="standard" fullWidth>
+          <InputLabel id="panel-options-label">Plot no</InputLabel>
+          <Select
+            name="panelOptions"
+            labelId="panel-options-label"
+            id="panel-options-select"
+            value={formData.panelOptions}
+            onChange={handleChange}
+            // Optional: MenuProps={MenuProps}, size="small" for further customization
+          >
+            {panelOptions.map((number) => (
+              <MenuItem key={number} value={number}>
+                {number}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       );
     } else {
       // If the panel is disabled, you might decide to render nothing or a placeholder
@@ -121,7 +161,7 @@ export const LoadData = (props) => {
     return content;
   }
 
-  function LimbSideOption({ isFootingDisabled, formData, handleChange }) {
+  function LimbSideOption() {
     let content;
     if (!isFootingDisabled) {
       content = (
@@ -175,7 +215,7 @@ export const LoadData = (props) => {
     return content;
   }
 
-  function GaitCycleOption({ isCycleDisabled, formData, handleChange }) {
+  function GaitCycleOption() {
     let content;
     if (!isCycleDisabled) {
       content = (
@@ -233,7 +273,7 @@ export const LoadData = (props) => {
     return content;
   }
 
-  function SpreadOption({ isSpreadDisabled, formData, handleChange }) {
+  function SpreadOption() {
     let content;
 
     if (!isSpreadDisabled) {
@@ -306,24 +346,28 @@ export const LoadData = (props) => {
         setIsCycleDisabled(false);
         setIsPanelDisabled(false);
         setIsSpreadDisabled(false);
+        setIsStpOptionDisabled(true);
       } else if (["trunk", "hipx"].includes(value)) {
         setDynamicFootingOptions([]);
         setIsFootingDisabled(true);
         setIsCycleDisabled(false);
         setIsPanelDisabled(false);
         setIsSpreadDisabled(false);
+        setIsStpOptionDisabled(true);
       } else if (["STP"].includes(value)) {
         setDynamicFootingOptions([]);
         setIsFootingDisabled(true);
         setIsCycleDisabled(true);
         setIsPanelDisabled(true);
         setIsSpreadDisabled(true);
+        setIsStpOptionDisabled(false);
       } else {
         setDynamicFootingOptions(["Left", "Right"]);
         setIsFootingDisabled(false);
         setIsCycleDisabled(false);
         setIsPanelDisabled(false);
         setIsSpreadDisabled(false);
+        setIsStpOptionDisabled(true);
       }
     }
   };
@@ -474,6 +518,8 @@ export const LoadData = (props) => {
 
         fileLocation: formData.fileLocation.replace(/\\/g, "/"),
         temp1FileLocation: formData.temp1FileLocation.replace(/\\/g, "/"),
+
+        stpparams: personName,
       };
 
       // Send the data (you can pass this to another component or perform another action)
@@ -497,7 +543,7 @@ export const LoadData = (props) => {
       }}
     >
       <Grid container spacing={0}>
-        <Grid item xs={8} lg={10}>
+        <Grid item xs={10} lg={10}>
           <TextField
             name="temp1FileLocation"
             placeholder="Group1 file location"
@@ -537,7 +583,7 @@ export const LoadData = (props) => {
           style={{
             paddingTop: "2.5vh",
             paddingRight: "1vh",
-            paddingLeft: "0vh",
+            marginLeft: "-1px",
           }}
         >
           <span className="p-float-label">
@@ -571,9 +617,33 @@ export const LoadData = (props) => {
           </span>
         </Grid>
 
+        <Grid item xs={12} sm={6} style={{ paddingRight: "1vh" }}>
+          <TextField
+            name="group1Label"
+            placeholder="group 1 label"
+            label="Group 1 label"
+            variant="standard"
+            fullWidth
+            value={formData.group1Label}
+            onChange={handleChange}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="group2Label"
+            placeholder="group 2 label"
+            label="Group 2 label"
+            variant="standard"
+            fullWidth
+            value={formData.group2Label}
+            onChange={handleChange}
+          />
+        </Grid>
+
         <Grid
           item
-          xs={12}
+          xs={6}
           sm={6}
           style={{ paddingRight: "1vh", paddingTop: "10px" }}
         >
@@ -628,11 +698,47 @@ export const LoadData = (props) => {
           </FormControl>
         </Grid>
 
-        <PlotOption
-          isPanelDisabled={isPanelDisabled}
-          formData={formData}
-          handleChange={handleChange}
-        />
+        <Grid item xs={6} lg={6} style={{ paddingTop: "10px" }}>
+          {!isStpOptionDisabled && (
+            <FormControl variant="standard" fullWidth>
+              <InputLabel id="demo-mutiple-checkbox-label">
+                Boxplots (up to 4)
+              </InputLabel>
+              <Select
+                labelId="demo-mutiple-checkbox-label"
+                id="demo-mutiple-checkbox"
+                multiple
+                value={personName}
+                onChange={handleStpParam}
+                input={<Input label="Names" />}
+                renderValue={(selected) => {
+                  // convert the selected array by dictStpParam
+                  let selectedNames = selected.map(
+                    (name) => dictStpParam[name]
+                  );
+
+                  return selectedNames.join(", ");
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200, // Set maximum height
+                      overflow: "auto", // Enable scrolling
+                    },
+                  },
+                }}
+              >
+                {names.map((name) => (
+                  <MenuItem key={name} value={name}>
+                    <Checkbox checked={personName.indexOf(name) > -1} />
+                    <ListItemText primary={dictStpParam[name]} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {!isPanelDisabled && <PlotOption />}
+        </Grid>
       </Grid>
 
       <Dialog
@@ -654,74 +760,22 @@ export const LoadData = (props) => {
       </Dialog>
 
       <Grid container spacing={1} style={{ paddingTop: "10px" }}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            name="group1Label"
-            placeholder="group 1 label"
-            label="Group 1 label"
-            variant="standard"
-            fullWidth
-            value={formData.group1Label}
-            onChange={handleChange}
-          />
-        </Grid>
+        <LimbSideOption />
 
-        <Grid item xs={12} sm={6}>
-          <TextField
-            name="group2Label"
-            placeholder="group 2 label"
-            label="Group 2 label"
-            variant="standard"
-            fullWidth
-            value={formData.group2Label}
-            onChange={handleChange}
-          />
-        </Grid>
+        <GaitCycleOption />
 
-        <LimbSideOption
-          isFootingDisabled={isFootingDisabled}
-          formData={formData}
-          handleChange={handleChange}
-        />
+        <SpreadOption />
 
-        <GaitCycleOption
-          isCycleDisabled={isCycleDisabled}
-          formData={formData}
-          handleChange={handleChange}
-        />
-
-        <SpreadOption
-          isSpreadDisabled={isSpreadDisabled}
-          formData={formData}
-          handleChange={handleChange}
-        />
-
-        {/* <Grid item xs={6}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.isGroup1Checked}
-                onChange={handleCheckboxChange}
-                name="isGroup1Checked"
-              />
-            }
-            label="Group 1 Spread"
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.isGroup2Checked}
-                onChange={handleCheckboxChange}
-                name="isGroup2Checked"
-              />
-            }
-            label="Group 2 Spread"
-          />
-        </Grid> */}
-
-        <Grid item xs={6} lg={12} style={{ textAlign: "center" }}>
+        <Grid
+          item
+          xs={12}
+          lg={12}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Button
             style={{ marginTop: "0vh" }}
             type="submit"

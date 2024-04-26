@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
+const dictStpParam = {
+  RstepLength: "Step Length (R)",
+  LstepLength: "Step Length (L)",
+  timeRswing: "Swing Time (R)",
+  timeLswing: "Swing Time (L)",
+  timeRgait: "Gait Time (R)",
+  timeLgait: "Gait Time (L)",
+  GaitSpeed: "Gait Speed",
+};
+
 // Function to calculate mean values for each measurement across a dataset
 function calculateMeans(dataset) {
   const totals = {};
@@ -214,7 +224,7 @@ const RadarChart = ({ chartData, labels }) => {
         .attr("y", textPosition.y)
         .attr("dy", "0.35em") // Vertically center text
         .style("text-anchor", textAnchor)
-        .text(param)
+        .text(dictStpParam[param])
         .attr("fill", "Grey")
         .style("font-size", "14px")
         .style("font-family", "Roboto, sans-serif");

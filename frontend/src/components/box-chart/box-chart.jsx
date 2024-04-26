@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
+const dictStpParam = {
+  RstepLength: "Step Length (R)",
+  LstepLength: "Step Length (L)",
+  timeRswing: "Swing Time (R)",
+  timeLswing: "Swing Time (L)",
+  timeRgait: "Gait Time (R)",
+  timeLgait: "Gait Time (L)",
+  GaitSpeed: "Gait Speed",
+};
+
 const BoxChart = ({ chartData, attribute, labels }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
@@ -109,7 +119,8 @@ const BoxChart = ({ chartData, attribute, labels }) => {
       .style("fill", "Black") // Text color
       .style("font-size", "14px")
       .style("font-family", "Roboto, sans-serif")
-      .text(attribute);
+      .style("font-weight", "bold") // Make the text bold roboto
+      .text(dictStpParam[attribute]);
 
     // Draw box plots for df1 and df2
     ["df1", "df2"].forEach((df, i) => {
@@ -177,7 +188,16 @@ const BoxChart = ({ chartData, attribute, labels }) => {
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
-      <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
+      {attribute ? (
+        <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
+      ) : (
+        /*<img
+          src="/placeholder.png"
+          alt="Placeholder"
+          style={{ width: "80%", height: "80%", marginTop: "10px" }}
+        />*/
+        <div className="no-data"></div>
+      )}
     </div>
   );
 };

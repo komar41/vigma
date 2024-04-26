@@ -1,0 +1,18 @@
+{
+  "fileLocation": "C:/Users/qshah/Documents/Spring 2024/eMoGis/data-processed/",
+  "group1SelectedFiles": [
+    "stroke_patients/011918ds_20",
+    "stroke_patients/012518cm_23",
+    "stroke_patients/081017bf_20"
+  ],
+  "group2SelectedFiles": [
+    "healthy_controls/081517ap_8",
+    "healthy_controls/090717jg_42",
+    "healthy_controls/101217al_29"
+  ],
+  "selectedColumn": "foot",
+  "selectedFooting1": "L",
+  "selectedCycle1": "L",
+  "selectedFooting2": "R",
+  "selectedCycle2": "R"
+}

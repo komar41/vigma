@@ -136,11 +136,11 @@ def interpolate_data(df, min_points):
     
     return interpolated_data
 
-def get_normalized_data(file_location, data_files, col):
+def get_normalized_data(file_location, data_files, col, limb, cycle):
 
-    def normalize_data(file_location, data_files, col):
+    def normalize_data(file_location, data_files, col, cycle):
         min_points = 100
-        array_L_cycle, array_R_cycle = [], []
+        dict_ = {}
 
         for file in data_files:
             patient_id = file.split('/')[-1].split('_')[0]
@@ -155,60 +155,50 @@ def get_normalized_data(file_location, data_files, col):
             data_step = data_step[(data_step['trial'] == int(trial_num)) & (data_step['subject'] == patient_id)]
             
             if(data_step['footing'].values[0] == 'L'):
-                data_trimmed_L_cycle = data[(data['time'] >= data_step['touch down'].values[0]) & (data['time'] <= data_step['touch down.2'].values[0])]
-                data_trimmed_R_cycle = data[(data['time'] >= data_step['touch down.1'].values[0]) & (data['time'] <= data_step['touch down.3'].values[0])]
+                if(cycle == 'L'): data_trimmed = data[(data['time'] >= data_step['touch down'].values[0]) & (data['time'] <= data_step['touch down.2'].values[0])]
+                else: data_trimmed = data[(data['time'] >= data_step['touch down.1'].values[0]) & (data['time'] <= data_step['touch down.3'].values[0])]
             else:
-                data_trimmed_L_cycle = data[(data['time'] >= data_step['touch down.1'].values[0]) & (data['time'] <= data_step['touch down.3'].values[0])]
-                data_trimmed_R_cycle = data[(data['time'] >= data_step['touch down'].values[0]) & (data['time'] <= data_step['touch down.2'].values[0])]
+                if(cycle == 'L'): data_trimmed = data[(data['time'] >= data_step['touch down.1'].values[0]) & (data['time'] <= data_step['touch down.3'].values[0])]
+                else: data_trimmed = data[(data['time'] >= data_step['touch down'].values[0]) & (data['time'] <= data_step['touch down.2'].values[0])]
             
-            interpolated_data_L_cycle = interpolate_data(data_trimmed_L_cycle, min_points)
-            interpolated_data_R_cycle = interpolate_data(data_trimmed_R_cycle, min_points)
+            interpolated_data = interpolate_data(data_trimmed, min_points)
+            dict_[patient_id + '_' + trial_num] = interpolated_data
 
-            array_L_cycle.append(interpolated_data_L_cycle)
-            array_R_cycle.append(interpolated_data_R_cycle)
-
-        return array_L_cycle, array_R_cycle
+        return dict_
     
     if(col=='AP' or col=='ML' or col=='VT' or col=='foot' or col=='shank' or col=='thigh'):
         if(col=='AP' or col=='ML' or col=='VT'): grf = True
         else: grf = False
-        array_L_Lcycle, array_L_Rcycle = normalize_data(file_location, data_files, 'L-%s'%col if grf else 'L%s'%col)
-        array_R_Lcycle, array_R_Rcycle = normalize_data(file_location, data_files, 'R-%s'%col if grf else 'R%s'%col)
-
-        if(col=='AP' or col=='ML' or col=='VT'):
-            array_agg_Lcycle, array_agg_Rcycle = [], []
-
-            for i in range(len(array_L_Lcycle)):
-                array_L_Lcycle_values = array_L_Lcycle[i]['L-%s'%col if grf else 'L%s'%col].values
-                array_R_Lcycle_values = array_R_Lcycle[i]['R-%s'%col if grf else 'R%s'%col].values
-
-                df = pd.DataFrame()
-                df['time'] = array_L_Lcycle[i]['time'].values
-                df['%s'%col] = [x + y for x, y in zip(array_L_Lcycle_values, array_R_Lcycle_values)]
-                df = interpolate_data(df, 100)
-
-                array_agg_Lcycle.append(df)
-
-                array_L_Rcycle_values = array_L_Rcycle[i]['L-%s'%col if grf else 'L%s'%col].values
-                array_R_Rcycle_values = array_R_Rcycle[i]['R-%s'%col if grf else 'R%s'%col].values
-
-                df = pd.DataFrame()
-                df['time'] = array_L_Rcycle[i]['time'].values
-                df['%s'%col] = [x + y for x, y in zip(array_L_Rcycle_values, array_R_Rcycle_values)]
-                df = interpolate_data(df, 100)
-
-                array_agg_Rcycle.append(df)
-
-            return array_L_Lcycle, array_L_Rcycle, array_R_Lcycle, array_R_Rcycle, array_agg_Lcycle, array_agg_Rcycle
         
+        dict_L = normalize_data(file_location, data_files, 'L-%s'%col if grf else 'L%s'%col, cycle)
+        dict_R = normalize_data(file_location, data_files, 'R-%s'%col if grf else 'R%s'%col, cycle)
+
+        if(limb == 'Agg'):
+            dict_agg = {}
+
+            for key in dict_L.keys():
+                dict_L_values = dict_L[key]['L-%s'%col if grf else 'L%s'%col].values
+                dict_R_values = dict_R[key]['R-%s'%col if grf else 'R%s'%col].values
+
+                df = pd.DataFrame()
+                df['time'] = dict_L[key]['time'].values
+                df['%s'%col] = [x + y for x, y in zip(dict_L_values, dict_R_values)]
+                df = interpolate_data(df, 100)
+
+                dict_agg[key] = df
+
+            return dict_agg
+        
+        elif(limb == 'L'):
+            return dict_L
         else:
-            return array_L_Lcycle, array_L_Rcycle, array_R_Lcycle, array_R_Rcycle
+            return dict_R
         
     else:
-        array_Lcycle, array_Rcycle = normalize_data(file_location, data_files, col)
-        return array_Lcycle, array_Rcycle
+        dict_ = normalize_data(file_location, data_files, col, cycle)
+        return dict_
 
-def get_ensembled_data(array_of_df, col):
+def get_ensembled_data(dict_of_df, col):
     
     def mean_sd(data):
         m = np.mean(data)
@@ -216,12 +206,12 @@ def get_ensembled_data(array_of_df, col):
         return m, m-sd, m+sd
 
     df = pd.DataFrame()
-    df['time'] = array_of_df[0]['time']
+    df['time'] = dict_of_df[list(dict_of_df.keys())[0]]['time'].values
 
-    for i in range(len(df)):
+    for i in range(len(df)): 
         values = []
-        for df_ in  array_of_df:
-            values.append(df_.loc[i, col])
+        for key in dict_of_df.keys():
+            values.append(dict_of_df[key].loc[i, col])
 
             m, l, u = mean_sd(values)
             df.loc[i, ('%s_m'%col)] = m
@@ -230,65 +220,67 @@ def get_ensembled_data(array_of_df, col):
     
     return df
 
-def process_data(file_location, data_files, col):
-    if(col=='AP' or col=='ML' or col=='VT'):
-        array_L_Lcycle, array_L_Rcycle, array_R_Lcycle, array_R_Rcycle, array_Lcycle, array_Rcycle = get_normalized_data(file_location, data_files, col)
-        df_L_Lcycle, df_L_Rcycle, df_R_Lcycle, df_R_Rcycle, df_agg_Lcycle, df_agg_Rcycle = get_ensembled_data(array_L_Lcycle, 'L-%s'%col), get_ensembled_data(array_L_Rcycle, 'L-%s'%col), get_ensembled_data(array_R_Lcycle, 'R-%s'%col), get_ensembled_data(array_R_Rcycle, 'R-%s'%col), get_ensembled_data(array_Lcycle, '%s'%col), get_ensembled_data(array_Rcycle, '%s'%col)
-        return df_L_Lcycle, df_L_Rcycle, df_R_Lcycle, df_R_Rcycle, df_agg_Lcycle, df_agg_Rcycle
+def process_data(file_location, data_files, col, limb, cycle):
+    dict_ = get_normalized_data(file_location, data_files, col, limb, cycle)
+    df = get_ensembled_data(dict_, col)
     
-    elif(col=='foot' or col=='shank' or col=='thigh'):
-        array_L_Lcycle, array_L_Rcycle, array_R_Lcycle, array_R_Rcycle = get_normalized_data(file_location, data_files, col)
-        df_L_Lcycle, df_L_Rcycle, df_R_Lcycle, df_R_Rcycle = get_ensembled_data(array_L_Lcycle, 'L%s'%col), get_ensembled_data(array_L_Rcycle, 'L%s'%col), get_ensembled_data(array_R_Lcycle, 'R%s'%col), get_ensembled_data(array_R_Rcycle, 'R%s'%col)
-        return df_L_Lcycle, df_L_Rcycle, df_R_Lcycle, df_R_Rcycle
-    
+    return df
+
+def get_col(col, limb):
+    if limb == 'Agg':
+        col_ = col
+    elif col=='AP' or col=='ML' or col=='VT':
+        col_ = limb + '-' + col
+    elif col == 'foot' or col == 'shank' or col == 'thigh':
+        col_ = limb + col
     else:
-        array_L_cycle, array_R_cycle = get_normalized_data(file_location, data_files, col)
-        df_Lcycle, df_Rcycle = get_ensembled_data(array_L_cycle, '%s'%col), get_ensembled_data(array_R_cycle, '%s'%col)
-        return df_Lcycle, df_Rcycle
+        col_ = col
     
-def get_dfs(col, footing1, cycle1, footing2, cycle2, **kwargs):
+    return col_
+    
+# def get_dfs(col, footing1, cycle1, footing2, cycle2, **kwargs):
 
-    def select_func(footing, cycle, group, options):
+#     def select_func(footing, cycle, group, options):
 
-        if(col == 'hipx' or col == 'trunk'):
-            if(cycle == 'L'):
-                df = options['df_Lcycle_%s'%group]
-            else:
-                df = options['df_Rcycle_%s'%group]
+#         if(col == 'hipx' or col == 'trunk'):
+#             if(cycle == 'L'):
+#                 df = options['df_Lcycle_%s'%group]
+#             else:
+#                 df = options['df_Rcycle_%s'%group]
 
-        else:
+#         else:
 
-            if(footing == 'L'):
-                if(cycle == 'L'):
-                    df = options['df_L_Lcycle_%s'%group]
-                else:
-                    df = options['df_L_Rcycle_%s'%group]
+#             if(footing == 'L'):
+#                 if(cycle == 'L'):
+#                     df = options['df_L_Lcycle_%s'%group]
+#                 else:
+#                     df = options['df_L_Rcycle_%s'%group]
 
-            elif(footing == 'R'):
-                if(cycle == 'L'):
-                    df = options['df_R_Lcycle_%s'%group]
-                else:
-                    df = options['df_R_Rcycle_%s'%group]
+#             elif(footing == 'R'):
+#                 if(cycle == 'L'):
+#                     df = options['df_R_Lcycle_%s'%group]
+#                 else:
+#                     df = options['df_R_Rcycle_%s'%group]
 
-            elif(footing == 'Agg'):
-                if(cycle == 'L'):
-                    df = options['df_agg_Lcycle_%s'%group]
-                else:
-                    df = options['df_agg_Rcycle_%s'%group]
+#             elif(footing == 'Agg'):
+#                 if(cycle == 'L'):
+#                     df = options['df_agg_Lcycle_%s'%group]
+#                 else:
+#                     df = options['df_agg_Rcycle_%s'%group]
 
-        return df
+#         return df
 
-    options = {
-        'df_L_Lcycle_1': None, 'df_L_Rcycle_1': None, 'df_R_Lcycle_1': None, 'df_R_Rcycle_1': None, 'df_agg_Lcycle_1': None, 'df_agg_Rcycle_1': None,
-        'df_L_Lcycle_2': None, 'df_L_Rcycle_2': None, 'df_R_Lcycle_2': None, 'df_R_Rcycle_2': None, 'df_agg_Lcycle_2': None, 'df_agg_Rcycle_2': None,
-        'df_Lcycle_1': None, 'df_Rcycle_1': None, 'df_Lcycle_2': None, 'df_Rcycle_2': None
-    }
+#     options = {
+#         'df_L_Lcycle_1': None, 'df_L_Rcycle_1': None, 'df_R_Lcycle_1': None, 'df_R_Rcycle_1': None, 'df_agg_Lcycle_1': None, 'df_agg_Rcycle_1': None,
+#         'df_L_Lcycle_2': None, 'df_L_Rcycle_2': None, 'df_R_Lcycle_2': None, 'df_R_Rcycle_2': None, 'df_agg_Lcycle_2': None, 'df_agg_Rcycle_2': None,
+#         'df_Lcycle_1': None, 'df_Rcycle_1': None, 'df_Lcycle_2': None, 'df_Rcycle_2': None
+#     }
 
-    options.update(kwargs)
-    df_1 = select_func(footing1, cycle1, '1', options)
-    df_2 = select_func(footing2, cycle2, '2', options)
+#     options.update(kwargs)
+#     df_1 = select_func(footing1, cycle1, '1', options)
+#     df_2 = select_func(footing2, cycle2, '2', options)
 
-    return df_1, df_2
+#     return df_1, df_2
 
 # Test cmd line: curl -X POST -H "Content-Type: application/json" -d @payload.json http://127.0.0.1:5000/process_form_data
 # stroke_patients/011918ds_20,stroke_patients/012518cm_23,stroke_patients/081017bf_20
@@ -321,44 +313,33 @@ def process_form_data():
             df_2 = get_stp_params(group2Files_loc)
 
         else:
-            if(col=='AP' or col=='ML' or col=='VT'):
-                group1FilesLoc = [file + '_grf.csv' for file in group1Files_loc]
-                group2FilesLoc = [file + '_grf.csv' for file in group2Files_loc]
-                df_L_Lcycle_1, df_L_Rcycle_1, df_R_Lcycle_1, df_R_Rcycle_1, df_agg_Lcycle_1, df_agg_Rcycle_1 = process_data(fileLocation, group1FilesLoc, col)
-                df_L_Lcycle_2, df_L_Rcycle_2, df_R_Lcycle_2, df_R_Rcycle_2, df_agg_Lcycle_2, df_agg_Rcycle_2 = process_data(fileLocation, group2FilesLoc, col)
-                df_1, df_2 = get_dfs(col, footing1, cycle1, footing2, cycle2, df_L_Lcycle_1=df_L_Lcycle_1, df_L_Rcycle_1=df_L_Rcycle_1, df_R_Lcycle_1=df_R_Lcycle_1, df_R_Rcycle_1=df_R_Rcycle_1, df_agg_Lcycle_1=df_agg_Lcycle_1, df_agg_Rcycle_1=df_agg_Rcycle_1, df_L_Lcycle_2=df_L_Lcycle_2, df_L_Rcycle_2=df_L_Rcycle_2, df_R_Lcycle_2=df_R_Lcycle_2, df_R_Rcycle_2=df_R_Rcycle_2, df_agg_Lcycle_2=df_agg_Lcycle_2, df_agg_Rcycle_2=df_agg_Rcycle_2)
+            col_1 = get_col(col, footing1)
+            col_2 = get_col(col, footing2)
+            
+            if(col == 'AP' or col == 'ML' or col == 'VT'): type = 'grf'
+            else: type = 'jnt'
+            group1FilesLoc = [file + '_%s.csv'%type for file in group1Files_loc]
+            group2FilesLoc = [file + '_%s.csv'%type for file in group2Files_loc]
 
-            elif(col!='hipx' and col!='trunk'):
-                group1FilesLoc = [file + '_jnt.csv' for file in group1Files_loc]
-                group2FilesLoc = [file + '_jnt.csv' for file in group2Files_loc]
-                df_L_Lcycle_1, df_L_Rcycle_1, df_R_Lcycle_1, df_R_Rcycle_1 = process_data(fileLocation, group1FilesLoc, col)
-                df_L_Lcycle_2, df_L_Rcycle_2, df_R_Lcycle_2, df_R_Rcycle_2 = process_data(fileLocation, group2FilesLoc, col)
-                df_1, df_2 = get_dfs(col, footing1, cycle1, footing2, cycle2, df_L_Lcycle_1=df_L_Lcycle_1, df_L_Rcycle_1=df_L_Rcycle_1, df_R_Lcycle_1=df_R_Lcycle_1, df_R_Rcycle_1=df_R_Rcycle_1, df_L_Lcycle_2=df_L_Lcycle_2, df_L_Rcycle_2=df_L_Rcycle_2, df_R_Lcycle_2=df_R_Lcycle_2, df_R_Rcycle_2=df_R_Rcycle_2)
-
-            else:
-                group1FilesLoc = [file + '_jnt.csv' for file in group1Files_loc]
-                group2FilesLoc = [file + '_jnt.csv' for file in group2Files_loc]
-                df_Lcycle_1, df_Rcycle_1 = process_data(fileLocation, group1FilesLoc, col)
-                df_Lcycle_2, df_Rcycle_2 = process_data(fileLocation, group2FilesLoc, col)
-                df_1, df_2 = get_dfs(col, footing1, cycle1, footing2, cycle2, df_Lcycle_1=df_Lcycle_1, df_Rcycle_1=df_Rcycle_1, df_Lcycle_2=df_Lcycle_2, df_Rcycle_2=df_Rcycle_2)
+            df_1 = process_data(fileLocation, group1FilesLoc, col_1, footing1, cycle1)
+            df_2 = process_data(fileLocation, group2FilesLoc, col_2, footing2, cycle2)
 
             df_1.columns = ['time'] + [col[-1] for col in df_1.columns if col != 'time']
             df_2.columns = ['time'] + [col[-1] for col in df_2.columns if col != 'time']
 
-
             # Add Local, global minima and maxima to the charts
-            l_minima_1 = argrelextrema(df_1['m'].values, np.less)[0].tolist()
-            l_maxima_1 = argrelextrema(df_1['m'].values, np.greater)[0].tolist()
-            l_minima_2 = argrelextrema(df_2['m'].values, np.less)[0].tolist()
-            l_maxima_2 = argrelextrema(df_2['m'].values, np.greater)[0].tolist()
+            # l_minima_1 = argrelextrema(df_1['m'].values, np.less)[0].tolist()
+            # l_maxima_1 = argrelextrema(df_1['m'].values, np.greater)[0].tolist()
+            # l_minima_2 = argrelextrema(df_2['m'].values, np.less)[0].tolist()
+            # l_maxima_2 = argrelextrema(df_2['m'].values, np.greater)[0].tolist()
 
-            g_minima_1 = df_1['m'].idxmin()
-            g_maxima_1 = df_1['m'].idxmax()
-            g_minima_2 = df_2['m'].idxmin()
-            g_maxima_2 = df_2['m'].idxmax()
+            # g_minima_1 = df_1['m'].idxmin()
+            # g_maxima_1 = df_1['m'].idxmax()
+            # g_minima_2 = df_2['m'].idxmin()
+            # g_maxima_2 = df_2['m'].idxmax()
 
-            df_1_mnmx = {'l_minima': l_minima_1, 'l_maxima': l_maxima_1, 'g_minima': g_minima_1, 'g_maxima': g_maxima_1}
-            df_2_mnmx = {'l_minima': l_minima_2, 'l_maxima': l_maxima_2, 'g_minima': g_minima_2, 'g_maxima': g_maxima_2}
+            # df_1_mnmx = {'l_minima': l_minima_1, 'l_maxima': l_maxima_1, 'g_minima': g_minima_1, 'g_maxima': g_maxima_1}
+            # df_2_mnmx = {'l_minima': l_minima_2, 'l_maxima': l_maxima_2, 'g_minima': g_minima_2, 'g_maxima': g_maxima_2}
 
             # Option to save normalized CSV files in frontend
 

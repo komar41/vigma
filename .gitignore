@@ -8,6 +8,8 @@ backend/__pycache__
 backend/.DS_Store
 BackendFlask/envs
 BackendFlask/data
+backend/test.ipynb
+backend/test copy.ipynb
 
 # Build files
 frontend/build

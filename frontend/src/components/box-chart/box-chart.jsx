@@ -92,10 +92,38 @@ const BoxChart = ({ chartData, attribute, labels }) => {
       .style("z-index", "10");
 
     // Y-axis
-    g.append("g")
+    const yAxis = g
+      .append("g")
       .style("font-size", "12px")
       .style("font-family", "Roboto, sans-serif")
       .call(d3.axisLeft(yScale).ticks(5));
+
+    const yAxisWidth = yAxis.node().getBBox().width;
+
+    // Calculate half-width for symmetrical brush
+    const brushHalfWidth = 10; // Adjust this value based on desired brush width
+
+    // Brush setup
+    const brush = d3
+      .brushY()
+      .extent([
+        [-brushHalfWidth, 0],
+        [brushHalfWidth, adjustedHeight],
+      ])
+      .on("end", brushed);
+
+    // Add brush to the yAxis
+    yAxis.call(brush);
+
+    // Function to handle brush events
+    function brushed(event) {
+      if (!event.selection) {
+        console.log("No selection");
+        return;
+      }
+      const [y0, y1] = event.selection.map((d) => yScale.invert(d));
+      console.log(`Brushed range: ${y0.toFixed(2)} to ${y1.toFixed(2)}`);
+    }
 
     // X-axis
     g.append("g")

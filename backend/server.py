@@ -25,10 +25,10 @@ def receive_data():
         folder_files = {}
                 # Iterate through the folders
         for entry in os.listdir(folder_location):
-            print("Entry:", entry)
+            # print("Entry:", entry)
             full_path = os.path.join(folder_location, entry)
             if os.path.isdir(full_path):
-                print("Full Path:", full_path)
+                # print("Full Path:", full_path)
                 folder_files[entry] = {}
                 for sub_entry in os.listdir(full_path):
                     sub_full_path = os.path.join(full_path, sub_entry)
@@ -43,7 +43,7 @@ def receive_data():
 
         # Convert the dictionary to JSON format
         json_output = json.dumps(folder_files, indent=4)
-        print("JSON Output",json_output)
+        # print("JSON Output",json_output)
 
         # Return the list of files as JSON
         return json_output
@@ -223,8 +223,11 @@ def get_ensembled_data(dict_of_df, col):
 def process_data(file_location, data_files, col, limb, cycle):
     dict_ = get_normalized_data(file_location, data_files, col, limb, cycle)
     df = get_ensembled_data(dict_, col)
+
+    for key in dict_.keys():
+        dict_[key] = dict_[key].rename(columns={col: 'col'})
     
-    return df
+    return dict_, df
 
 def get_col(col, limb):
     if limb == 'Agg':
@@ -237,50 +240,6 @@ def get_col(col, limb):
         col_ = col
     
     return col_
-    
-# def get_dfs(col, footing1, cycle1, footing2, cycle2, **kwargs):
-
-#     def select_func(footing, cycle, group, options):
-
-#         if(col == 'hipx' or col == 'trunk'):
-#             if(cycle == 'L'):
-#                 df = options['df_Lcycle_%s'%group]
-#             else:
-#                 df = options['df_Rcycle_%s'%group]
-
-#         else:
-
-#             if(footing == 'L'):
-#                 if(cycle == 'L'):
-#                     df = options['df_L_Lcycle_%s'%group]
-#                 else:
-#                     df = options['df_L_Rcycle_%s'%group]
-
-#             elif(footing == 'R'):
-#                 if(cycle == 'L'):
-#                     df = options['df_R_Lcycle_%s'%group]
-#                 else:
-#                     df = options['df_R_Rcycle_%s'%group]
-
-#             elif(footing == 'Agg'):
-#                 if(cycle == 'L'):
-#                     df = options['df_agg_Lcycle_%s'%group]
-#                 else:
-#                     df = options['df_agg_Rcycle_%s'%group]
-
-#         return df
-
-#     options = {
-#         'df_L_Lcycle_1': None, 'df_L_Rcycle_1': None, 'df_R_Lcycle_1': None, 'df_R_Rcycle_1': None, 'df_agg_Lcycle_1': None, 'df_agg_Rcycle_1': None,
-#         'df_L_Lcycle_2': None, 'df_L_Rcycle_2': None, 'df_R_Lcycle_2': None, 'df_R_Rcycle_2': None, 'df_agg_Lcycle_2': None, 'df_agg_Rcycle_2': None,
-#         'df_Lcycle_1': None, 'df_Rcycle_1': None, 'df_Lcycle_2': None, 'df_Rcycle_2': None
-#     }
-
-#     options.update(kwargs)
-#     df_1 = select_func(footing1, cycle1, '1', options)
-#     df_2 = select_func(footing2, cycle2, '2', options)
-
-#     return df_1, df_2
 
 # Test cmd line: curl -X POST -H "Content-Type: application/json" -d @payload.json http://127.0.0.1:5000/process_form_data
 # stroke_patients/011918ds_20,stroke_patients/012518cm_23,stroke_patients/081017bf_20
@@ -289,10 +248,10 @@ def get_col(col, limb):
 @app.route('/process_form_data', methods=['POST']) # Add , 'GET' to check
 def process_form_data():
     if request.method == 'POST':
-        print(request)
+        # print(request)
         
         form_data = request.json
-        print("form data",form_data)
+        # print("form data",form_data)
         fileLocation =  form_data.get('fileLocation')     #form_data.get('fileLocation') # C:/Users/qshah/Documents/Spring 2024/eMoGis/data-processed
         group1Files = form_data.get('group1SelectedFiles') # [stroke_patients/011918ds_20,stroke_patients/012518cm_23,stroke_patients/081017bf_20]
         group2Files = form_data.get('group2SelectedFiles') # [healthy_controls/081517ap_8,healthy_controls/090717jg_42,healthy_controls/101217al_29]
@@ -304,9 +263,9 @@ def process_form_data():
 
         group1Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group1Files]
         group2Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group2Files]
-        
 
         df_1, df_2, df_1_mnmx, df_2_mnmx = None, None, None, None
+        dict_list_df1, dict_list_df2 = None, None
 
         if(col=='STP'):
             df_1 = get_stp_params(group1Files_loc)
@@ -321,8 +280,8 @@ def process_form_data():
             group1FilesLoc = [file + '_%s.csv'%type for file in group1Files_loc]
             group2FilesLoc = [file + '_%s.csv'%type for file in group2Files_loc]
 
-            df_1 = process_data(fileLocation, group1FilesLoc, col_1, footing1, cycle1)
-            df_2 = process_data(fileLocation, group2FilesLoc, col_2, footing2, cycle2)
+            dict_df_1, df_1 = process_data(fileLocation, group1FilesLoc, col_1, footing1, cycle1)
+            dict_df_2, df_2 = process_data(fileLocation, group2FilesLoc, col_2, footing2, cycle2)
 
             df_1.columns = ['time'] + [col[-1] for col in df_1.columns if col != 'time']
             df_2.columns = ['time'] + [col[-1] for col in df_2.columns if col != 'time']
@@ -343,7 +302,10 @@ def process_form_data():
 
             # Option to save normalized CSV files in frontend
 
-        return jsonify({'df1': df_1.to_dict(orient='records'), 'df2': df_2.to_dict(orient='records'), 'df1_mnmx': df_1_mnmx, 'df2_mnmx': df_2_mnmx})
+            dict_list_df1 = {key: df.to_dict(orient='records') for key, df in dict_df_1.items()}
+            dict_list_df2 = {key: df.to_dict(orient='records') for key, df in dict_df_2.items()}
+
+        return jsonify({'df1': df_1.to_dict(orient='records'), 'df2': df_2.to_dict(orient='records'), 'df1_data': dict_list_df1, 'df2_data': dict_list_df2, 'df1_mnmx': df_1_mnmx, 'df2_mnmx': df_2_mnmx})
         
         #return jsonify({'df1': 'df_1', 'df2': 'df_2', 'df1_mnmx': 'df_1_mnmx', 'df2_mnmx': 'df_2_mnmx'})
     # else: 

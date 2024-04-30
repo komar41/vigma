@@ -15,6 +15,9 @@ import {
   DialogActions,
   ListItemText,
   Input,
+  FormLabel,
+  RadioGroup,
+  Radio,
 } from "@mui/material";
 import axios from "axios";
 
@@ -49,7 +52,7 @@ const dictStpParam = {
 
 export const LoadData = (props) => {
   const [personName, setPersonName] = useState([]); // State for selected names
-  console.log(personName);
+  // console.log(personName);
 
   const handleStpParam = (event) => {
     const {
@@ -79,9 +82,10 @@ export const LoadData = (props) => {
     selectedCycle1: "",
     selectedFooting2: "",
     selectedCycle2: "",
-    isGroup1Checked: false,
-    isGroup2Checked: false,
+    // isGroup1Checked: false,
+    // isGroup2Checked: false,
     panelOptions: "",
+    spreadOption: "Spread",
     // Any other fields you might have
   });
 
@@ -116,6 +120,7 @@ export const LoadData = (props) => {
   const [isFootingDisabled, setIsFootingDisabled] = useState(false);
   const [isCycleDisabled, setIsCycleDisabled] = useState(false);
   const [isSpreadDisabled, setIsSpreadDisabled] = useState(false);
+  const [spreadOption, setSpreadOption] = useState("Spread");
   const [isPanelDisabled, setIsPanelDisabled] = useState(false);
   const [isStpOptionDisabled, setIsStpOptionDisabled] = useState(true);
   const gaitCycleOptions = ["Left", "Right"]; // Assuming 'names' are used for multiple selects
@@ -279,7 +284,7 @@ export const LoadData = (props) => {
     if (!isSpreadDisabled) {
       content = (
         <>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -302,6 +307,41 @@ export const LoadData = (props) => {
               }
               label="Group 2 Spread"
             />
+          </Grid> */}
+          <Grid item xs={12}>
+            <FormControl component="fieldset" fullWidth>
+              <FormLabel
+                component="legend"
+                id="demo-row-radio-buttons-group-label"
+                style={{ marginBottom: "-5px" }} // Reduced bottom margin
+              >
+                Plot option
+              </FormLabel>
+              <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                value={spreadOption}
+                onChange={handleRadioChange}
+              >
+                <Grid container item spacing={2}>
+                  <Grid item xs={6}>
+                    <FormControlLabel
+                      value="Spread"
+                      control={<Radio />}
+                      label="Spread"
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <FormControlLabel
+                      value="All data"
+                      control={<Radio />}
+                      label="All data"
+                    />
+                  </Grid>
+                </Grid>
+              </RadioGroup>
+            </FormControl>
           </Grid>
         </>
       );
@@ -372,12 +412,16 @@ export const LoadData = (props) => {
     }
   };
 
-  const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target; // Destructure name and checked from the event target
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: checked, // Use computed property name based on the checkbox name
-    }));
+  // const handleCheckboxChange = (event) => {
+  //   const { name, checked } = event.target; // Destructure name and checked from the event target
+  //   setFormData((prevState) => ({
+  //     ...prevState,
+  //     [name]: checked, // Use computed property name based on the checkbox name
+  //   }));
+  // };
+
+  const handleRadioChange = (event) => {
+    setSpreadOption(event.target.value);
   };
 
   function getCheckedFileTitles(selectedNodeKeys) {
@@ -520,6 +564,7 @@ export const LoadData = (props) => {
         temp1FileLocation: formData.temp1FileLocation.replace(/\\/g, "/"),
 
         stpparams: personName,
+        spreadOption: spreadOption,
       };
 
       // Send the data (you can pass this to another component or perform another action)

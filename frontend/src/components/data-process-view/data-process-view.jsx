@@ -17,70 +17,85 @@ export const DataProcessView = (props) => {
       plotNumber: 2,
       group1Data: [],
       group2Data: [],
-      group1Spread: false,
-      group2Spread: false,
+      group1AllData: [],
+      group2AllData: [],
+      // group1Spread: false,
+      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
       selectedFooting2: "",
       selectedCycle1: "",
       selectedCycle2: "",
+      spreadOption: "",
     }, // Chart 2
     {
       active: false,
       plotNumber: 1,
       group1Data: [],
       group2Data: [],
-      group1Spread: false,
-      group2Spread: false,
+      group1AllData: [],
+      group2AllData: [],
+      // group1Spread: false,
+      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
       selectedFooting2: "",
       selectedCycle1: "",
       selectedCycle2: "",
+      spreadOption: "",
     }, // Chart 1
     {
       active: false,
       plotNumber: 3,
       group1Data: [],
       group2Data: [],
-      group1Spread: false,
-      group2Spread: false,
+      group1AllData: [],
+      group2AllData: [],
+      // group1Spread: false,
+      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
       selectedFooting2: "",
       selectedCycle1: "",
       selectedCycle2: "",
+      spreadOption: "",
     }, // Chart 3
     {
       active: false,
       plotNumber: 4,
       group1Data: [],
       group2Data: [],
-      group1Spread: false,
-      group2Spread: false,
+      group1AllData: [],
+      group2AllData: [],
+      // group1Spread: false,
+      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
       selectedFooting2: "",
       selectedCycle1: "",
       selectedCycle2: "",
+      spreadOption: "",
     }, // Chart 4
     {
       active: false,
       plotNumber: 5,
       group1Data: [],
       group2Data: [],
-      group1Spread: false,
-      group2Spread: false,
+      group1AllData: [],
+      group2AllData: [],
+      // group1Spread: false,
+      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
       selectedFooting2: "",
       selectedCycle1: "",
       selectedCycle2: "",
+      spreadOption: "",
     }, // Chart 5
     // Add more objects as neede for additional charts
   ]);
@@ -120,8 +135,12 @@ export const DataProcessView = (props) => {
         "http://localhost:5000/process_form_data",
         formData
       );
+      console.log(formData.spreadOption);
       const group1Data = response.data.df1;
       const group2Data = response.data.df2;
+
+      const group1AllData = response.data.df1_data;
+      const group2AllData = response.data.df2_data;
 
       if (response.status !== 200) {
         console.error("Error while processing form data:", response);
@@ -150,14 +169,17 @@ export const DataProcessView = (props) => {
           newChartData.parameter = formData.selectedColumn; // Assuming this is the parameter to use
           newChartData.group1Data = group1Data; // Update with actual data from the response
           newChartData.group2Data = group2Data; // Update with actual data from the response
-          newChartData.group1Spread = formData.isGroup1Checked;
-          newChartData.group2Spread = formData.isGroup2Checked;
+          // newChartData.group1Spread = formData.isGroup1Checked;
+          // newChartData.group2Spread = formData.isGroup2Checked;
           newChartData.group1Label = formData.group1Label;
           newChartData.group2Label = formData.group2Label;
           newChartData.group1Footing = formData.selectedFooting1; // Assuming these fields exist in formData
           newChartData.group2Footing = formData.selectedFooting2;
           newChartData.group1GaitCycle = formData.selectedCycle1;
           newChartData.group2GaitCycle = formData.selectedCycle2;
+          newChartData.group1AllData = group1AllData;
+          newChartData.group2AllData = group2AllData;
+          newChartData.spreadOption = formData.spreadOption;
 
           newData[chartIndex] = newChartData; // Update the array with the modified chart data
 

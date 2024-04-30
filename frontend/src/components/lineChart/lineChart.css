@@ -1,6 +1,43 @@
 .grid .tick line {
-    stroke: lightgrey;
-    stroke-opacity: 0.7;
-    shape-rendering: crispEdges;
-  }
-  
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: auto;
+  padding: 8px;
+  font: 14px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.line-normal {
+  stroke: #fc8d62;
+  stroke-dasharray: 5, 5;
+  opacity: 0.5;
+}
+
+.line-highlight {
+  stroke: #d95f02; /* Or any other color that stands out */
+  stroke-width: 3; /* Make it thicker when highlighted */
+  opacity: 1; /* Make it fully opaque to stand out */
+}
+
+.line-normal-2 {
+  stroke: #66c2a5;
+  stroke-dasharray: 5, 5;
+  opacity: 0.5;
+}
+
+.line-highlight-2 {
+  stroke: #1b9e77; /* Or any other color that stands out */
+  stroke-width: 3; /* Make it thicker when highlighted */
+  opacity: 1; /* Make it fully opaque to stand out */
+}

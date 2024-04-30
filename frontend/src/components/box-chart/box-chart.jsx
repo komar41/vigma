@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { act } from "react";
 
 const dictStpParam = {
   RstepLength: "Step Length (R)",
@@ -11,7 +12,8 @@ const dictStpParam = {
   GaitSpeed: "Gait Speed",
 };
 
-const BoxChart = ({ chartData, attribute, labels }) => {
+const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
+  // console.log(activeGroups, "activeGroups*****");
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
   if (chartData) chartData = chartData.response;
@@ -152,9 +154,10 @@ const BoxChart = ({ chartData, attribute, labels }) => {
 
     // Draw box plots for df1 and df2
     ["df1", "df2"].forEach((df, i) => {
+      if (!activeGroups[i]) return;
       const { min, q1, median, q3, max } = stats[df];
 
-      const color = i === 0 ? "#66c2a5" : "#fc8d62";
+      const color = i === 0 ? "#fc8d62" : "#66c2a5";
 
       // Box
       g.append("rect")
@@ -212,7 +215,7 @@ const BoxChart = ({ chartData, attribute, labels }) => {
         .attr("y2", (d) => yScale(d))
         .attr("stroke", "black");
     });
-  }, [chartData, dimensions, attribute]);
+  }, [chartData, dimensions, attribute, activeGroups]);
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>

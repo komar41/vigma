@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-const BoxTitle = ({ chartData, labels, title }) => {
+const BoxTitle = ({
+  chartData,
+  labels,
+  title,
+  activeGroups,
+  setActiveGroups,
+}) => {
   // Accept title as a prop
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
+  // const [activeGroups, setActiveGroups] = useState([true, true]);
 
   useEffect(() => {
     const observeTarget = containerRef.current;
@@ -20,6 +27,8 @@ const BoxTitle = ({ chartData, labels, title }) => {
     resizeObserver.observe(observeTarget);
     return () => resizeObserver.unobserve(observeTarget);
   }, []);
+
+  // console.log(activeGroups, "activeGroups");
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -37,7 +46,7 @@ const BoxTitle = ({ chartData, labels, title }) => {
       .attr("height", adjustedHeight)
       .attr("fill", "white");
 
-    console.log(labels["label1"], "**");
+    // console.log(labels["label1"], "**");
     const legendData = [
       { color: "#fc8d62", text: labels["label1"] },
       { color: "#66c2a5", text: labels["label2"] },
@@ -74,7 +83,27 @@ const BoxTitle = ({ chartData, labels, title }) => {
         .attr("height", 20)
         .attr("fill", (d) => d.color)
         .attr("x", (d, i) => i * 200) // Set x position based on index to space items horizontally
-        .attr("y", 0); // Keep y position constant as all items are on the same horizontal line
+        .attr("y", 0) // Keep y position constant as all items are on the same horizontal line
+        .style("opacity", (d) => {
+          // Determine initial opacity based on active groups
+          const groupClass = d.text.includes(labels["label1"])
+            ? "group1"
+            : "group2";
+          return groupClass === "group1"
+            ? activeGroups[0]
+              ? 1
+              : 0.5
+            : activeGroups[1]
+            ? 1
+            : 0.5;
+        })
+        .on("click", function (event, d) {
+          if (d.text === labels["label1"]) {
+            setActiveGroups([!activeGroups[0], activeGroups[1]]);
+          } else if (d.text === labels["label2"]) {
+            setActiveGroups([activeGroups[0], !activeGroups[1]]);
+          }
+        });
 
       legend
         .selectAll("text")
@@ -87,7 +116,7 @@ const BoxTitle = ({ chartData, labels, title }) => {
         .style("font-size", "15px")
         .style("font-family", "Roboto, sans-serif");
     }
-  }, [chartData, dimensions, title]); // Redraw when chartData, dimensions, or title change
+  }, [chartData, dimensions, title, activeGroups]); // Redraw when chartData, dimensions, or title change
 
   return (
     <div

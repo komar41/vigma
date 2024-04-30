@@ -11,6 +11,9 @@ import BoxChart from "../box-chart/box-chart";
 import BoxTitle from "../box-chart/box-title";
 
 export const DataProcessView = (props) => {
+  const [activeGroupsRadar, setActiveGroupsRadar] = useState([true, true]);
+  const [activeGroupsBox, setActiveGroupsBox] = useState([true, true]);
+
   const [lineChartsData, setLineChartsData] = useState([
     {
       active: false,
@@ -284,6 +287,8 @@ export const DataProcessView = (props) => {
             title={"Spatiotemporal Distributions"}
             labels={boxChartLabels}
             chartData={boxChartData}
+            activeGroups={activeGroupsBox}
+            setActiveGroups={setActiveGroupsBox}
           ></BoxTitle>
         </Grid>
         {definedAttributes.map((attribute, index) => (
@@ -302,6 +307,7 @@ export const DataProcessView = (props) => {
               chartData={boxChartData}
               attribute={attribute}
               labels={boxChartLabels}
+              activeGroups={activeGroupsBox}
             ></BoxChart>
           </Grid>
         ))}
@@ -312,6 +318,8 @@ export const DataProcessView = (props) => {
             title="Spatiotemporal Comparison"
             labels={boxChartLabels}
             chartData={boxChartData}
+            activeGroups={activeGroupsRadar}
+            setActiveGroups={setActiveGroupsRadar}
           ></BoxTitle>
         </Grid>
         <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
@@ -319,6 +327,7 @@ export const DataProcessView = (props) => {
             chartData={boxChartData}
             labels={boxChartLabels}
             style={{ boxSizing: "border-box" }}
+            activeGroups={activeGroupsRadar}
           ></RadarChart>
         </Grid>
       </Grid>

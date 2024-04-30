@@ -44,7 +44,7 @@ function getRandomColor() {
   return color;
 }
 
-const RadarChart = ({ chartData, labels }) => {
+const RadarChart = ({ chartData, labels, activeGroups }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
 
@@ -166,15 +166,15 @@ const RadarChart = ({ chartData, labels }) => {
     });
 
     // Function to draw radar chart area
-    const radarLine = d3
-      .lineRadial()
-      .radius((d) => rScale(d.value))
-      .angle((d, i) => i * angleSlice)
-      .curve(d3.curveLinearClosed);
+    // const radarLine = d3
+    //   .lineRadial()
+    //   .radius((d) => rScale(d.value))
+    //   .angle((d, i) => i * angleSlice)
+    //   .curve(d3.curveLinearClosed);
 
     // Draw concentric circles
     const levels = 5; // Number of concentric circles
-    const levelFactor = radius / levels;
+    // const levelFactor = radius / levels;
     for (let i = 0; i <= levels; i++) {
       const rValue = (maxDataValue * i) / levels; // Calculate the value for each level
 
@@ -199,6 +199,7 @@ const RadarChart = ({ chartData, labels }) => {
         .text(rValue.toFixed(2)); // Show the value, formatted to 2 decimal places
     }
     parameters.forEach((param, i) => {
+      // if (!activeGroups[i]) return;
       const sliceAngle = (Math.PI * 2) / parameters.length;
       const angle = sliceAngle * i;
       const lineLength = radius; // Assuming 'radius' is the length of your axis lines
@@ -238,6 +239,9 @@ const RadarChart = ({ chartData, labels }) => {
 
     // Ensure consistent use of angle when plotting radar chart data
     radarChartData.forEach((data, i) => {
+      console.log(i, activeGroups[i]);
+      if (!activeGroups[i]) return;
+      console.log(data);
       radarGroup
         .append("path")
         .datum(
@@ -259,8 +263,8 @@ const RadarChart = ({ chartData, labels }) => {
             .curve(d3.curveLinearClosed)
         )
         .style("stroke-width", "2px")
-        .style("stroke", i === 0 ? "#1b9e77" : "#d95f02")
-        .style("fill", i === 0 ? "#1b9e77" : "#d95f02")
+        .style("stroke", i === 0 ? "#d95f02" : "#1b9e77")
+        .style("fill", i === 0 ? "#d95f02" : "#1b9e77")
         .style("fill-opacity", 0.1);
     });
 
@@ -279,6 +283,7 @@ const RadarChart = ({ chartData, labels }) => {
 
     // Draw invisible arcs for each axis
     parameters.forEach((param, i) => {
+      // if (!activeGroups[i]) return;
       radarGroup
         .append("path")
         .attr("d", arcGenerator(i))
@@ -301,7 +306,7 @@ const RadarChart = ({ chartData, labels }) => {
           tooltip.style("display", "none");
         });
     });
-  }, [chartData, dimensions]); // Redraw when chartData or dimensions change
+  }, [chartData, dimensions, activeGroups]); // Redraw when chartData or dimensions change
 
   return (
     <div

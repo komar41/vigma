@@ -72,7 +72,7 @@ const LineChart = ({ chartData }) => {
     });
   };
 
-  console.log(selectedKeysG1, "selectedKeysG1");
+  // console.log(selectedKeysG1, "selectedKeysG1");
   // console.log(selectedKeysG2, "selectedKeysG2");
 
   // Active groups

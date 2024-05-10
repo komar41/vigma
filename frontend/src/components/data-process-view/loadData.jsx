@@ -120,7 +120,7 @@ export const LoadData = (props) => {
   const [isFootingDisabled, setIsFootingDisabled] = useState(false);
   const [isCycleDisabled, setIsCycleDisabled] = useState(false);
   const [isSpreadDisabled, setIsSpreadDisabled] = useState(false);
-  const [spreadOption, setSpreadOption] = useState("Spread");
+  const [spreadOption, setSpreadOption] = useState("Default");
   const [isPanelDisabled, setIsPanelDisabled] = useState(false);
   const [isStpOptionDisabled, setIsStpOptionDisabled] = useState(true);
   const gaitCycleOptions = ["Left", "Right"]; // Assuming 'names' are used for multiple selects
@@ -313,7 +313,7 @@ export const LoadData = (props) => {
               <FormLabel
                 component="legend"
                 id="demo-row-radio-buttons-group-label"
-                style={{ marginBottom: "-5px" }} // Reduced bottom margin
+                style={{ marginBottom: "-5px" }}
               >
                 Plot option
               </FormLabel>
@@ -325,18 +325,25 @@ export const LoadData = (props) => {
                 onChange={handleRadioChange}
               >
                 <Grid container item spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <FormControlLabel
                       value="Spread"
                       control={<Radio />}
                       label="Spread"
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <FormControlLabel
                       value="All data"
                       control={<Radio />}
                       label="All data"
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <FormControlLabel
+                      value="Default"
+                      control={<Radio />}
+                      label="Default"
                     />
                   </Grid>
                 </Grid>
@@ -583,8 +590,8 @@ export const LoadData = (props) => {
         borderRadius: "10px",
         boxShadow: "0 0 10px rgba(0, 0, 0, 1)",
         border: "1px solid #bbb", // Adjust the border color and width as needed
-        marginTop: "3vh",
-        marginLeft: "1vh",
+        marginTop: "0.5vh",
+        marginLeft: "0.5vh",
       }}
     >
       <Grid container spacing={0}>
@@ -600,6 +607,7 @@ export const LoadData = (props) => {
             size="small"
           />
         </Grid>
+
         <Grid item xs={2} lg={2}>
           <Button
             style={{
@@ -624,9 +632,45 @@ export const LoadData = (props) => {
         <Grid
           item
           xs={12}
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.allowGroupExploration}
+                // onChange={handleCheckboxChange}
+                name="allowGroupExploration"
+                color="primary"
+                size="large" // Makes the checkbox larger
+              />
+            }
+            label="Dual group exploration"
+            style={{ display: "flex", justifyContent: "center", width: "100%" }}
+            labelPlacement="end"
+            componentsProps={{
+              typography: { style: { fontSize: "1.1rem" } }, // Increases the label text size
+            }}
+          />
+        </Grid>
+
+        <hr
+          style={{
+            width: "100%",
+            height: "2px", // Height adjusted to accommodate the pattern more visibly
+            backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='black' stroke-width='10' stroke-dasharray='15%2c 15%2c 1' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+            backgroundSize: "auto 20px", // Adjusts the size of the SVG to fit the height of the hr
+            backgroundRepeat: "repeat-x", // Ensures the pattern repeats across the width
+            border: "none",
+            marginTop: "-5px",
+          }}
+        />
+
+        <Grid
+          item
+          xs={12}
           sm={6}
           style={{
-            paddingTop: "2.5vh",
+            paddingTop: "10px",
             paddingRight: "1vh",
             marginLeft: "-1px",
           }}
@@ -646,7 +690,14 @@ export const LoadData = (props) => {
           </span>
         </Grid>
 
-        <Grid item xs={12} sm={6} style={{ paddingTop: "2.5vh" }}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          style={{
+            paddingTop: "10px",
+          }}
+        >
           <span className="p-float-label">
             <TreeSelect
               value={selectedNodeKeysGroup2}
@@ -804,7 +855,13 @@ export const LoadData = (props) => {
         </DialogActions>
       </Dialog>
 
-      <Grid container spacing={1} style={{ paddingTop: "10px" }}>
+      <Grid
+        container
+        spacing={1}
+        style={{
+          paddingTop: "10px",
+        }}
+      >
         <LimbSideOption />
 
         <GaitCycleOption />
@@ -822,7 +879,7 @@ export const LoadData = (props) => {
           }}
         >
           <Button
-            style={{ marginTop: "0vh" }}
+            // style={{ marginTop: "0vh" }}
             type="submit"
             variant="contained"
             size="large"

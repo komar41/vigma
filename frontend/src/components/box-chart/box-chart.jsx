@@ -154,6 +154,12 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
 
     // Draw box plots for df1 and df2
     ["df1", "df2"].forEach((df, i) => {
+      const activeCount = activeGroups.filter(Boolean).length;
+      let xPos = xScale(df);
+      if (activeCount === 1) {
+        // Center the box plot if only one is active
+        xPos = (adjustedWidth - xScale.bandwidth()) / 2;
+      }
       if (!activeGroups[i]) return;
       const { min, q1, median, q3, max } = stats[df];
 
@@ -161,12 +167,15 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
 
       // Box
       g.append("rect")
-        .attr("x", xScale(df))
+        .attr("x", xPos)
         .attr("y", yScale(q3))
         .attr("width", xScale.bandwidth())
         .attr("height", yScale(q1) - yScale(q3))
         .attr("stroke", "black")
         .attr("fill", color)
+        // round the corners of the box
+        .attr("rx", 2)
+        .attr("ry", 2)
         .on("mouseover", (event, d) => {
           tooltip
             .style("opacity", 1)
@@ -184,8 +193,8 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
 
       // Median line
       g.append("line")
-        .attr("x1", xScale(df))
-        .attr("x2", xScale(df) + xScale.bandwidth())
+        .attr("x1", xPos)
+        .attr("x2", xPos + xScale.bandwidth())
         .attr("y1", yScale(median))
         .attr("y2", yScale(median))
         .attr("stroke", "black");
@@ -198,8 +207,8 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
         ])
         .enter()
         .append("line")
-        .attr("x1", xScale(df) + xScale.bandwidth() / 2)
-        .attr("x2", xScale(df) + xScale.bandwidth() / 2)
+        .attr("x1", xPos + xScale.bandwidth() / 2)
+        .attr("x2", xPos + xScale.bandwidth() / 2)
         .attr("y1", (d) => yScale(d[0]))
         .attr("y2", (d) => yScale(d[1]))
         .attr("stroke", "black");
@@ -209,8 +218,8 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
         .data([min, max])
         .enter()
         .append("line")
-        .attr("x1", xScale(df))
-        .attr("x2", xScale(df) + xScale.bandwidth())
+        .attr("x1", xPos)
+        .attr("x2", xPos + xScale.bandwidth())
         .attr("y1", (d) => yScale(d))
         .attr("y2", (d) => yScale(d))
         .attr("stroke", "black");

@@ -312,7 +312,7 @@ const LineChart = ({ chartData }) => {
                 return y(d.u);
               })
           );
-      } else {
+      } else if (spreadOption == "All data") {
         // Add all lines
         Object.entries(group1AllData).forEach(([key, array]) => {
           const visibleLine = svg
@@ -455,7 +455,7 @@ const LineChart = ({ chartData }) => {
                 return y(d.u);
               })
           );
-      } else {
+      } else if (spreadOption == "All data") {
         // Add all lines
         Object.entries(group2AllData).forEach(([key, array]) => {
           const visibleLine = svg
@@ -514,7 +514,7 @@ const LineChart = ({ chartData }) => {
       }
     }
 
-    if (spreadOption == "Spread") {
+    if (spreadOption == "Spread" || spreadOption == "Default") {
       // Circles for highlighting points
       const circle1 = svg
         .append("circle")

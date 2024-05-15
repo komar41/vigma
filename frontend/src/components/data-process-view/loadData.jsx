@@ -313,7 +313,7 @@ export const LoadData = (props) => {
               <FormLabel
                 component="legend"
                 id="demo-row-radio-buttons-group-label"
-                style={{ marginBottom: "-5px" }}
+                style={{ marginBottom: "-10px" }}
               >
                 Plot option
               </FormLabel>
@@ -879,10 +879,10 @@ export const LoadData = (props) => {
           }}
         >
           <Button
-            // style={{ marginTop: "0vh" }}
+            style={{ marginTop: "-5px" }}
             type="submit"
             variant="contained"
-            size="large"
+            // size="small"
             onClick={(e) => handleSubmitForm(e)}
           >
             Submit

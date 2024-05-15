@@ -64,10 +64,7 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
 
     const yScale = d3
       .scaleLinear()
-      .domain([
-        0.9 * d3.min([stats.df1.min, stats.df2.min]),
-        1.1 * d3.max([stats.df1.max, stats.df2.max]),
-      ])
+      .domain([0, 1.1 * d3.max([stats.df1.max, stats.df2.max])])
       .range([adjustedHeight, 0]);
 
     const xScale = d3
@@ -94,37 +91,85 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .style("z-index", "10");
 
     // Y-axis
-    const yAxis = g
+    const yAxisLeft = g
       .append("g")
       .style("font-size", "12px")
       .style("font-family", "Roboto, sans-serif")
-      .call(d3.axisLeft(yScale).ticks(5));
+      .call(d3.axisLeft(yScale).ticks(3));
 
-    const yAxisWidth = yAxis.node().getBBox().width;
+    const yAxisRight = g
+      .append("g")
+      .style("font-size", "0px")
+      .style("font-family", "Roboto, sans-serif")
+      .attr("transform", `translate(${adjustedWidth}, 0)`)
+      .call(d3.axisRight(yScale).ticks(3));
+
+    function roundHalf(num) {
+      return Math.round(num * 2) / 2;
+    }
+
+    // custom ticks from 0 to max value with interval of 0.5
+    // yAxisLeft.call(
+    //   d3
+    //     .axisLeft(yScale)
+    //     .tickValues(d3.range(0, 1.1 * d3.max([stats.df1.max, stats.df2.max])))
+    //     .tickFormat(d3.format(".1f"))
+    //     .ticks(5)
+    // );
+
+    const yAxisWidth = yAxisLeft.node().getBBox().width;
 
     // Calculate half-width for symmetrical brush
-    const brushHalfWidth = 10; // Adjust this value based on desired brush width
+    const brushHalfWidth = 5; // Adjust this value based on desired brush width
 
     // Brush setup
-    const brush = d3
+    const brushLeft = d3
       .brushY()
       .extent([
         [-brushHalfWidth, 0],
         [brushHalfWidth, adjustedHeight],
       ])
-      .on("end", brushed);
+      .on("end", brushedLeft);
 
-    // Add brush to the yAxis
-    yAxis.call(brush);
+    const brushRight = d3
+      .brushY()
+      .extent([
+        [-brushHalfWidth, 0],
+        [brushHalfWidth, adjustedHeight],
+      ])
+      .on("end", brushedRight);
+
+    yAxisLeft
+      .call(brushLeft)
+      .selectAll(".selection")
+      .style("fill", "#fc8d62") // Change the color of the selection area
+      .style("stroke", "#fc8d62"); // Change the color of the border
+
+    yAxisRight
+      .call(brushRight)
+      .selectAll(".selection")
+      .style("fill", "#66c2a5") // Change the color of the selection area
+      .style("stroke", "#66c2a5"); // Change the color of the border
 
     // Function to handle brush events
-    function brushed(event) {
+    function brushedLeft(event) {
       if (!event.selection) {
-        console.log("No selection");
+        console.log("No selection (left");
         return;
       }
       const [y0, y1] = event.selection.map((d) => yScale.invert(d));
-      console.log(`Brushed range: ${y0.toFixed(2)} to ${y1.toFixed(2)}`);
+      console.log(`Brushed range (left): ${y0.toFixed(2)} to ${y1.toFixed(2)}`);
+    }
+
+    function brushedRight(event) {
+      if (!event.selection) {
+        console.log("No selection (right)");
+        return;
+      }
+      const [y0, y1] = event.selection.map((d) => yScale.invert(d));
+      console.log(
+        `Brushed range (right): ${y0.toFixed(2)} to ${y1.toFixed(2)}`
+      );
     }
 
     // X-axis

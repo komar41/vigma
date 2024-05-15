@@ -104,19 +104,6 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .attr("transform", `translate(${adjustedWidth}, 0)`)
       .call(d3.axisRight(yScale).ticks(3));
 
-    function roundHalf(num) {
-      return Math.round(num * 2) / 2;
-    }
-
-    // custom ticks from 0 to max value with interval of 0.5
-    // yAxisLeft.call(
-    //   d3
-    //     .axisLeft(yScale)
-    //     .tickValues(d3.range(0, 1.1 * d3.max([stats.df1.max, stats.df2.max])))
-    //     .tickFormat(d3.format(".1f"))
-    //     .ticks(5)
-    // );
-
     const yAxisWidth = yAxisLeft.node().getBBox().width;
 
     // Calculate half-width for symmetrical brush
@@ -150,6 +137,14 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .selectAll(".selection")
       .style("fill", "#66c2a5") // Change the color of the selection area
       .style("stroke", "#66c2a5"); // Change the color of the border
+
+    // Calculate pixel positions for y-values 0 and 0.5
+    const y0 = yScale(0);
+    const y0_5 = yScale(0.5);
+    brushLeft.move(yAxisLeft, [y0_5, y0]);
+
+    const y1 = yScale(1);
+    brushRight.move(yAxisRight, [y1, y0_5]);
 
     // Function to handle brush events
     function brushedLeft(event) {

@@ -13,7 +13,13 @@ const LineChart = ({ chartData }) => {
   const group1Data = chartData.group1Data;
   const group2Data = chartData.group2Data;
   const group1AllData = chartData.group1AllData;
+  const group1AllDataSample = Object.fromEntries(
+    Object.entries(group1AllData).slice(0, 4)
+  );
   const group2AllData = chartData.group2AllData;
+  const group2AllDataSample = Object.fromEntries(
+    Object.entries(group2AllData).slice(0, 4)
+  );
   const group1Label = chartData.group1Label;
   const group2Label = chartData.group2Label;
   const group1Spread = chartData.group1Spread;
@@ -312,6 +318,26 @@ const LineChart = ({ chartData }) => {
                 return y(d.u);
               })
           );
+
+        // add group1AllDataSample
+        Object.entries(group1AllDataSample).forEach(([key, array]) => {
+          const visibleLine = svg
+            .append("path")
+            .datum(array)
+            .attr("fill", "none")
+            .attr("stroke", "#fc8d62")
+            .attr("stroke-dasharray", "10")
+            .attr("opacity", 1)
+            // .attr("class", "line group1")
+            .attr(
+              "d",
+              d3
+                .line()
+                .x((d) => x(d.time))
+                .y((d) => y(d.col))
+            );
+          visibleLine.attr("class", "line-highlight");
+        });
       } else if (spreadOption == "All data") {
         // Add all lines
         Object.entries(group1AllData).forEach(([key, array]) => {

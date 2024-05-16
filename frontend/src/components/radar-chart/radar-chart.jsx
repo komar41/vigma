@@ -99,7 +99,33 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
       },
     ];
 
-    // console.log("updated Log", updatedSampleData);
+    // mock data
+    const updatedSampleData2 = [
+      {
+        label: labels["label1"],
+        values: {
+          timeLswing: Math.random() * (meansDf1["timeLswing"] - 0.5) + 0.5,
+          timeRswing: Math.random() * (meansDf1["timeRswing"] - 0.5) + 0.5,
+          LstepLength: Math.random() * (meansDf1["LstepLength"] - 0.1) + 0.1,
+          RstepLength: Math.random() * (meansDf1["RstepLength"] - 0.1) + 0.1,
+          GaitSpeed: Math.random() * (meansDf1["GaitSpeed"] - 0.1) + 0.1,
+          timeLgait: Math.random() * (meansDf1["timeLgait"] - 0.5) + 0.5,
+          timeRgait: Math.random() * (meansDf1["timeRgait"] - 0.5) + 0.5,
+        },
+      },
+      {
+        label: labels["label2"],
+        values: {
+          timeLswing: Math.random() * (meansDf2["timeLswing"] - 0.5) + 0.5,
+          timeRswing: Math.random() * (meansDf2["timeRswing"] - 0.5) + 0.5,
+          LstepLength: Math.random() * (meansDf2["LstepLength"] - 0.1) + 0.1,
+          RstepLength: Math.random() * (meansDf2["RstepLength"] - 0.1) + 0.1,
+          GaitSpeed: Math.random() * (meansDf2["GaitSpeed"] - 0.1) + 0.1,
+          timeLgait: Math.random() * (meansDf2["timeLgait"] - 0.5) + 0.5,
+          timeRgait: Math.random() * (meansDf2["timeRgait"] - 0.5) + 0.5,
+        },
+      },
+    ];
 
     const parameters = [
       "timeLswing",
@@ -131,6 +157,14 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
 
     // Convert the sample data to a format suitable for the radarLine function
     const radarChartData = updatedSampleData.map((dataSet) => ({
+      label: dataSet.label,
+      values: parameters.map((param) => ({
+        axis: param,
+        value: dataSet.values[param],
+      })),
+    }));
+
+    const radarChartData2 = updatedSampleData2.map((dataSet) => ({
       label: dataSet.label,
       values: parameters.map((param) => ({
         axis: param,
@@ -262,10 +296,66 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
             .y((d) => d.y)
             .curve(d3.curveLinearClosed)
         )
-        .style("stroke-width", "2px")
+        // .style("stroke-width", "2px")
+        .style("stroke-opacity", 0.9)
         .style("stroke", i === 0 ? "#d95f02" : "#1b9e77")
         .style("fill", i === 0 ? "#d95f02" : "#1b9e77")
         .style("fill-opacity", 0.1);
+      // dashed line
+      // add circles
+    });
+
+    radarChartData2.forEach((data, i) => {
+      console.log(i, activeGroups[i]);
+      if (!activeGroups[i]) return;
+      console.log(data);
+      radarGroup
+        .append("path")
+        .datum(
+          data.values.map((v, index) => {
+            return {
+              // Convert each value to the correct position on the chart
+              x: rScale(v.value) * Math.cos(angleSlice * index), // Adjust for starting angle
+              y: rScale(v.value) * Math.sin(angleSlice * index),
+            };
+          })
+        )
+        // Convert the calculated points to a path string
+        .attr(
+          "d",
+          d3
+            .line()
+            .x((d) => d.x)
+            .y((d) => d.y)
+            .curve(d3.curveLinearClosed)
+        )
+        .style("stroke-width", "2px")
+        .style("stroke", i === 0 ? "#d95f02" : "#1b9e77")
+        // stroke opacity
+        .style("stroke-opacity", 1)
+        .style("fill", i === 0 ? "#d95f02" : "#1b9e77")
+        .style("fill-opacity", 0)
+        // dashed line
+        .style("stroke-dasharray", "10,10");
+      // add circles
+
+      // Then, append circles for each data point
+      radarGroup
+        .selectAll(null) // This null is important as it ensures that new elements are created for each data point
+        .data(
+          data.values.map((v, index) => ({
+            x: rScale(v.value) * Math.cos(angleSlice * index),
+            y: rScale(v.value) * Math.sin(angleSlice * index),
+            groupColor: i === 0 ? "#d95f02" : "#1b9e77",
+          }))
+        )
+        .enter()
+        .append("circle")
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y)
+        .attr("r", 5) // Radius of the circles
+        .style("fill", (d) => d.groupColor)
+        .style("fill-opacity", 0.9);
     });
 
     // Adjust the arc generator setup
@@ -293,14 +383,15 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
           tooltip
             .style("display", "inline")
             .html(
-              `Parameter:  ${param} <br> ${labels["label1"]}: ${meansDf1[
-                param
-              ].toFixed(2)}<br>${labels["label2"]}: ${meansDf2[param].toFixed(
-                2
-              )}`
+              `Parameter:  ${dictStpParam[param]} <br> ${
+                labels["label1"]
+              }: ${meansDf1[param].toFixed(2)}<br>${
+                labels["label2"]
+              }: ${meansDf2[param].toFixed(2)}`
             )
-            .style("left", event.pageX + 10 + "px")
-            .style("top", event.pageY + 10 + "px");
+            .style("left", event.pageX + 8 + "px")
+            .style("top", event.pageY + 8 + "px")
+            .style("font-size", "12px");
         })
         .on("mouseout", function () {
           tooltip.style("display", "none");

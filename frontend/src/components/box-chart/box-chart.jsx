@@ -138,13 +138,13 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .style("fill", "#66c2a5") // Change the color of the selection area
       .style("stroke", "#66c2a5"); // Change the color of the border
 
-    // Calculate pixel positions for y-values 0 and 0.5
-    const y0 = yScale(0);
-    const y0_5 = yScale(0.5);
-    brushLeft.move(yAxisLeft, [y0_5, y0]);
+    // Move the brushes to the initial positions. Should be the global filter values
+    // const y0 = yScale(0);
+    // const y0_5 = yScale(0.5);
+    // brushLeft.move(yAxisLeft, [y0_5, y0]);
 
-    const y1 = yScale(1);
-    brushRight.move(yAxisRight, [y1, y0_5]);
+    // const y1 = yScale(1);
+    // brushRight.move(yAxisRight, [y1, y0_5]);
 
     // Function to handle brush events
     function brushedLeft(event) {

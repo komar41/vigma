@@ -43,4 +43,5 @@ yarn-error.log*
 frontend/misc
 
 notebooks/envs
+notebooks/data
 notebooks/__pycache__

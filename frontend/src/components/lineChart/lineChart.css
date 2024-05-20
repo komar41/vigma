@@ -26,7 +26,7 @@
 
 .line-highlight {
   stroke: #d95f02; /* Or any other color that stands out */
-  stroke-width: 3; /* Make it thicker when highlighted */
+  stroke-width: 2; /* Make it thicker when highlighted */
   opacity: 1; /* Make it fully opaque to stand out */
 }
 
@@ -38,6 +38,6 @@
 
 .line-highlight-2 {
   stroke: #1b9e77; /* Or any other color that stands out */
-  stroke-width: 3; /* Make it thicker when highlighted */
+  stroke-width: 2; /* Make it thicker when highlighted */
   opacity: 1; /* Make it fully opaque to stand out */
 }

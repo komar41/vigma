@@ -319,7 +319,7 @@ const LineChart = ({ chartData }) => {
               })
           );
 
-        // add group1AllDataSample
+        // add group1AllDataSample if Global filter exists. Only if spread option is Spread or Default
         Object.entries(group1AllDataSample).forEach(([key, array]) => {
           const visibleLine = svg
             .append("path")
@@ -481,6 +481,26 @@ const LineChart = ({ chartData }) => {
                 return y(d.u);
               })
           );
+
+        // add group2AllDataSample if Global filter. Only if spread option is Spread or Default
+        Object.entries(group2AllDataSample).forEach(([key, array]) => {
+          const visibleLine = svg
+            .append("path")
+            .datum(array)
+            .attr("fill", "none")
+            .attr("stroke", "#66c2a5")
+            .attr("stroke-dasharray", "10")
+            .attr("opacity", 1)
+            // .attr("class", "line group1")
+            .attr(
+              "d",
+              d3
+                .line()
+                .x((d) => x(d.time))
+                .y((d) => y(d.col))
+            );
+          visibleLine.attr("class", "line-highlight-2");
+        });
       } else if (spreadOption == "All data") {
         // Add all lines
         Object.entries(group2AllData).forEach(([key, array]) => {

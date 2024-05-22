@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
+import { GlobalContext } from "../globalHighlight/GlobalContext";
 
 const dictStpParam = {
   RstepLength: "Step Length (R)",
@@ -50,6 +51,9 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
 
+  const { globalArray } = useContext(GlobalContext);
+  const { globalArray2 } = useContext(GlobalContext);
+
   // Add this inside your RadarChart component, before the useEffect hooks
   const tooltip = d3
     .select("body")
@@ -87,6 +91,16 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
     const meansDf1 = calculateMeans(chartData.df1);
     const meansDf2 = calculateMeans(chartData.df2);
 
+    const highlightData1 = chartData.df1.filter((item) => {
+      return globalArray.includes(item.sid + "_" + item.trial);
+    });
+    const highlightData2 = chartData.df2.filter((item) => {
+      return globalArray2.includes(item.sid + "_" + item.trial);
+    });
+
+    const meansDf1H = calculateMeans(highlightData1);
+    const meansDf2H = calculateMeans(highlightData2);
+
     // Map the means back into a structure similar to sampleData
     const updatedSampleData = [
       {
@@ -99,31 +113,14 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
       },
     ];
 
-    // mock data
     const updatedSampleData2 = [
       {
         label: labels["label1"],
-        values: {
-          timeLswing: Math.random() * (meansDf1["timeLswing"] - 0.5) + 0.5,
-          timeRswing: Math.random() * (meansDf1["timeRswing"] - 0.5) + 0.5,
-          LstepLength: Math.random() * (meansDf1["LstepLength"] - 0.1) + 0.1,
-          RstepLength: Math.random() * (meansDf1["RstepLength"] - 0.1) + 0.1,
-          GaitSpeed: Math.random() * (meansDf1["GaitSpeed"] - 0.1) + 0.1,
-          timeLgait: Math.random() * (meansDf1["timeLgait"] - 0.5) + 0.5,
-          timeRgait: Math.random() * (meansDf1["timeRgait"] - 0.5) + 0.5,
-        },
+        values: meansDf1H,
       },
       {
         label: labels["label2"],
-        values: {
-          timeLswing: Math.random() * (meansDf2["timeLswing"] - 0.5) + 0.5,
-          timeRswing: Math.random() * (meansDf2["timeRswing"] - 0.5) + 0.5,
-          LstepLength: Math.random() * (meansDf2["LstepLength"] - 0.1) + 0.1,
-          RstepLength: Math.random() * (meansDf2["RstepLength"] - 0.1) + 0.1,
-          GaitSpeed: Math.random() * (meansDf2["GaitSpeed"] - 0.1) + 0.1,
-          timeLgait: Math.random() * (meansDf2["timeLgait"] - 0.5) + 0.5,
-          timeRgait: Math.random() * (meansDf2["timeRgait"] - 0.5) + 0.5,
-        },
+        values: meansDf2H,
       },
     ];
 
@@ -177,8 +174,22 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
       dataSet.values.map((valueObject) => valueObject.value)
     );
 
+    let allValues2 = radarChartData2.flatMap((dataSet) =>
+      dataSet.values.map((valueObject) => valueObject.value)
+    );
+
+    // if there are nan values in the data, replace them with 0 for allValues2
+    allValues2 = allValues2.map((value) => {
+      if (isNaN(value)) {
+        return 0;
+      }
+      return value;
+    });
+
     // Find the maximum value
-    const maxDataValue = Math.max(...allValues);
+    let maxDataValue = Math.max(...allValues);
+    let maxDataValue2 = Math.max(...allValues2);
+    maxDataValue = Math.max(maxDataValue, maxDataValue2);
 
     // Scale for the radius
     const rScale = d3
@@ -273,9 +284,9 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
 
     // Ensure consistent use of angle when plotting radar chart data
     radarChartData.forEach((data, i) => {
-      console.log(i, activeGroups[i]);
+      // console.log(i, activeGroups[i]);
       if (!activeGroups[i]) return;
-      console.log(data);
+      // console.log(data);
       radarGroup
         .append("path")
         .datum(
@@ -306,9 +317,9 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
     });
 
     radarChartData2.forEach((data, i) => {
-      console.log(i, activeGroups[i]);
+      // console.log(i, activeGroups[i]);
       if (!activeGroups[i]) return;
-      console.log(data);
+      // console.log(data);
       radarGroup
         .append("path")
         .datum(
@@ -355,7 +366,8 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
         .attr("cy", (d) => d.y)
         .attr("r", 5) // Radius of the circles
         .style("fill", (d) => d.groupColor)
-        .style("fill-opacity", 0.9);
+        // .style("stroke", "black")
+        .style("fill-opacity", 0.7);
     });
 
     // Adjust the arc generator setup
@@ -397,7 +409,7 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
           tooltip.style("display", "none");
         });
     });
-  }, [chartData, dimensions, activeGroups]); // Redraw when chartData or dimensions change
+  }, [chartData, dimensions, activeGroups, globalArray, globalArray2]); // Redraw when chartData or dimensions change
 
   return (
     <div

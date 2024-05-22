@@ -52,7 +52,6 @@ const dictStpParam = {
 
 export const LoadData = (props) => {
   const [personName, setPersonName] = useState([]); // State for selected names
-  // console.log(personName);
 
   const handleStpParam = (event) => {
     const {
@@ -86,6 +85,7 @@ export const LoadData = (props) => {
     // isGroup2Checked: false,
     panelOptions: "",
     spreadOption: "Spread",
+    groupExploration: false,
     // Any other fields you might have
   });
 
@@ -133,6 +133,15 @@ export const LoadData = (props) => {
 
   const [openDialog, setOpenDialog] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
+
+  // one group change
+  const [allowGroupExploration, setAllowGroupExploration] = useState(false);
+  const handleCheckboxChange = (event) => {
+    setAllowGroupExploration(event.target.checked);
+  };
+  // one group change
+
+  // console.log(allowGroupExploration, "allowGroupExploration");
 
   function PlotOption() {
     let content;
@@ -201,7 +210,7 @@ export const LoadData = (props) => {
                 value={formData.selectedFooting2}
                 onChange={handleChange}
                 // MenuProps={MenuProps}
-                disabled={isFootingDisabled}
+                disabled={isFootingDisabled || !allowGroupExploration}
               >
                 {dynamicFootingOptions.map((option) => (
                   <MenuItem key={option} value={option}>
@@ -257,7 +266,7 @@ export const LoadData = (props) => {
                 labelId="group2-gait-cycle-label"
                 id="group2-gait-cycle-select"
                 value={formData.selectedCycle2}
-                disabled={isCycleDisabled}
+                disabled={isCycleDisabled || !allowGroupExploration}
                 onChange={handleChange}
                 // MenuProps={MenuProps}
               >
@@ -284,30 +293,6 @@ export const LoadData = (props) => {
     if (!isSpreadDisabled) {
       content = (
         <>
-          {/* <Grid item xs={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.isGroup1Checked}
-                  onChange={handleCheckboxChange}
-                  name="isGroup1Checked"
-                />
-              }
-              label="Group 1 Spread"
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.isGroup2Checked}
-                  onChange={handleCheckboxChange}
-                  name="isGroup2Checked"
-                />
-              }
-              label="Group 2 Spread"
-            />
-          </Grid> */}
           <Grid item xs={12}>
             <FormControl component="fieldset" fullWidth>
               <FormLabel
@@ -366,17 +351,19 @@ export const LoadData = (props) => {
           const response = await axios.post("http://localhost:5000/send-data", {
             fileLocation: formData.fileLocation,
           });
+          console.log(response);
           NodeService.updateData(response.data);
           // Retrieve the updated tree structure
           NodeService.getTreeNodes().then((data) => setNodesGroup1(data));
           NodeService.getTreeNodes().then((data) => setNodesGroup2(data));
         } catch (error) {
           console.error("Error sending data to backend:", error);
+          console.log("Error sending data to backend:", error);
         }
       }
     };
     fetchFolders();
-  }, [formData.fileLocation]);
+  }, [formData.fileLocation, allowGroupExploration]);
 
   const handleChange = (event) => {
     const { name, value, checked, type } = event.target;
@@ -469,30 +456,8 @@ export const LoadData = (props) => {
         return;
       }
 
-      // Checking if Group 1 files are selected
-      if (
-        !selectedNodeKeysGroup2 ||
-        Object.keys(selectedNodeKeysGroup2).length === 0
-      ) {
-        setErrorMessage("Group 2 files are not selected");
-        setOpenDialog(true);
-        return;
-      }
-
-      if (!formData.selectedColumn) {
-        setErrorMessage("selectedColumn is not selected");
-        setOpenDialog(true);
-        return;
-      }
-
       if (!formData.group1Label) {
         setErrorMessage("Group 1 label is not entered");
-        setOpenDialog(true);
-        return;
-      }
-
-      if (!formData.group2Label) {
-        setErrorMessage("Group 2 label is not entered");
         setOpenDialog(true);
         return;
       }
@@ -503,20 +468,44 @@ export const LoadData = (props) => {
         return;
       }
 
-      if (!isFootingDisabled & !formData.selectedFooting2) {
-        setErrorMessage("Group 2 footing is not selected");
-        setOpenDialog(true);
-        return;
-      }
-
       if (!isCycleDisabled & !formData.selectedCycle1) {
         setErrorMessage("Group 1 gait cycle is not selected");
         setOpenDialog(true);
         return;
       }
 
-      if (!isCycleDisabled & !formData.selectedCycle2) {
-        setErrorMessage("Group 2 gait cycle is not selected");
+      if (allowGroupExploration) {
+        // Checking if Group 2 files are selected
+        if (
+          !selectedNodeKeysGroup2 ||
+          Object.keys(selectedNodeKeysGroup2).length === 0
+        ) {
+          setErrorMessage("Group 2 files are not selected");
+          setOpenDialog(true);
+          return;
+        }
+
+        if (!formData.group2Label) {
+          setErrorMessage("Group 2 label is not entered");
+          setOpenDialog(true);
+          return;
+        }
+
+        if (!isFootingDisabled & !formData.selectedFooting2) {
+          setErrorMessage("Group 2 footing is not selected");
+          setOpenDialog(true);
+          return;
+        }
+
+        if (!isCycleDisabled & !formData.selectedCycle2) {
+          setErrorMessage("Group 2 gait cycle is not selected");
+          setOpenDialog(true);
+          return;
+        }
+      }
+
+      if (!formData.selectedColumn) {
+        setErrorMessage("selectedColumn is not selected");
         setOpenDialog(true);
         return;
       }
@@ -556,15 +545,15 @@ export const LoadData = (props) => {
         }
       };
 
-      const newForm = {
+      let newForm = {
         ...formData, // Spread the existing formData to copy its properties
         // Apply conversions
         selectedFooting1: convertFootingValue(formData.selectedFooting1),
-        selectedFooting2: convertFootingValue(formData.selectedFooting2),
         selectedCycle1: convertCycleValue(formData.selectedCycle1),
-        selectedCycle2: convertCycleValue(formData.selectedCycle2),
-        // Ensure getCheckedFileTitles function is defined and accessible here
         group1SelectedFiles: getCheckedFileTitles(selectedNodeKeysGroup1),
+
+        selectedFooting2: convertFootingValue(formData.selectedFooting2),
+        selectedCycle2: convertCycleValue(formData.selectedCycle2),
         group2SelectedFiles: getCheckedFileTitles(selectedNodeKeysGroup2),
 
         fileLocation: formData.fileLocation.replace(/\\/g, "/"),
@@ -572,7 +561,17 @@ export const LoadData = (props) => {
 
         stpparams: personName,
         spreadOption: spreadOption,
+        groupExploration: allowGroupExploration,
       };
+
+      // if (allowGroupExploration) {
+      //   newForm = {
+      //     ...newForm,
+      //     selectedFooting2: convertFootingValue(formData.selectedFooting2),
+      //     selectedCycle2: convertCycleValue(formData.selectedCycle2),
+      //     group2SelectedFiles: getCheckedFileTitles(selectedNodeKeysGroup2),
+      //   };
+      // }
 
       // Send the data (you can pass this to another component or perform another action)
       await props.handleFormSubmitParent(newForm);
@@ -619,12 +618,13 @@ export const LoadData = (props) => {
             variant="contained"
             size="small"
             fullWidth
-            onClick={() =>
+            onClick={() => {
+              console.log("temp1FileLocation", formData.temp1FileLocation);
               setFormData({
                 ...formData,
                 fileLocation: formData.temp1FileLocation,
-              })
-            }
+              });
+            }}
           >
             Set
           </Button>
@@ -637,8 +637,8 @@ export const LoadData = (props) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allowGroupExploration}
-                // onChange={handleCheckboxChange}
+                checked={allowGroupExploration}
+                onChange={handleCheckboxChange}
                 name="allowGroupExploration"
                 color="primary"
                 size="large" // Makes the checkbox larger
@@ -708,6 +708,7 @@ export const LoadData = (props) => {
               selectionMode="checkbox"
               display="chip"
               placeholder="Group 2 Items"
+              disabled={!allowGroupExploration}
             ></TreeSelect>
             <label htmlFor="treeselect">Group 2 files</label>
           </span>
@@ -734,6 +735,7 @@ export const LoadData = (props) => {
             fullWidth
             value={formData.group2Label}
             onChange={handleChange}
+            disabled={!allowGroupExploration}
           />
         </Grid>
 

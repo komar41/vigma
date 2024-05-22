@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { LoadData } from "./loadData";
 import { Grid } from "@mui/material";
-import { Paper } from "@mui/material";
 import axios from "axios";
 import LineChart from "../lineChart/lineChart";
 import { useTheme } from "@mui/material/styles";
@@ -22,8 +21,6 @@ export const DataProcessView = (props) => {
       group2Data: [],
       group1AllData: [],
       group2AllData: [],
-      // group1Spread: false,
-      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
@@ -31,6 +28,7 @@ export const DataProcessView = (props) => {
       selectedCycle1: "",
       selectedCycle2: "",
       spreadOption: "",
+      groupExploration: false,
     }, // Chart 2
     {
       active: false,
@@ -39,8 +37,6 @@ export const DataProcessView = (props) => {
       group2Data: [],
       group1AllData: [],
       group2AllData: [],
-      // group1Spread: false,
-      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
@@ -48,6 +44,7 @@ export const DataProcessView = (props) => {
       selectedCycle1: "",
       selectedCycle2: "",
       spreadOption: "",
+      groupExploration: false,
     }, // Chart 1
     {
       active: false,
@@ -56,8 +53,6 @@ export const DataProcessView = (props) => {
       group2Data: [],
       group1AllData: [],
       group2AllData: [],
-      // group1Spread: false,
-      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
@@ -65,6 +60,7 @@ export const DataProcessView = (props) => {
       selectedCycle1: "",
       selectedCycle2: "",
       spreadOption: "",
+      groupExploration: false,
     }, // Chart 3
     {
       active: false,
@@ -73,8 +69,6 @@ export const DataProcessView = (props) => {
       group2Data: [],
       group1AllData: [],
       group2AllData: [],
-      // group1Spread: false,
-      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
@@ -82,6 +76,7 @@ export const DataProcessView = (props) => {
       selectedCycle1: "",
       selectedCycle2: "",
       spreadOption: "",
+      groupExploration: false,
     }, // Chart 4
     {
       active: false,
@@ -90,8 +85,6 @@ export const DataProcessView = (props) => {
       group2Data: [],
       group1AllData: [],
       group2AllData: [],
-      // group1Spread: false,
-      // group2Spread: false,
       group1Label: "",
       group2Label: "",
       selectedFooting1: "",
@@ -99,12 +92,10 @@ export const DataProcessView = (props) => {
       selectedCycle1: "",
       selectedCycle2: "",
       spreadOption: "",
+      groupExploration: false,
     }, // Chart 5
     // Add more objects as neede for additional charts
   ]);
-
-  // selectedColumn = dict[selectedColumn];
-  // console.log(selectedColumn)
 
   const [boxChartData, setBoxChartData] = useState({});
   const [boxChartParams, setBoxChartParams] = useState({});
@@ -138,7 +129,7 @@ export const DataProcessView = (props) => {
         "http://localhost:5000/process_form_data",
         formData
       );
-      console.log(formData.spreadOption);
+      // console.log(formData.spreadOption);
       const group1Data = response.data.df1;
       const group2Data = response.data.df2;
 
@@ -149,6 +140,12 @@ export const DataProcessView = (props) => {
         console.error("Error while processing form data:", response);
         return;
       }
+
+      // if (group2Data === undefined) {
+      //   setGroupExploration(false);
+      // } else {
+      //   setGroupExploration(true);
+      // }
 
       if (formData.selectedColumn === "STP") {
         setBoxChartData({
@@ -183,6 +180,7 @@ export const DataProcessView = (props) => {
           newChartData.group1AllData = group1AllData;
           newChartData.group2AllData = group2AllData;
           newChartData.spreadOption = formData.spreadOption;
+          newChartData.groupExploration = formData.groupExploration;
 
           newData[chartIndex] = newChartData; // Update the array with the modified chart data
 
@@ -303,12 +301,13 @@ export const DataProcessView = (props) => {
               flexGrow: 0, // Prevent stretching
             }}
           >
-            <BoxChart
+            {/* <BoxChart
               chartData={boxChartData}
               attribute={attribute}
               labels={boxChartLabels}
               activeGroups={activeGroupsBox}
-            ></BoxChart>
+              groupExploration = {groupExploration}
+            ></BoxChart> */}
           </Grid>
         ))}
       </Grid>
@@ -323,12 +322,13 @@ export const DataProcessView = (props) => {
           ></BoxTitle>
         </Grid>
         <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
-          <RadarChart
+          {/* <RadarChart
             chartData={boxChartData}
             labels={boxChartLabels}
             style={{ boxSizing: "border-box" }}
             activeGroups={activeGroupsRadar}
-          ></RadarChart>
+            groupExploration = {groupExploration}
+          ></RadarChart> */}
         </Grid>
       </Grid>
     </Grid>

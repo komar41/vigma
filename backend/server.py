@@ -5,7 +5,6 @@ import numpy as np
 import os
 from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
-import pandas as pd
 import json
 
 app = Flask(__name__)
@@ -245,14 +244,12 @@ def get_col(col, limb):
 # stroke_patients/011918ds_20,stroke_patients/012518cm_23,stroke_patients/081017bf_20
 # healthy_controls/081517ap_8,healthy_controls/090717jg_42,healthy_controls/101217al_29
 
-@app.route('/process_form_data', methods=['POST']) # Add , 'GET' to check
+@app.route('/process_form_data', methods=['POST'])
 def process_form_data():
-    if request.method == 'POST':
-        # print(request)
-        
+    if request.method == 'POST':        
         form_data = request.json
-        # print("form data",form_data)
         fileLocation =  form_data.get('fileLocation')     #form_data.get('fileLocation') # C:/Users/qshah/Documents/Spring 2024/eMoGis/data-processed
+        if(fileLocation[-1] != '/'): fileLocation += '/'
         group1Files = form_data.get('group1SelectedFiles') # [stroke_patients/011918ds_20,stroke_patients/012518cm_23,stroke_patients/081017bf_20]
         group2Files = form_data.get('group2SelectedFiles') # [healthy_controls/081517ap_8,healthy_controls/090717jg_42,healthy_controls/101217al_29]
         col = form_data.get('selectedColumn') # AP/ML/VT/hipx/trunk/foot/shank/thigh/STP
@@ -264,12 +261,13 @@ def process_form_data():
         group1Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group1Files]
         group2Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group2Files]
 
+        print(group2Files, group1Files)
         df_1, df_2, df_1_mnmx, df_2_mnmx = None, None, None, None
         dict_list_df1, dict_list_df2 = None, None
 
         if(col=='STP'):
             df_1 = get_stp_params(group1Files_loc)
-            df_2 = get_stp_params(group2Files_loc)
+            if group2Files: df_2 = get_stp_params(group2Files_loc)
 
         else:
             col_1 = get_col(col, footing1)
@@ -281,10 +279,14 @@ def process_form_data():
             group2FilesLoc = [file + '_%s.csv'%type for file in group2Files_loc]
 
             dict_df_1, df_1 = process_data(fileLocation, group1FilesLoc, col_1, footing1, cycle1)
-            dict_df_2, df_2 = process_data(fileLocation, group2FilesLoc, col_2, footing2, cycle2)
-
             df_1.columns = ['time'] + [col[-1] for col in df_1.columns if col != 'time']
-            df_2.columns = ['time'] + [col[-1] for col in df_2.columns if col != 'time']
+            dict_list_df1 = {key: df.to_dict(orient='records') for key, df in dict_df_1.items()}
+
+            if(group2Files):
+                dict_df_2, df_2 = process_data(fileLocation, group2FilesLoc, col_2, footing2, cycle2)
+                df_2.columns = ['time'] + [col[-1] for col in df_2.columns if col != 'time']
+                dict_list_df2 = {key: df.to_dict(orient='records') for key, df in dict_df_2.items()}
+
 
             # Add Local, global minima and maxima to the charts
             # l_minima_1 = argrelextrema(df_1['m'].values, np.less)[0].tolist()
@@ -302,10 +304,20 @@ def process_form_data():
 
             # Option to save normalized CSV files in frontend
 
-            dict_list_df1 = {key: df.to_dict(orient='records') for key, df in dict_df_1.items()}
-            dict_list_df2 = {key: df.to_dict(orient='records') for key, df in dict_df_2.items()}
+        response = {
+            'df1': df_1.to_dict(orient='records'),
+            'df1_data': dict_list_df1,
+            'df1_mnmx': df_1_mnmx
+        }
 
-        return jsonify({'df1': df_1.to_dict(orient='records'), 'df2': df_2.to_dict(orient='records'), 'df1_data': dict_list_df1, 'df2_data': dict_list_df2, 'df1_mnmx': df_1_mnmx, 'df2_mnmx': df_2_mnmx})
+        if group2Files:
+            response.update({
+                'df2': df_2.to_dict(orient='records'),
+                'df2_data': dict_list_df2,
+                'df2_mnmx': df_2_mnmx
+            })
+
+        return jsonify(response)
         
         #return jsonify({'df1': 'df_1', 'df2': 'df_2', 'df1_mnmx': 'df_1_mnmx', 'df2_mnmx': 'df_2_mnmx'})
     # else: 

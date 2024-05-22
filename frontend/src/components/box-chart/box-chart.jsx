@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
-import { act } from "react";
+import { GlobalContext } from "../globalHighlight/GlobalContext";
 
 const dictStpParam = {
   RstepLength: "Step Length (R)",
@@ -13,7 +13,19 @@ const dictStpParam = {
 };
 
 const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
-  // console.log(activeGroups, "activeGroups*****");
+  const { globalArray, setGlobalArray } = useContext(GlobalContext);
+  const selectedKeysRefG1 = useRef(globalArray);
+  const { globalArray2, setGlobalArray2 } = useContext(GlobalContext);
+  const selectedKeysRefG2 = useRef(globalArray2);
+
+  useEffect(() => {
+    selectedKeysRefG1.current = globalArray;
+  }, [globalArray]);
+
+  useEffect(() => {
+    selectedKeysRefG2.current = globalArray2;
+  }, [globalArray2]);
+
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
   if (chartData) chartData = chartData.response;
@@ -52,6 +64,14 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
     const adjustedWidth = dimensions.width - margin.left - margin.right;
     const adjustedHeight = dimensions.height - margin.top - margin.bottom;
 
+    const highlightData = chartData.df1.filter((item) => {
+      return selectedKeysRefG1.current.includes(item.sid + "_" + item.trial);
+    });
+
+    const highlightData2 = chartData.df2.filter((item) => {
+      return selectedKeysRefG2.current.includes(item.sid + "_" + item.trial);
+    });
+
     const g = svg
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -61,6 +81,12 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       df1: calculateStatistics(chartData.df1),
       df2: calculateStatistics(chartData.df2),
     };
+
+    const minHighlight1 = d3.min(highlightData, (d) => d[attribute]);
+    const maxHighlight1 = d3.max(highlightData, (d) => d[attribute]);
+
+    const minHighlight2 = d3.min(highlightData2, (d) => d[attribute]);
+    const maxHighlight2 = d3.max(highlightData2, (d) => d[attribute]);
 
     const yScale = d3
       .scaleLinear()
@@ -72,9 +98,6 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .domain(["df1", "df2"])
       .range([0, adjustedWidth])
       .padding(0.1);
-
-    // change x labels to labels[0] and labels[1]
-    // console.log(labels["label1"], labels["label2"]);
 
     // Create a tooltip
     const tooltip = d3
@@ -104,8 +127,6 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .attr("transform", `translate(${adjustedWidth}, 0)`)
       .call(d3.axisRight(yScale).ticks(3));
 
-    const yAxisWidth = yAxisLeft.node().getBBox().width;
-
     // Calculate half-width for symmetrical brush
     const brushHalfWidth = 5; // Adjust this value based on desired brush width
 
@@ -126,6 +147,22 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       ])
       .on("end", brushedRight);
 
+    const minBrushHeight = 1; // Minimum height for the brush
+
+    const adjustBrushRange = (minHighlight, maxHighlight, yScale) => {
+      let minY = yScale(maxHighlight);
+      let maxY = yScale(minHighlight);
+
+      // If the min and max highlights are the same, add the minimum height
+      if (minHighlight === maxHighlight) {
+        minY = minY - minBrushHeight / 2;
+        maxY = maxY + minBrushHeight / 2;
+      }
+
+      return [minY, maxY];
+    };
+
+    // Apply brushes and set styles
     yAxisLeft
       .call(brushLeft)
       .selectAll(".selection")
@@ -138,34 +175,96 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .style("fill", "#66c2a5") // Change the color of the selection area
       .style("stroke", "#66c2a5"); // Change the color of the border
 
-    // Move the brushes to the initial positions. Should be the global filter values
-    const y0 = yScale(0);
-    const y0_5 = yScale(0.5);
-    brushLeft.move(yAxisLeft, [y0_5, y0]);
+    const brushRangeLeft = adjustBrushRange(
+      minHighlight1,
+      maxHighlight1,
+      yScale
+    );
 
-    const y1 = yScale(1);
-    brushRight.move(yAxisRight, [y1, y0_5]);
+    const brushRangeRight = adjustBrushRange(
+      minHighlight2,
+      maxHighlight2,
+      yScale
+    );
 
-    // Function to handle brush events
+    let isProgrammaticBrushMove = false;
+
     function brushedLeft(event) {
-      if (!event.selection) {
-        console.log("No selection (left");
+      if (isProgrammaticBrushMove) {
+        // If the move is programmatic, do nothing
         return;
       }
-      const [y0, y1] = event.selection.map((d) => yScale.invert(d));
-      console.log(`Brushed range (left): ${y0.toFixed(2)} to ${y1.toFixed(2)}`);
+
+      if (!event.selection) {
+        return;
+      }
+
+      let [y1, y0] = event.selection.map((d) => yScale.invert(d));
+
+      const filteredData = chartData.df1.filter((item) => {
+        return item[attribute] >= y0 && item[attribute] <= y1;
+      });
+
+      // update globalArray by item.sid + "_" + item.trial for each item in filteredData using setGlobalArray
+      const tempArray = [];
+      filteredData.forEach((item) => {
+        tempArray.push(item.sid + "_" + item.trial);
+      });
+
+      setGlobalArray(tempArray);
     }
 
     function brushedRight(event) {
-      if (!event.selection) {
-        console.log("No selection (right)");
+      if (isProgrammaticBrushMove) {
+        // If the move is programmatic, do nothing
         return;
       }
-      const [y0, y1] = event.selection.map((d) => yScale.invert(d));
-      console.log(
-        `Brushed range (right): ${y0.toFixed(2)} to ${y1.toFixed(2)}`
-      );
+
+      if (!event.selection) {
+        return;
+      }
+      let [y1, y0] = event.selection.map((d) => yScale.invert(d));
+
+      const filteredData = chartData.df2.filter((item) => {
+        return item[attribute] >= y0 && item[attribute] <= y1;
+      });
+
+      // update globalArray2 by item.sid + "_" + item.trial for each item in filteredData using setGlobalArray2
+      const tempArray = [];
+      filteredData.forEach((item) => {
+        tempArray.push(item.sid + "_" + item.trial);
+      });
+
+      setGlobalArray2(tempArray);
     }
+
+    function disableBrushEvent(brush, yAxis, eventType, handler, brushRange) {
+      // Set the flag to true to indicate a programmatic move
+      isProgrammaticBrushMove = true;
+
+      // Perform the brush move operation
+      brush.move(yAxis, brushRange);
+
+      // Set the flag back to false after the move is complete
+      isProgrammaticBrushMove = false;
+    }
+
+    // Temporarily disable the brush event, move the brush, and then re-enable the event
+    disableBrushEvent(
+      brushRight,
+      yAxisRight,
+      "brush",
+      brushedRight,
+      brushRangeRight
+    );
+
+    disableBrushEvent(
+      brushLeft,
+      yAxisLeft,
+      "brush",
+      brushedLeft,
+      brushRangeLeft
+    );
 
     // X-axis
     g.append("g")
@@ -177,7 +276,6 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
             d === "df1" ? labels["label1"] : labels["label2"]
           )
       )
-
       .style("font-size", "12px")
       .style("font-family", "Roboto, sans-serif")
       // Add x-axis label
@@ -264,7 +362,14 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
         .attr("y2", (d) => yScale(d))
         .attr("stroke", "black");
     });
-  }, [chartData, dimensions, attribute, activeGroups]);
+  }, [
+    chartData,
+    dimensions,
+    attribute,
+    activeGroups,
+    selectedKeysRefG2.current,
+    selectedKeysRefG1.current,
+  ]);
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>

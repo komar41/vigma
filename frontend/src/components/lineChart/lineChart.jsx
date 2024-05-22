@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 import "./lineChart.css";
-import { spread } from "axios";
+import { GlobalContext } from "../globalHighlight/GlobalContext";
 
 const LineChart = ({ chartData }) => {
+  console.log(chartData.groupExploration, "groupExploration");
+  console.log(chartData.parameter, "attribute");
+  console.log(chartData.group1AllData, "group1AllData");
+  console.log(chartData.group2AllData, "group2AllData");
+  console.log(chartData.group1Data, "group1Data");
+  console.log(chartData.group2Data, "group2Data");
+
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
   const tooltipRef = useRef(); // Ref for the tooltip
@@ -13,17 +20,9 @@ const LineChart = ({ chartData }) => {
   const group1Data = chartData.group1Data;
   const group2Data = chartData.group2Data;
   const group1AllData = chartData.group1AllData;
-  const group1AllDataSample = Object.fromEntries(
-    Object.entries(group1AllData).slice(0, 4)
-  );
   const group2AllData = chartData.group2AllData;
-  const group2AllDataSample = Object.fromEntries(
-    Object.entries(group2AllData).slice(0, 4)
-  );
   const group1Label = chartData.group1Label;
   const group2Label = chartData.group2Label;
-  const group1Spread = chartData.group1Spread;
-  const group2Spread = chartData.group2Spread;
   const selectedFooting1 = chartData.group1Footing;
   const selectedFooting2 = chartData.group2Footing;
   const group1Cycle = chartData.group1GaitCycle;
@@ -33,27 +32,26 @@ const LineChart = ({ chartData }) => {
   const [dimensions, setDimensions] = useState({ width: 450, height: 300 }); // State for dimensions
 
   // New Tooltip states
-  const [tooltipContent, setTooltipContent] = useState("");
-  const [tooltipVisibility, setTooltipVisibility] = useState("hidden");
-  const [tooltipPosition, setTooltipPosition] = useState({ left: 0, top: 0 });
+  const [tooltipContent] = useState("");
+  const [tooltipVisibility] = useState("hidden");
+  const [tooltipPosition] = useState({ left: 0, top: 0 });
 
-  const [selectedKeysG1, setSelectedKeysG1] = useState([]);
-  const selectedKeysRefG1 = useRef(selectedKeysG1);
-
-  const [selectedKeysG2, setSelectedKeysG2] = useState([]);
-  const selectedKeysRefG2 = useRef(selectedKeysG2);
+  const { globalArray, setGlobalArray } = useContext(GlobalContext);
+  const selectedKeysRefG1 = useRef(globalArray);
+  const { globalArray2, setGlobalArray2 } = useContext(GlobalContext);
+  const selectedKeysRefG2 = useRef(globalArray2);
 
   // Sync the ref with the current state
   useEffect(() => {
-    selectedKeysRefG1.current = selectedKeysG1;
-  }, [selectedKeysG1]);
+    selectedKeysRefG1.current = globalArray;
+  }, [globalArray]);
 
   useEffect(() => {
-    selectedKeysRefG2.current = selectedKeysG2;
-  }, [selectedKeysG2]);
+    selectedKeysRefG2.current = globalArray2;
+  }, [globalArray2]);
 
   const handleLineClickG1 = (key, visibleLine) => {
-    setSelectedKeysG1((prevKeys) => {
+    setGlobalArray((prevKeys) => {
       const newKeys = prevKeys.includes(key)
         ? prevKeys.filter((k) => k !== key)
         : [...prevKeys, key];
@@ -66,7 +64,7 @@ const LineChart = ({ chartData }) => {
   };
 
   const handleLineClickG2 = (key, visibleLine) => {
-    setSelectedKeysG2((prevKeys) => {
+    setGlobalArray2((prevKeys) => {
       const newKeys = prevKeys.includes(key)
         ? prevKeys.filter((k) => k !== key)
         : [...prevKeys, key];
@@ -125,11 +123,11 @@ const LineChart = ({ chartData }) => {
     };
   }, []);
 
-  useEffect(() => {
-    // Tooltip setup
-    setSelectedKeysG1([]);
-    setSelectedKeysG2([]);
-  }, [chartData]);
+  // useEffect(() => {
+  //   // Tooltip setup
+  //   setSelectedKeysG1([]);
+  //   setSelectedKeysG2([]);
+  // }, [chartData]);
 
   useEffect(() => {
     if (!active) return;
@@ -180,18 +178,17 @@ const LineChart = ({ chartData }) => {
       (d) => d.col
     );
 
-    const group2Min = d3.min(group2Data, (d) => d.l);
-    const group2Max = d3.max(group2Data, (d) => d.u);
+    let group2Min, group2Max, group2AllMin, group2AllMax;
+    group2Min = group2AllMin = Infinity;
+    group2Max = group2AllMax = -Infinity;
 
-    const group2AllMin = d3.min(
-      Object.values(group2AllData).flat(),
-      (d) => d.col
-    );
+    if (chartData.groupExploration) {
+      group2Min = d3.min(group2Data, (d) => d.l);
+      group2Max = d3.max(group2Data, (d) => d.u);
 
-    const group2AllMax = d3.max(
-      Object.values(group2AllData).flat(),
-      (d) => d.col
-    );
+      group2AllMin = d3.min(Object.values(group2AllData).flat(), (d) => d.col);
+      group2AllMax = d3.max(Object.values(group2AllData).flat(), (d) => d.col);
+    }
 
     // Calculate overall min and max
     const overallMin = Math.min(group1Min, group2Min);
@@ -295,7 +292,30 @@ const LineChart = ({ chartData }) => {
             })
         )
         .attr("stroke-width", 3);
-      if (spreadOption == "Spread") {
+
+      if (spreadOption === "Spread" || spreadOption === "Default") {
+        Object.entries(group1AllData).forEach(([key, array]) => {
+          if (selectedKeysRefG1.current.includes(key)) {
+            const visibleLine = svg
+              .append("path")
+              .datum(array)
+              .attr("fill", "none")
+              .attr("stroke", "#fc8d62")
+              .attr("stroke-dasharray", "10")
+              .attr("opacity", 1)
+              .attr(
+                "d",
+                d3
+                  .line()
+                  .x((d) => x(d.time))
+                  .y((d) => y(d.col))
+              );
+            visibleLine.attr("class", "line-highlight");
+          }
+        });
+      }
+
+      if (spreadOption === "Spread") {
         // Show confidence interval
         svg
           .append("path")
@@ -318,27 +338,7 @@ const LineChart = ({ chartData }) => {
                 return y(d.u);
               })
           );
-
-        // add group1AllDataSample if Global filter exists. Only if spread option is Spread or Default
-        Object.entries(group1AllDataSample).forEach(([key, array]) => {
-          const visibleLine = svg
-            .append("path")
-            .datum(array)
-            .attr("fill", "none")
-            .attr("stroke", "#fc8d62")
-            .attr("stroke-dasharray", "10")
-            .attr("opacity", 1)
-            // .attr("class", "line group1")
-            .attr(
-              "d",
-              d3
-                .line()
-                .x((d) => x(d.time))
-                .y((d) => y(d.col))
-            );
-          visibleLine.attr("class", "line-highlight");
-        });
-      } else if (spreadOption == "All data") {
+      } else if (spreadOption === "All data") {
         // Add all lines
         Object.entries(group1AllData).forEach(([key, array]) => {
           const visibleLine = svg
@@ -362,7 +362,7 @@ const LineChart = ({ chartData }) => {
             .datum(array)
             .attr("fill", "none")
             .attr("stroke", "transparent") // Invisible stroke
-            .attr("stroke-width", 10) // Adjust the width to increase the hit area size
+            .attr("stroke-width", 5) // Adjust the width to increase the hit area size
             // .attr("class", "line group1")
             .attr(
               "d",
@@ -439,7 +439,7 @@ const LineChart = ({ chartData }) => {
       txt.text("Angle (°)");
     }
 
-    if (activeGroups[1]) {
+    if (activeGroups[1] && chartData.groupExploration) {
       svg
         .append("path")
         .datum(group2Data)
@@ -459,7 +459,31 @@ const LineChart = ({ chartData }) => {
             })
         )
         .attr("stroke-width", 3);
-      if (spreadOption == "Spread") {
+
+      if (spreadOption === "Spread" || spreadOption === "Default") {
+        // add group2AllDataSample if Global filter. Only if spread option is Spread or Default
+        Object.entries(group2AllData).forEach(([key, array]) => {
+          if (selectedKeysRefG2.current.includes(key)) {
+            const visibleLine = svg
+              .append("path")
+              .datum(array)
+              .attr("fill", "none")
+              .attr("stroke", "#66c2a5")
+              .attr("stroke-dasharray", "10")
+              .attr("opacity", 1)
+              // .attr("class", "line group1")
+              .attr(
+                "d",
+                d3
+                  .line()
+                  .x((d) => x(d.time))
+                  .y((d) => y(d.col))
+              );
+            visibleLine.attr("class", "line-highlight-2");
+          }
+        });
+      }
+      if (spreadOption === "Spread") {
         svg
           .append("path")
           .datum(group2Data)
@@ -481,27 +505,7 @@ const LineChart = ({ chartData }) => {
                 return y(d.u);
               })
           );
-
-        // add group2AllDataSample if Global filter. Only if spread option is Spread or Default
-        Object.entries(group2AllDataSample).forEach(([key, array]) => {
-          const visibleLine = svg
-            .append("path")
-            .datum(array)
-            .attr("fill", "none")
-            .attr("stroke", "#66c2a5")
-            .attr("stroke-dasharray", "10")
-            .attr("opacity", 1)
-            // .attr("class", "line group1")
-            .attr(
-              "d",
-              d3
-                .line()
-                .x((d) => x(d.time))
-                .y((d) => y(d.col))
-            );
-          visibleLine.attr("class", "line-highlight-2");
-        });
-      } else if (spreadOption == "All data") {
+      } else if (spreadOption === "All data") {
         // Add all lines
         Object.entries(group2AllData).forEach(([key, array]) => {
           const visibleLine = svg
@@ -526,7 +530,7 @@ const LineChart = ({ chartData }) => {
             .datum(array)
             .attr("fill", "none")
             .attr("stroke", "transparent") // Invisible stroke
-            .attr("stroke-width", 10) // Adjust the width to increase the hit area size
+            .attr("stroke-width", 5) // Adjust the width to increase the hit area size
             // .attr("class", "line group2")
             .attr(
               "d",
@@ -560,7 +564,7 @@ const LineChart = ({ chartData }) => {
       }
     }
 
-    if (spreadOption == "Spread" || spreadOption == "Default") {
+    if (spreadOption === "Spread" || spreadOption === "Default") {
       // Circles for highlighting points
       const circle1 = svg
         .append("circle")
@@ -575,17 +579,22 @@ const LineChart = ({ chartData }) => {
         .style("opacity", 0)
         .attr("text-anchor", "middle"); // Center the text on its x position
 
-      const circle2 = svg
-        .append("circle")
-        .attr("r", 5)
-        .attr("fill", "#66c2a5") // Change to match your line color
-        .style("opacity", 0);
+      let circle2 = svg;
+      let text2;
 
-      const text2 = svg
-        .append("text")
-        .attr("fill", "#1b9e77") // Match the second line color or choose a visible color
-        .style("opacity", 0)
-        .attr("text-anchor", "middle"); // Center the text on its x position
+      if (chartData.groupExploration) {
+        circle2 = svg
+          .append("circle")
+          .attr("r", 5)
+          .attr("fill", "#66c2a5") // Change to match your line color
+          .style("opacity", 0);
+
+        text2 = svg
+          .append("text")
+          .attr("fill", "#1b9e77") // Match the second line color or choose a visible color
+          .style("opacity", 0)
+          .attr("text-anchor", "middle"); // Center the text on its x position
+      }
 
       // Tooltip and mouse tracking logic
       const mouseG = svg.append("g").attr("class", "mouse-over-effects");
@@ -601,16 +610,20 @@ const LineChart = ({ chartData }) => {
           const x0 = x.invert(mouseX);
           const bisectDate = d3.bisector((d) => d.time).left;
           const i1 = bisectDate(group1Data, x0, 1);
-          const i2 = bisectDate(group2Data, x0, 1);
           const d1 = group1Data[Math.max(0, i1 - 1)];
-          const d2 = group2Data[Math.max(0, i2 - 1)];
+
+          let d2, i2;
+          if (chartData.groupExploration) {
+            i2 = bisectDate(group2Data, x0, 1);
+            d2 = group2Data[Math.max(0, i2 - 1)];
+          }
 
           if (d1 && activeGroups[0]) {
             const y1 = y(d1.m);
             circle1.attr("cx", x(d1.time)).attr("cy", y1).style("opacity", 1);
           }
 
-          if (d2 && activeGroups[1]) {
+          if (d2 && activeGroups[1] && chartData.groupExploration) {
             const y2 = y(d2.m);
             circle2.attr("cx", x(d2.time)).attr("cy", y2).style("opacity", 1);
           }
@@ -624,7 +637,11 @@ const LineChart = ({ chartData }) => {
 
           // Dynamically adjust text positions to prevent overlap
           let textY1 = y(d1.m) - offset - textHeight; // Default above the circle
-          let textY2 = y(d2.m) + offset; // Default below the circle
+
+          let textY2;
+          if (chartData.groupExploration) {
+            textY2 = y(d2.m) + offset; // Default below the circle
+          }
 
           if (d1 && d2 && Math.abs(textY1 - textY2) < 2 * offset) {
             // Adjust positions if too close
@@ -663,7 +680,7 @@ const LineChart = ({ chartData }) => {
               .text(`L: ${Number(d1.l).toFixed(2)}`);
           }
 
-          if (d2 && activeGroups[1]) {
+          if (d2 && activeGroups[1] && chartData.groupExploration) {
             text2
               .attr("x", x(d2.time))
               .attr("y", textY2)
@@ -690,9 +707,9 @@ const LineChart = ({ chartData }) => {
         })
         .on("mouseout", () => {
           circle1.style("opacity", 0);
-          circle2.style("opacity", 0);
+          if (chartData.groupExploration) circle2.style("opacity", 0);
           text1.style("opacity", 0);
-          text2.style("opacity", 0);
+          if (chartData.groupExploration) text2.style("opacity", 0);
         });
     }
     // Legends setup
@@ -711,15 +728,18 @@ const LineChart = ({ chartData }) => {
         x: legendX,
         y: legendYStart,
       },
-      {
+    ];
+
+    if (chartData.groupExploration) {
+      legendData.push({
         color: "#66c2a5",
         text: `${group2Label} [${
           selectedFooting2 !== "NA" ? " Limb: " + selectedFooting2 + "," : ""
         } Cycle: ${group2Cycle} ]`,
         x: legendX,
         y: legendYStart + legendSpacing,
-      },
-    ];
+      });
+    }
 
     // Legends drawing code (remains the same)
     const legend = svg
@@ -768,7 +788,14 @@ const LineChart = ({ chartData }) => {
       .attr("y", (d) => d.y + 15) // Center text vertically with the rectangle
       .style("text-anchor", "start")
       .text((d) => d.text);
-  }, [chartData, dimensions, active, activeGroups]);
+  }, [
+    chartData,
+    dimensions,
+    active,
+    activeGroups,
+    selectedKeysRefG1.current,
+    selectedKeysRefG2.current,
+  ]);
 
   // console.log(active, "active");
 

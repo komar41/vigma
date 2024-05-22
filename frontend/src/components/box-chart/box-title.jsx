@@ -13,7 +13,6 @@ const BoxTitle = ({
   const containerRef = useRef(); // Ref for the container
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 400 }); // State for dimensions
-  // const [activeGroups, setActiveGroups] = useState([true, true]);
 
   useEffect(() => {
     const observeTarget = containerRef.current;
@@ -27,8 +26,6 @@ const BoxTitle = ({
     resizeObserver.observe(observeTarget);
     return () => resizeObserver.unobserve(observeTarget);
   }, []);
-
-  // console.log(activeGroups, "activeGroups");
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -46,11 +43,11 @@ const BoxTitle = ({
       .attr("height", adjustedHeight)
       .attr("fill", "white");
 
-    // console.log(labels["label1"], "**");
-    const legendData = [
-      { color: "#fc8d62", text: labels["label1"] },
-      { color: "#66c2a5", text: labels["label2"] },
-    ];
+    const legendData = [{ color: "#fc8d62", text: labels["label1"] }];
+
+    if (chartData.groupExploration) {
+      legendData.push({ color: "#66c2a5", text: labels["label2"] });
+    }
 
     if (chartData && Object.keys(chartData).length > 0) {
       svg
@@ -71,8 +68,10 @@ const BoxTitle = ({
         .append("g")
         .attr(
           "transform",
-          `translate(${adjustedWidth / 2 - 150}, ${legendYPosition})`
-        ); // Center the legend below the title
+          `translate(${
+            adjustedWidth / 2 - (legendData.length === 1 ? 75 : 150)
+          }, ${legendYPosition})`
+        ); // Center the legend below the title, adjust based on number of items
 
       legend
         .selectAll("rect")
@@ -82,7 +81,7 @@ const BoxTitle = ({
         .attr("width", 20)
         .attr("height", 20)
         .attr("fill", (d) => d.color)
-        .attr("x", (d, i) => i * 200) // Set x position based on index to space items horizontally
+        .attr("x", (d, i) => i * (legendData.length === 1 ? 0 : 200)) // Center if only one item
         .attr("y", 0) // Keep y position constant as all items are on the same horizontal line
         .style("opacity", (d) => {
           // Determine initial opacity based on active groups
@@ -110,20 +109,21 @@ const BoxTitle = ({
         .data(legendData)
         .enter()
         .append("text")
-        .attr("x", (d, i) => i * 200 + 25) // Set x position so text appears right after the rectangle
+        .attr("x", (d, i) => i * (legendData.length === 1 ? 0 : 200) + 25) // Center if only one item
         .attr("y", 15) // Align text vertically to be centered with the box
         .text((d) => d.text)
         .style("font-size", "15px")
         .style("font-family", "Roboto, sans-serif");
     }
-  }, [chartData, dimensions, title, activeGroups]); // Redraw when chartData, dimensions, or title change
+  }, [chartData, dimensions, title, activeGroups, labels, setActiveGroups]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{ width: "100%", height: "100%", display: "block" }}
-    >
-      <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
+    <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
+      <svg
+        ref={svgRef}
+        width={dimensions.width}
+        height={dimensions.height}
+      ></svg>
     </div>
   );
 };

@@ -419,6 +419,7 @@ export const LoadData = (props) => {
   };
 
   function getCheckedFileTitles(selectedNodeKeys) {
+    if (selectedNodeKeys === null) return [];
     // Regex to match the specific format (folderName/insideFolder_trialNumber)
     const regex = /\/.+\_.+$/;
 

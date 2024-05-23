@@ -99,6 +99,7 @@ export const DataProcessView = (props) => {
 
   const [boxChartData, setBoxChartData] = useState({});
   const [boxChartParams, setBoxChartParams] = useState({});
+  const [boxGroupExploration, setBoxGroupExploration] = useState(false);
 
   // convert boxChartParams to array named definedParams
   const definedAttributes = Object.values(boxChartParams);
@@ -158,6 +159,8 @@ export const DataProcessView = (props) => {
           label1: formData.group1Label,
           label2: formData.group2Label,
         });
+
+        setBoxGroupExploration(formData.groupExploration);
       } else {
         setLineChartsData((currentData) => {
           const newData = [...currentData]; // Create a shallow copy of the array
@@ -287,6 +290,7 @@ export const DataProcessView = (props) => {
             chartData={boxChartData}
             activeGroups={activeGroupsBox}
             setActiveGroups={setActiveGroupsBox}
+            groupExploration={boxGroupExploration}
           ></BoxTitle>
         </Grid>
         {definedAttributes.map((attribute, index) => (
@@ -301,13 +305,13 @@ export const DataProcessView = (props) => {
               flexGrow: 0, // Prevent stretching
             }}
           >
-            {/* <BoxChart
+            <BoxChart
               chartData={boxChartData}
               attribute={attribute}
               labels={boxChartLabels}
               activeGroups={activeGroupsBox}
-              groupExploration = {groupExploration}
-            ></BoxChart> */}
+              groupExploration={boxGroupExploration}
+            ></BoxChart>
           </Grid>
         ))}
       </Grid>
@@ -322,13 +326,13 @@ export const DataProcessView = (props) => {
           ></BoxTitle>
         </Grid>
         <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
-          {/* <RadarChart
+          <RadarChart
             chartData={boxChartData}
             labels={boxChartLabels}
             style={{ boxSizing: "border-box" }}
             activeGroups={activeGroupsRadar}
-            groupExploration = {groupExploration}
-          ></RadarChart> */}
+            groupExploration={boxGroupExploration}
+          ></RadarChart>
         </Grid>
       </Grid>
     </Grid>

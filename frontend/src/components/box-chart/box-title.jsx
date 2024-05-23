@@ -7,6 +7,7 @@ const BoxTitle = ({
   title,
   activeGroups,
   setActiveGroups,
+  groupExploration,
 }) => {
   // Accept title as a prop
   const svgRef = useRef();
@@ -45,7 +46,7 @@ const BoxTitle = ({
 
     const legendData = [{ color: "#fc8d62", text: labels["label1"] }];
 
-    if (chartData.groupExploration) {
+    if (groupExploration) {
       legendData.push({ color: "#66c2a5", text: labels["label2"] });
     }
 

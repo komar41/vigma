@@ -45,7 +45,7 @@ function calculateMeans(dataset) {
 //   return color;
 // }
 
-const RadarChart = ({ chartData, labels, activeGroups }) => {
+const RadarChart = ({ chartData, labels, activeGroups, groupExploration }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
 
@@ -87,19 +87,25 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
     chartData = chartData.response;
 
     if (!chartData) return;
-    // console.log("radar chartData", chartData);
+
     const meansDf1 = calculateMeans(chartData.df1);
-    const meansDf2 = calculateMeans(chartData.df2);
+    let meansDf2;
+    if (groupExploration) meansDf2 = calculateMeans(chartData.df2);
 
     const highlightData1 = chartData.df1.filter((item) => {
       return globalArray.includes(item.sid + "_" + item.trial);
     });
-    const highlightData2 = chartData.df2.filter((item) => {
-      return globalArray2.includes(item.sid + "_" + item.trial);
-    });
+
+    let highlightData2;
+    if (groupExploration) {
+      highlightData2 = chartData.df2.filter((item) => {
+        return globalArray2.includes(item.sid + "_" + item.trial);
+      });
+    }
 
     const meansDf1H = calculateMeans(highlightData1);
-    const meansDf2H = calculateMeans(highlightData2);
+    let meansDf2H;
+    if (groupExploration) meansDf2H = calculateMeans(highlightData2);
 
     // Map the means back into a structure similar to sampleData
     const updatedSampleData = [
@@ -107,22 +113,26 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
         label: labels["label1"],
         values: meansDf1,
       },
-      {
+    ];
+    if (groupExploration) {
+      updatedSampleData.push({
         label: labels["label2"],
         values: meansDf2,
-      },
-    ];
+      });
+    }
 
     const updatedSampleData2 = [
       {
         label: labels["label1"],
         values: meansDf1H,
       },
-      {
+    ];
+    if (groupExploration) {
+      updatedSampleData2.push({
         label: labels["label2"],
         values: meansDf2H,
-      },
-    ];
+      });
+    }
 
     const parameters = [
       "timeLswing",
@@ -286,6 +296,7 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
     radarChartData.forEach((data, i) => {
       // console.log(i, activeGroups[i]);
       if (!activeGroups[i]) return;
+      if (!groupExploration && i === 1) return;
       // console.log(data);
       radarGroup
         .append("path")
@@ -392,15 +403,19 @@ const RadarChart = ({ chartData, labels, activeGroups }) => {
         .style("fill", "none")
         .style("pointer-events", "all") // Make sure the arc can trigger mouse events
         .on("mouseover", function (event) {
+          let tooltipContent = `Parameter:  ${dictStpParam[param]} <br> ${
+            labels["label1"]
+          }: ${meansDf1[param].toFixed(2)}`;
+
+          if (groupExploration) {
+            tooltipContent += `<br>${labels["label2"]}: ${meansDf2[
+              param
+            ].toFixed(2)}`;
+          }
+
           tooltip
             .style("display", "inline")
-            .html(
-              `Parameter:  ${dictStpParam[param]} <br> ${
-                labels["label1"]
-              }: ${meansDf1[param].toFixed(2)}<br>${
-                labels["label2"]
-              }: ${meansDf2[param].toFixed(2)}`
-            )
+            .html(tooltipContent)
             .style("left", event.pageX + 8 + "px")
             .style("top", event.pageY + 8 + "px")
             .style("font-size", "12px");

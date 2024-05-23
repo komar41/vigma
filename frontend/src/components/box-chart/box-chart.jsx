@@ -12,7 +12,13 @@ const dictStpParam = {
   GaitSpeed: "Gait Speed",
 };
 
-const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
+const BoxChart = ({
+  chartData,
+  attribute,
+  labels,
+  activeGroups,
+  groupExploration,
+}) => {
   const { globalArray, setGlobalArray } = useContext(GlobalContext);
   const selectedKeysRefG1 = useRef(globalArray);
   const { globalArray2, setGlobalArray2 } = useContext(GlobalContext);
@@ -68,9 +74,12 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       return selectedKeysRefG1.current.includes(item.sid + "_" + item.trial);
     });
 
-    const highlightData2 = chartData.df2.filter((item) => {
-      return selectedKeysRefG2.current.includes(item.sid + "_" + item.trial);
-    });
+    let highlightData2;
+    if (groupExploration) {
+      highlightData2 = chartData.df2.filter((item) => {
+        return selectedKeysRefG2.current.includes(item.sid + "_" + item.trial);
+      });
+    }
 
     const g = svg
       .append("g")
@@ -79,23 +88,31 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
     // Data for df1 and df2
     const stats = {
       df1: calculateStatistics(chartData.df1),
-      df2: calculateStatistics(chartData.df2),
     };
+    if (groupExploration) {
+      stats.df2 = calculateStatistics(chartData.df2);
+    }
 
     const minHighlight1 = d3.min(highlightData, (d) => d[attribute]);
     const maxHighlight1 = d3.max(highlightData, (d) => d[attribute]);
 
-    const minHighlight2 = d3.min(highlightData2, (d) => d[attribute]);
-    const maxHighlight2 = d3.max(highlightData2, (d) => d[attribute]);
+    let minHighlight2, maxHighlight2;
+    if (groupExploration) {
+      minHighlight2 = d3.min(highlightData2, (d) => d[attribute]);
+      maxHighlight2 = d3.max(highlightData2, (d) => d[attribute]);
+    }
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, 1.1 * d3.max([stats.df1.max, stats.df2.max])])
+      .domain([
+        0,
+        1.1 * d3.max([stats.df1.max, groupExploration ? stats.df2.max : 0]),
+      ])
       .range([adjustedHeight, 0]);
 
     const xScale = d3
       .scaleBand()
-      .domain(["df1", "df2"])
+      .domain(groupExploration ? ["df1", "df2"] : ["df1"])
       .range([0, adjustedWidth])
       .padding(0.1);
 
@@ -120,12 +137,15 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       .style("font-family", "Roboto, sans-serif")
       .call(d3.axisLeft(yScale).ticks(3));
 
-    const yAxisRight = g
-      .append("g")
-      .style("font-size", "0px")
-      .style("font-family", "Roboto, sans-serif")
-      .attr("transform", `translate(${adjustedWidth}, 0)`)
-      .call(d3.axisRight(yScale).ticks(3));
+    let yAxisRight;
+    if (groupExploration && activeGroups[1]) {
+      yAxisRight = g
+        .append("g")
+        .style("font-size", "0px")
+        .style("font-family", "Roboto, sans-serif")
+        .attr("transform", `translate(${adjustedWidth}, 0)`)
+        .call(d3.axisRight(yScale).ticks(3));
+    }
 
     // Calculate half-width for symmetrical brush
     const brushHalfWidth = 5; // Adjust this value based on desired brush width
@@ -139,13 +159,16 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
       ])
       .on("end", brushedLeft);
 
-    const brushRight = d3
-      .brushY()
-      .extent([
-        [-brushHalfWidth, 0],
-        [brushHalfWidth, adjustedHeight],
-      ])
-      .on("end", brushedRight);
+    let brushRight;
+    if (groupExploration && activeGroups[1]) {
+      brushRight = d3
+        .brushY()
+        .extent([
+          [-brushHalfWidth, 0],
+          [brushHalfWidth, adjustedHeight],
+        ])
+        .on("end", brushedRight);
+    }
 
     const minBrushHeight = 1; // Minimum height for the brush
 
@@ -163,29 +186,31 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
     };
 
     // Apply brushes and set styles
-    yAxisLeft
-      .call(brushLeft)
-      .selectAll(".selection")
-      .style("fill", "#fc8d62") // Change the color of the selection area
-      .style("stroke", "#fc8d62"); // Change the color of the border
+    if (activeGroups[0]) {
+      yAxisLeft
+        .call(brushLeft)
+        .selectAll(".selection")
+        .style("fill", "#fc8d62") // Change the color of the selection area
+        .style("stroke", "#fc8d62"); // Change the color of the border
+    }
 
-    yAxisRight
-      .call(brushRight)
-      .selectAll(".selection")
-      .style("fill", "#66c2a5") // Change the color of the selection area
-      .style("stroke", "#66c2a5"); // Change the color of the border
+    if (groupExploration && activeGroups[1]) {
+      yAxisRight
+        .call(brushRight)
+        .selectAll(".selection")
+        .style("fill", "#66c2a5") // Change the color of the selection area
+        .style("stroke", "#66c2a5"); // Change the color of the border
+    }
 
-    const brushRangeLeft = adjustBrushRange(
-      minHighlight1,
-      maxHighlight1,
-      yScale
-    );
+    let brushRangeLeft;
+    if (activeGroups[0]) {
+      brushRangeLeft = adjustBrushRange(minHighlight1, maxHighlight1, yScale);
+    }
 
-    const brushRangeRight = adjustBrushRange(
-      minHighlight2,
-      maxHighlight2,
-      yScale
-    );
+    let brushRangeRight;
+    if (groupExploration && activeGroups[1]) {
+      brushRangeRight = adjustBrushRange(minHighlight2, maxHighlight2, yScale);
+    }
 
     let isProgrammaticBrushMove = false;
 
@@ -250,71 +275,80 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
     }
 
     // Temporarily disable the brush event, move the brush, and then re-enable the event
-    disableBrushEvent(
-      brushRight,
-      yAxisRight,
-      "brush",
-      brushedRight,
-      brushRangeRight
-    );
+    if (groupExploration && activeGroups[1]) {
+      disableBrushEvent(
+        brushRight,
+        yAxisRight,
+        "brush",
+        brushedRight,
+        brushRangeRight
+      );
+    }
 
-    disableBrushEvent(
-      brushLeft,
-      yAxisLeft,
-      "brush",
-      brushedLeft,
-      brushRangeLeft
-    );
+    if (activeGroups[0]) {
+      disableBrushEvent(
+        brushLeft,
+        yAxisLeft,
+        "brush",
+        brushedLeft,
+        brushRangeLeft
+      );
+    }
 
     // X-axis
     g.append("g")
       .attr("transform", `translate(0, ${adjustedHeight})`)
       .call(
-        d3
-          .axisBottom(xScale)
-          .tickFormat((d) =>
-            d === "df1" ? labels["label1"] : labels["label2"]
-          )
+        d3.axisBottom(xScale).tickFormat((d) => {
+          if (d === "df1") return labels["label1"];
+          if (groupExploration && d === "df2") return labels["label2"];
+          return null;
+        })
       )
       .style("font-size", "12px")
       .style("font-family", "Roboto, sans-serif")
-      // Add x-axis label
       .append("text")
       .attr("class", "axis-label")
       .attr("x", adjustedWidth / 2)
       .attr("y", margin.bottom / 1.5)
-      .attr("text-anchor", "middle") // Ensure it's centered horizontally
-      .style("fill", "Black") // Text color
+      .attr("text-anchor", "middle")
+      .style("fill", "Black")
       .style("font-size", "14px")
       .style("font-family", "Roboto, sans-serif")
-      .style("font-weight", "bold") // Make the text bold roboto
+      .style("font-weight", "bold")
       .text(dictStpParam[attribute]);
 
     // Draw box plots for df1 and df2
-    ["df1", "df2"].forEach((df, i) => {
+    ["df1", groupExploration ? "df2" : null].forEach((df, i) => {
+      if (!df) return;
+
       const activeCount = activeGroups.filter(Boolean).length;
       let xPos = xScale(df);
-      if (activeCount === 1) {
-        // Center the box plot if only one is active
-        xPos = (adjustedWidth - xScale.bandwidth()) / 2;
+      let boxWidth = xScale.bandwidth();
+
+      if (!groupExploration) {
+        boxWidth /= 2; // Halve the width of the boxplot
+        xPos = (adjustedWidth - boxWidth) / 2; // Center it in the x-axis
+      } else if (activeCount === 1) {
+        xPos = (adjustedWidth - boxWidth) / 2; // Center it in the x-axis if only one group is active
       }
+
       if (!activeGroups[i]) return;
+
       const { min, q1, median, q3, max } = stats[df];
 
       const color = i === 0 ? "#fc8d62" : "#66c2a5";
 
-      // Box
       g.append("rect")
         .attr("x", xPos)
         .attr("y", yScale(q3))
-        .attr("width", xScale.bandwidth())
+        .attr("width", boxWidth)
         .attr("height", yScale(q1) - yScale(q3))
         .attr("stroke", "black")
         .attr("fill", color)
-        // round the corners of the box
         .attr("rx", 2)
         .attr("ry", 2)
-        .on("mouseover", (event, d) => {
+        .on("mouseover", (event) => {
           tooltip
             .style("opacity", 1)
             .html(
@@ -329,15 +363,13 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
         })
         .on("mouseout", () => tooltip.style("opacity", 0));
 
-      // Median line
       g.append("line")
         .attr("x1", xPos)
-        .attr("x2", xPos + xScale.bandwidth())
+        .attr("x2", xPos + boxWidth)
         .attr("y1", yScale(median))
         .attr("y2", yScale(median))
         .attr("stroke", "black");
 
-      // Whiskers
       g.selectAll(".whisker")
         .data([
           [min, q1],
@@ -345,19 +377,18 @@ const BoxChart = ({ chartData, attribute, labels, activeGroups }) => {
         ])
         .enter()
         .append("line")
-        .attr("x1", xPos + xScale.bandwidth() / 2)
-        .attr("x2", xPos + xScale.bandwidth() / 2)
+        .attr("x1", xPos + boxWidth / 2)
+        .attr("x2", xPos + boxWidth / 2)
         .attr("y1", (d) => yScale(d[0]))
         .attr("y2", (d) => yScale(d[1]))
         .attr("stroke", "black");
 
-      // Horizontal lines at the min and max
       g.selectAll(".whisker-end")
         .data([min, max])
         .enter()
         .append("line")
         .attr("x1", xPos)
-        .attr("x2", xPos + xScale.bandwidth())
+        .attr("x2", xPos + boxWidth)
         .attr("y1", (d) => yScale(d))
         .attr("y2", (d) => yScale(d))
         .attr("stroke", "black");

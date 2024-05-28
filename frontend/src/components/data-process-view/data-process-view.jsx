@@ -323,6 +323,7 @@ export const DataProcessView = (props) => {
             chartData={boxChartData}
             activeGroups={activeGroupsRadar}
             setActiveGroups={setActiveGroupsRadar}
+            groupExploration={boxGroupExploration}
           ></BoxTitle>
         </Grid>
         <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>

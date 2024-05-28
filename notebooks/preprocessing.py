@@ -107,7 +107,7 @@ def mice_impute(data):
 
 ''' mark step times '''
 
-def mark_step_times(L, R, file_location, subject, trial, trialtype):
+def mark_step_times(file_location, subject, trial, L, R, trialtype):
 
     if(L[0][0] < L[1][0]):
         p1, p2, p3, p4 = L[0], R[0], L[1], R[1]

@@ -101,7 +101,7 @@ def extract_stp(filepath, pid, trial):
 
     return RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed
 
-def get_stp_params(file_location, pid, save = False):
+def get_stp_params(file_location, pid, save = False, replace = False):
     files = os.listdir(file_location + "/" + pid)
 
     pattern = r'_(\d+)_'
@@ -124,7 +124,10 @@ def get_stp_params(file_location, pid, save = False):
     df = pd.DataFrame(stpParams, columns=['sid', 'trial', 'RstepLength', 'LstepLength', 'timeRswing', 'timeLswing', 'timeRgait', 'timeLgait', 'GaitSpeed'])
 
     if save == True:
-        df.to_csv(file_location + '/' + pid + '/' + pid + 'stp.csv', index=False)
+        if(replace == True):
+            df.to_csv(file_location + '/' + pid + '/' + pid + 'step.csv', index=False)
+        else:
+            df.to_csv(file_location + '/' + pid + '/' + pid + 'step_n.csv', index=False)
 
     return df
 

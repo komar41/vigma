@@ -111,7 +111,6 @@ def extract_JNT_df(df):
     thigh (left, right) -> hip(up_marker), knee (low_marker)
     trunk (left, right) -> (shoulder(up_marker) + hip(low_marker)) / 2
     '''
-
     df_jnt = pd.DataFrame()
 
     df_jnt['time'] = df['time'].reset_index(drop=True)
@@ -121,6 +120,7 @@ def extract_JNT_df(df):
     mot = [('heel', 'toe'), ('knee', 'ankle'),
            ('hip', 'knee'), ('shoulder', 'hip')]
 
+    
     for i in range(len(seg)):
         up_marker_rt = df['Right '+mot[i][0]].astype(float)
         up_marker_lt = df['Left '+mot[i][0]].astype(float)
@@ -140,6 +140,9 @@ def extract_JNT_df(df):
             df_jnt['R'+seg[i]] = angles_rt
             df_jnt['L'+seg[i]] = angles_lt
 
+    # print(df['Left hip'].iloc[:, 0].astype(float))
+    df_jnt['hipx'] = (df['Left hip'].iloc[:, 0].astype(float) + df['Right hip'].iloc[:, 0].astype(float)) / (2 * 1000)
+    
     return df_jnt
 
 
@@ -207,21 +210,19 @@ def plot(data_type='jnt', **kwargs):
     
 
     if(kwargs['cycle'] == True):
-        kwargs['steps'] = 'N'
+        kwargs['steps'] = False
 
-    if(kwargs['steps'] == 'Y'):
+    if(kwargs['steps'] == True):
         df_step = pd.read_csv('%s/%s/%sstep.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id']))
         tdowns = df_step[df_step['trial'] == kwargs['trial']][['touch down', 'touch down.1', 'touch down.2', 'touch down.3']].values.tolist()[0]
         toffs = df_step[df_step['trial'] == kwargs['trial']][['toe off', 'toe off.1', 'toe off.2', 'toe off.3']].values.tolist()[0]
+        kwargs['cycle'] = False
     
-    jnt_col = ['trunk']
+    jnt_col = ['trunk', 'hipx']
     if(data_type=='grf'):
         cols = ['AP', 'ML', 'VT']
     else:
-        cols = ['foot', 'shank', 'thigh', 'trunk']
-        if(kwargs['hip'] == 'Y'): 
-            cols.append('hipx')
-            jnt_col.append('hipx')
+        cols = ['foot', 'shank', 'thigh', 'trunk', 'hipx']
     
     traces = []
     colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
@@ -286,7 +287,7 @@ def plot(data_type='jnt', **kwargs):
 
     fig = go.Figure(data=traces, layout=layout)
 
-    if(kwargs['steps'] == 'Y'):
+    if(kwargs['steps'] == True):
         numeric_df = df.select_dtypes(include=['number']).drop('time', axis=1, errors='ignore')
         min_value = numeric_df.min().min()
         max_value = numeric_df.max().max()

@@ -506,13 +506,13 @@ export const LoadData = (props) => {
       }
 
       if (!formData.selectedColumn) {
-        setErrorMessage("selectedColumn is not selected");
+        setErrorMessage("Parameter is not selected");
         setOpenDialog(true);
         return;
       }
 
       if (!isPanelDisabled & !formData.panelOptions) {
-        setErrorMessage("Panel option is not selected");
+        setErrorMessage("Plot no is not selected");
         setOpenDialog(true);
         return;
       }

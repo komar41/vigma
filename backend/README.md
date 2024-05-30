@@ -6,5 +6,5 @@ Note: Choose the alternative approach and add the path to the environment variab
 - conda create --prefix ./envs
 - conda config --set env_prompt '({name})'
 - conda activate ./envs
-- conda install flask flask_cors pandas numpy scipy
+- conda install flask flask_cors pandas numpy scipy scikit-learn
 - start the server: python server.py

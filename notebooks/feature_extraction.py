@@ -4,6 +4,7 @@ from utils import *
 import numpy as np
 import pandas as pd
 import os
+from preprocessing import knn_impute
 
 def motionToJointAngle(file_location, patient_id, trial, save = False):
     '''
@@ -33,7 +34,7 @@ def motionToJointAngle(file_location, patient_id, trial, save = False):
         df = df.rename(columns=rename_cols)
 
     df = extract_JNT_df(df)
-
+    
     # Extract filename using regex
     # regex = r"([^\\\/]+?)(?=\.csv)"
     # match = re.search(regex, file_dir)
@@ -52,21 +53,30 @@ def motionToJointAngle(file_location, patient_id, trial, save = False):
     
 def extract_stp(filepath, pid, trial):
     jnts = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_jnt.csv")
+    jnts = knn_impute(dataframe = jnts, data_type='jnt')
     grfs = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_grf.csv")
+    dem = pd.read_csv(filepath + '/' + "demographic.csv")
 
     sts = pd.read_csv(filepath + "/" + pid + '/' + pid + "step.csv")
-    
+
+    jnts.columns = jnts.columns.str.strip()
+    grfs.columns = grfs.columns.str.strip()
+    dem.columns = dem.columns.str.strip()
+
+    thigh = dem[dem['id'] == pid]['thigh'].values[0]
+    shank = dem[dem['id'] == pid]['shank'].values[0]
+
     first_step = sts[sts['trial'] == trial].footing.values[0]
     trials = list(sts['trial'])
-    
+
     trial_index = trials.index(trial)
 
     TDs = sts.filter(like='touch').values[trial_index]
     LOs = sts.filter(like='off').values[trial_index]
 
-    timeswing1 = LOs[1] - TDs[1]  # right swing phase
+    timeswing1 = LOs[1] - TDs[1]
     timeswing2 = LOs[0] - TDs[0]
-    timegait1 = TDs[3] - TDs[1]  # right gait cycle
+    timegait1 = TDs[3] - TDs[1]
     timegait2 = TDs[2] - TDs[0]
 
     timeRswing = timeswing1 if first_step == 'L' else timeswing2
@@ -81,21 +91,21 @@ def extract_stp(filepath, pid, trial):
     hipx = jnts.hipx.values
 
     # Nan values in hipx
-    if(type(hipx[0]) == str):
-        hipx = np.array([float(value.strip()) if value.strip().lower() != 'nan' else np.nan for value in hipx])
-        hipx = hipx[~np.isnan(hipx.astype(float))]
+    # if(type(hipx[0]) == str):
+    #     hipx = np.array([float(value.strip()) if value.strip().lower() != 'nan' else np.nan for value in hipx])
+    
 
-    TD1 = int(round(TDs[1]*120))
-    TD2 = int(round(TDs[2]*120))
-    TD3 = int(round(TDs[3]*120))
+    TD1 = int(round(TDs[0]*120))
+    TD2 = int(round(TDs[1]*120))
+    TD3 = int(round(TDs[2]*120))
 
-    if(first_step == 'L'):
-        RstepLength = -np.cos(Rthigh[TD1]) -np.cos(Rshank[TD1]) + np.cos(Lthigh[TD1]) + np.cos(Lshank[TD1])
-        LstepLength = np.cos(Rthigh[TD2]) + np.cos(Rshank[TD2]) - np.cos(Lthigh[TD2]) - np.cos(Lshank[TD2])
+    if(first_step == 'R'):
+        RstepLength = -np.cos(Rthigh[TD1])*thigh - np.cos(Rshank[TD1])*shank + np.cos(Lthigh[TD1])*thigh + np.cos(Lshank[TD1])*shank
+        LstepLength =  np.cos(Rthigh[TD2])*thigh + np.cos(Rshank[TD2])*shank - np.cos(Lthigh[TD2])*thigh - np.cos(Lshank[TD2])*shank
 
     else:
-        RstepLength = -np.cos(Rthigh[TD2]) -np.cos(Rshank[TD2]) + np.cos(Lthigh[TD2]) + np.cos(Lshank[TD2])
-        LstepLength = np.cos(Rthigh[TD1]) + np.cos(Rshank[TD1]) - np.cos(Lthigh[TD1]) - np.cos(Lshank[TD1])
+        RstepLength = -np.cos(Rthigh[TD2])*thigh - np.cos(Rshank[TD2])*shank + np.cos(Lthigh[TD2])*thigh + np.cos(Lshank[TD2])*shank
+        LstepLength =  np.cos(Rthigh[TD1])*thigh + np.cos(Rshank[TD1])*shank - np.cos(Lthigh[TD1])*thigh - np.cos(Lshank[TD1])*shank
 
     GaitSpeed = np.mean((np.diff(hipx)*120)[TD1-1:TD3])
 
@@ -130,34 +140,3 @@ def get_stp_params(file_location, pid, save = False, replace = False):
             df.to_csv(file_location + '/' + pid + '/' + pid + 'step_n.csv', index=False)
 
     return df
-
-# def filterJntGrf(patient, trial):
-
-#     touch_downs, toe_offs = getTouchDownToeOff(patient, trial)
-
-#     # start time is 0.3s before the first touch down
-#     start_time = touch_downs[0] - 0.5
-
-#     # end time is 0.3s after the last toe off
-#     end_time = toe_offs[len(touch_downs) - 1] + 0.5
-
-#     # read joint angle file of the trial
-#     trial_df_jnt = pd.read_csv(
-#         'data/input/20 trials/%s_%s_jnt.csv' % (patient, trial))
-
-#     # read ground reaction force file of the trial
-#     trial_df_grf = pd.read_csv(
-#         'data/input/20 trials/%s_%s_grf.csv' % (patient, trial))
-
-#     trial_df_jnt = filter_data(trial_df_jnt, start_time, end_time)
-#     trial_df_grf = filter_data(trial_df_grf, start_time, end_time)
-
-#     # save filtered joint angle file
-#     trial_df_jnt.to_csv('data/output/%s_%s_jnt_filtered.csv' %
-#                         (patient, trial), index=False)
-
-#     # save filtered ground reaction force file
-#     trial_df_grf.to_csv('data/output/%s_%s_grf_filtered.csv' %
-#                         (patient, trial), index=False)
-
-#     return trial_df_jnt, trial_df_grf

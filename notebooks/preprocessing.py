@@ -28,9 +28,13 @@ def filter_signal(x, t, cutoff, order):
     
     return xf_full
 
-def filter_data(df, cutoff=6, order=4, **kwargs):
-    df_filter = df.drop(columns=['#frame'])
-    # convert columns to float
+def filter_data(data_type='jnt', cutoff=6, order=4, save=False, replace=False, **kwargs):
+    if('dataframe' in kwargs):
+        df = kwargs['dataframe']
+    else:
+        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
+
+    if('#frame' in df.columns): df_filter = df.drop(columns=['#frame'])
     df_filter = df_filter.astype(float)
     df_filter.set_index('time', inplace=True)
 
@@ -38,14 +42,14 @@ def filter_data(df, cutoff=6, order=4, **kwargs):
         x.to_numpy(), x.index.to_numpy(), cutoff, order), axis=0)
 
     df_filter = df_filter.reset_index()
-    df_filter['#frame'] = df['#frame']
+    if('#frame' in df.columns): df_filter['#frame'] = df['#frame']
 
-    if(kwargs['save']):
+    if(save):
         data_type = kwargs['data_type']
         pid = kwargs['patient_id']
         trial = kwargs['trial']
         file_location = kwargs['file_location']
-        if(kwargs['replace']):
+        if(replace):
             df_filter.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
         else:
             df_filter.to_csv('%s/%s/%s_%s_%s_f.csv' % (file_location, pid, pid, trial, data_type), index=False)
@@ -54,45 +58,79 @@ def filter_data(df, cutoff=6, order=4, **kwargs):
 
 ''' missing value imputation '''
 
-def interpolate_impute(data):
-    df = file_or_df(data)
+def interpolate_impute(data_type='jnt', save = False, replace = False, **kwargs):
+    if('dataframe' in kwargs):
+        df = kwargs['dataframe']
+    else:
+        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
 
-    df = df.drop(columns=['#frame'])
-    df.set_index('time', inplace=True)
-    df = df.interpolate(limit_direction='both', method='spline', order=1)
-    df = df.reset_index()
+    if('#frame' in df.columns): df_interpolate = df.drop(columns=['#frame'])
+    df_interpolate = df_interpolate.astype(float)
+    df_interpolate.set_index('time', inplace=True)
+    df_interpolate = df_interpolate.interpolate(limit_direction='both', method='spline', order=1)
+    df_interpolate = df_interpolate.reset_index()
+    if('#frame' in df.columns): df_interpolate['#frame'] = df['#frame']
 
-    return df
+    if(save):
+        data_type = kwargs['data_type']
+        pid = kwargs['patient_id']
+        trial = kwargs['trial']
+        file_location = kwargs['file_location']
+        if(replace):
+            df_interpolate.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
+        else:
+            df_interpolate.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
 
-def knn_impute(data, **kwargs):
-    df = file_or_df(data)
+    return df_interpolate
 
-    df_knn = df.drop(columns=['time', '#frame'])
+def knn_impute(data_type = 'jnt', save = False, replace = False, **kwargs):
+    
+
+    if('dataframe' in kwargs):
+        df = kwargs['dataframe']
+    else:
+        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
+
+    df.columns = df.columns.str.strip()
+    if('' in df.columns):
+        df = df.drop(columns=[''])
+
+    columns = ['time', '#frame']
+    existing_columns_to_drop = [col for col in columns if col in df.columns]
+
+    df_knn = df.drop(columns=existing_columns_to_drop)
 
     knn_imputer = KNNImputer(n_neighbors=5, weights='uniform')
 
     df_knn_imputed = pd.DataFrame(
         knn_imputer.fit_transform(df_knn), columns=df_knn.columns)
 
-    df_knn_imputed['time'] = df['time']
-    df_knn_imputed['#frame'] = df['#frame']
+    for col in columns:
+        if col in df.columns:
+            df_knn_imputed[col] = df[col]
 
-    if(kwargs['save']):
+    if(save):
         data_type = kwargs['data_type']
         pid = kwargs['patient_id']
         trial = kwargs['trial']
         file_location = kwargs['file_location']
-        if(kwargs['replace']):
+        if(replace):
             df_knn_imputed.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
         else:
             df_knn_imputed.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
 
     return df_knn_imputed
 
-def mice_impute(data):
-    df = file_or_df(data)
+def mice_impute(data_type='jnt', save = False, replace = False, **kwargs):
+    if('dataframe' in kwargs):
+        df = kwargs['dataframe']
+    else:
+        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
 
-    df_mice = df.drop(columns=['time', '#frame'])
+    columns = ['time', '#frame']
+    existing_columns_to_drop = [col for col in columns if col in df.columns]
+
+    df_mice = df.drop(columns=existing_columns_to_drop)
 
     mice_imputer = IterativeImputer(estimator=linear_model.BayesianRidge(
     ), n_nearest_features=None, imputation_order='ascending', max_iter=100)
@@ -100,8 +138,19 @@ def mice_impute(data):
     df_mice_imputed = pd.DataFrame(
         mice_imputer.fit_transform(df_mice), columns=df_mice.columns)
 
-    df_mice_imputed['time'] = df['time']
-    df_mice_imputed['#frame'] = df['#frame']
+    for col in columns:
+        if col in df.columns:
+            df_mice_imputed[col] = df[col]
+
+    if(save):
+        data_type = kwargs['data_type']
+        pid = kwargs['patient_id']
+        trial = kwargs['trial']
+        file_location = kwargs['file_location']
+        if(replace):
+            df_mice_imputed.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
+        else:
+            df_mice_imputed.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
 
     return df_mice_imputed
 

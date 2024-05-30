@@ -142,6 +142,16 @@ def extract_JNT_df(df):
 
     # print(df['Left hip'].iloc[:, 0].astype(float))
     df_jnt['hipx'] = (df['Left hip'].iloc[:, 0].astype(float) + df['Right hip'].iloc[:, 0].astype(float)) / (2 * 1000)
+
+    # For 'Rfoot', 'Lfoot', if the value is < -150 add 360 to it
+    for foot in ['Rfoot', 'Lfoot']:
+        df_jnt[foot] = df_jnt[foot].astype(float)
+        df_jnt[foot] = df_jnt[foot].apply(lambda x: x + 360 if x < -150 else x)
+
+    if (df_jnt['Rfoot'] > 150).any():
+        df_jnt['Rfoot'] = df_jnt['Rfoot'] - 180
+    if(df_jnt['Lfoot'] > 150).any():
+        df_jnt['Lfoot'] = df_jnt['Lfoot'] - 180
     
     return df_jnt
 
@@ -201,22 +211,24 @@ def save_csv(df, file_name):
     return
 
 
-def plot(data_type='jnt', **kwargs):
+def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
 
-    if('df' in kwargs):
-        df = kwargs['df']
+    if('dataframe' in kwargs):
+        df = kwargs['dataframe']
     else:
         df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
     
 
-    if(kwargs['cycle'] == True):
-        kwargs['steps'] = False
+    if(cycle == True):
+        steps = False
 
-    if(kwargs['steps'] == True):
+    if(steps == True):
         df_step = pd.read_csv('%s/%s/%sstep.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id']))
-        tdowns = df_step[df_step['trial'] == kwargs['trial']][['touch down', 'touch down.1', 'touch down.2', 'touch down.3']].values.tolist()[0]
-        toffs = df_step[df_step['trial'] == kwargs['trial']][['toe off', 'toe off.1', 'toe off.2', 'toe off.3']].values.tolist()[0]
-        kwargs['cycle'] = False
+        tdowns1 = df_step[df_step['trial'] == kwargs['trial']][['touch down', 'touch down.2']].values.tolist()[0]
+        tdowns2 = df_step[df_step['trial'] == kwargs['trial']][['touch down.1', 'touch down.3']].values.tolist()[0]
+        toffs1 = df_step[df_step['trial'] == kwargs['trial']][['toe off', 'toe off.2']].values.tolist()[0]
+        toffs2 = df_step[df_step['trial'] == kwargs['trial']][['toe off.1', 'toe off.3']].values.tolist()[0]
+        cycle = False
     
     jnt_col = ['trunk', 'hipx']
     if(data_type=='grf'):
@@ -277,7 +289,7 @@ def plot(data_type='jnt', **kwargs):
 
     layout = go.Layout(
         xaxis=dict(
-            title='time (s)' if(kwargs['cycle']==False) else 'cycle (%)',
+            title='time (s)' if(cycle == False) else 'cycle (%)',
             # tickformat='.2f',
             # nticks=5, 
         ),
@@ -287,32 +299,58 @@ def plot(data_type='jnt', **kwargs):
 
     fig = go.Figure(data=traces, layout=layout)
 
-    if(kwargs['steps'] == True):
+    if(steps == True):
         numeric_df = df.select_dtypes(include=['number']).drop('time', axis=1, errors='ignore')
         min_value = numeric_df.min().min()
         max_value = numeric_df.max().max()
 
-        for i, tdown in enumerate(tdowns):
+        for i, tdown in enumerate(tdowns1):
             y_range = [min_value, max_value]
             fig.add_trace(go.Scatter(
                 x=[tdown, tdown],
                 y=[y_range[0], y_range[1]],  # Use the determined or default y-range
                 mode="lines",
-                name='tdown',
-                legendgroup='tdown',
+                name='tdowns1',
+                legendgroup='tdown1',
                 line=dict(color='RoyalBlue', width=2, dash='longdashdot'),
                 hoverinfo='x',
                 showlegend=(i==0)
             ))
 
-        for i, toff in enumerate(toffs):
+        for i, tdown in enumerate(tdowns2):
+            y_range = [min_value, max_value]
+            fig.add_trace(go.Scatter(
+                x=[tdown, tdown],
+                y=[y_range[0], y_range[1]],  # Use the determined or default y-range
+                mode="lines",
+                name='tdowns2',
+                legendgroup='tdown2',
+                line=dict(color='RoyalBlue', width=2, dash='longdashdot'),
+                hoverinfo='x',
+                showlegend=(i==0)
+            ))
+
+        for i, toff in enumerate(toffs1):
             y_range = [min_value, max_value]
             fig.add_trace(go.Scatter(
                 x=[toff, toff],
                 y=[y_range[0], y_range[1]],  # Use the determined or default y-range
                 mode="lines",
-                name='toff',
-                legendgroup='toff',
+                name='toffs1',
+                legendgroup='toff1',
+                line=dict(color='rebeccapurple', width=2, dash='longdashdot'),
+                hoverinfo='x',
+                showlegend=(i==0)
+            ))
+
+        for i, toff in enumerate(toffs2):
+            y_range = [min_value, max_value]
+            fig.add_trace(go.Scatter(
+                x=[toff, toff],
+                y=[y_range[0], y_range[1]],  # Use the determined or default y-range
+                mode="lines",
+                name='toffs2',
+                legendgroup='toff2',
                 line=dict(color='rebeccapurple', width=2, dash='longdashdot'),
                 hoverinfo='x',
                 showlegend=(i==0)

@@ -5,6 +5,7 @@ import numpy as np
 import os
 from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
+from sklearn.impute import KNNImputer
 import json
 
 app = Flask(__name__)
@@ -53,23 +54,59 @@ def receive_data():
 
 
 def extract_stp(filepath, sid, trial):
+
+    def knn_impute(data_type = 'jnt', **kwargs):
+        df = kwargs['dataframe']
+        df.columns = df.columns.str.strip()
+
+        if('' in df.columns):
+            df = df.drop(columns=[''])
+
+        columns = ['time', '#frame']
+        existing_columns_to_drop = [col for col in columns if col in df.columns]
+
+        df_knn = df.drop(columns=existing_columns_to_drop)
+
+        knn_imputer = KNNImputer(n_neighbors=5, weights='uniform')
+
+        df_knn_imputed = pd.DataFrame(
+            knn_imputer.fit_transform(df_knn), columns=df_knn.columns)
+
+        for col in columns:
+            if col in df.columns:
+                df_knn_imputed[col] = df[col]
+
+        return df_knn_imputed
+    
     jnts = pd.read_csv(filepath + "_jnt.csv")
+    jnts = knn_impute(dataframe = jnts, data_type='jnt')
     grfs = pd.read_csv(filepath + "_grf.csv")
+
+    parent_dir = os.path.abspath(os.path.join(filepath, "../../"))
+    demographic_file_path = os.path.join(parent_dir, "demographic.csv")
+    dem = pd.read_csv(demographic_file_path)
 
     directory = os.path.dirname(filepath)
     sts = pd.read_csv(directory + "/" + sid + "step.csv")
-    
+
+    jnts.columns = jnts.columns.str.strip()
+    grfs.columns = grfs.columns.str.strip()
+    dem.columns = dem.columns.str.strip()
+
+    thigh = dem[dem['id'] == sid]['thigh'].values[0]
+    shank = dem[dem['id'] == sid]['shank'].values[0]
+
     first_step = sts[sts['trial'] == trial].footing.values[0]
     trials = list(sts['trial'])
-    
+
     trial_index = trials.index(trial)
 
     TDs = sts.filter(like='touch').values[trial_index]
     LOs = sts.filter(like='off').values[trial_index]
 
-    timeswing1 = LOs[1] - TDs[1]  # right swing phase
+    timeswing1 = LOs[1] - TDs[1]
     timeswing2 = LOs[0] - TDs[0]
-    timegait1 = TDs[3] - TDs[1]  # right gait cycle
+    timegait1 = TDs[3] - TDs[1]
     timegait2 = TDs[2] - TDs[0]
 
     timeRswing = timeswing1 if first_step == 'L' else timeswing2
@@ -84,21 +121,21 @@ def extract_stp(filepath, sid, trial):
     hipx = jnts.hipx.values
 
     # Nan values in hipx
-    if(type(hipx[0]) == str):
-        hipx = np.array([float(value.strip()) if value.strip().lower() != 'nan' else np.nan for value in hipx])
-        hipx = hipx[~np.isnan(hipx.astype(float))]
+    # if(type(hipx[0]) == str):
+    #     hipx = np.array([float(value.strip()) if value.strip().lower() != 'nan' else np.nan for value in hipx])
+    
 
-    TD1 = int(round(TDs[1]*120))
-    TD2 = int(round(TDs[2]*120))
-    TD3 = int(round(TDs[3]*120))
+    TD1 = int(round(TDs[0]*120))
+    TD2 = int(round(TDs[1]*120))
+    TD3 = int(round(TDs[2]*120))
 
-    if(first_step == 'L'):
-        RstepLength = -np.cos(Rthigh[TD1]) -np.cos(Rshank[TD1]) + np.cos(Lthigh[TD1]) + np.cos(Lshank[TD1])
-        LstepLength = np.cos(Rthigh[TD2]) + np.cos(Rshank[TD2]) - np.cos(Lthigh[TD2]) - np.cos(Lshank[TD2])
+    if(first_step == 'R'):
+        RstepLength = -np.cos(Rthigh[TD1])*thigh - np.cos(Rshank[TD1])*shank + np.cos(Lthigh[TD1])*thigh + np.cos(Lshank[TD1])*shank
+        LstepLength =  np.cos(Rthigh[TD2])*thigh + np.cos(Rshank[TD2])*shank - np.cos(Lthigh[TD2])*thigh - np.cos(Lshank[TD2])*shank
 
     else:
-        RstepLength = -np.cos(Rthigh[TD2]) -np.cos(Rshank[TD2]) + np.cos(Lthigh[TD2]) + np.cos(Lshank[TD2])
-        LstepLength = np.cos(Rthigh[TD1]) + np.cos(Rshank[TD1]) - np.cos(Lthigh[TD1]) - np.cos(Lshank[TD1])
+        RstepLength = -np.cos(Rthigh[TD2])*thigh - np.cos(Rshank[TD2])*shank + np.cos(Lthigh[TD2])*thigh + np.cos(Lshank[TD2])*shank
+        LstepLength =  np.cos(Rthigh[TD1])*thigh + np.cos(Rshank[TD1])*shank - np.cos(Lthigh[TD1])*thigh - np.cos(Lshank[TD1])*shank
 
     GaitSpeed = np.mean((np.diff(hipx)*120)[TD1-1:TD3])
 

@@ -28,7 +28,7 @@ def filter_signal(x, t, cutoff, order):
     
     return xf_full
 
-def filter_df(df, cutoff=6, order=4, **kwargs):
+def filter_data(df, cutoff=6, order=4, **kwargs):
     df_filter = df.drop(columns=['#frame'])
     # convert columns to float
     df_filter = df_filter.astype(float)

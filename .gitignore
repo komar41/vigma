@@ -49,3 +49,8 @@ notebooks/__pycache__
 docker-compose.yml
 frontend/Dockerfile
 frontend/.env
+backend/Dockerfile
+backend/app.py
+backend/data.json
+backend/payload.json
+backend/requirements.txt

@@ -4,11 +4,11 @@
 
 ## Step 1: Install Anaconda
 
-Follow this [guide](<(https://docs.anaconda.com/free/anaconda/install/index.html)>) to install Anaconda.
+Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
 
 ## Step 2: Install Node
 
-Follow this [link](<(https://nodejs.org/en/download/prebuilt-installer)>) to install Node. Prebuilt installer is the easiest way to do perform installation.
+Follow this [link](https://nodejs.org/en/download/prebuilt-installer) to install Node. Prebuilt installer is the easiest way to do perform installation.
 
 # Project Setup
 

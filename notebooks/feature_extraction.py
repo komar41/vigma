@@ -54,13 +54,13 @@ def motionToJointAngle(file_location, patient_id, trial, save = False):
 def extract_stp(filepath, pid, trial):
     jnts = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_jnt.csv")
     jnts = knn_impute(dataframe = jnts, data_type='jnt')
-    grfs = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_grf.csv")
+    # grfs = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_grf.csv")
     dem = pd.read_csv(filepath + '/' + "demographic.csv")
 
     sts = pd.read_csv(filepath + "/" + pid + '/' + pid + "step.csv")
 
     jnts.columns = jnts.columns.str.strip()
-    grfs.columns = grfs.columns.str.strip()
+    # grfs.columns = grfs.columns.str.strip()
     dem.columns = dem.columns.str.strip()
 
     thigh = dem[dem['id'] == pid]['thigh'].values[0]

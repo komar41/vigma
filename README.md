@@ -6,6 +6,7 @@
 
 - Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
 - Follow this [link](https://nodejs.org/en/download/prebuilt-installer) to install Node. Prebuilt installer is the easiest way to perform installation.
+- Visual Studio Code
 
 ## Project Setup
 
@@ -87,4 +88,6 @@ Follow this [link](https://github.com/komar41/eMoGis/blob/Docker/notebooks/READM
   npm start
   ```
 
-  This will open a tab in your browser and you're all set to use eMoGis Visua Analytics system.
+  This will open a tab in your browser and you're all set to use **eMoGis** visual analytics (VA) system. We added some mock data inside the **"eMoGis/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
+
+  Follow along this [video]() to learn how to load the data and use the VA system.

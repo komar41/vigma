@@ -216,14 +216,14 @@ def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
     if('dataframe' in kwargs):
         df = kwargs['dataframe']
     else:
-        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
+        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
     
 
     if(cycle == True):
         steps = False
 
     if(steps == True):
-        df_step = pd.read_csv('%s/%s/%sstep.csv' % (kwargs['file_location'], kwargs['patient_id'], kwargs['patient_id']))
+        df_step = pd.read_csv('%s/%s/%sstep.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id']))
         tdowns1 = df_step[df_step['trial'] == kwargs['trial']][['touch down', 'touch down.2']].values.tolist()[0]
         tdowns2 = df_step[df_step['trial'] == kwargs['trial']][['touch down.1', 'touch down.3']].values.tolist()[0]
         toffs1 = df_step[df_step['trial'] == kwargs['trial']][['toe off', 'toe off.2']].values.tolist()[0]

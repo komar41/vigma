@@ -61,6 +61,10 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
   npm install --legacy-peer-deps
   ```
 
+## Use the Python Library
+
+Follow this [link](https://github.com/komar41/eMoGis/blob/Docker/notebooks/README.md) to learn how to use the **eMoGis** python library.
+
 ## Run the application
 
 - Open a terminal inside the eMoGis folder. Run the following commands in the terminal:
@@ -83,4 +87,4 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
   npm start
   ```
 
-  This will open a tab in your browser and you're all set to use eMoGis system.
+  This will open a tab in your browser and you're all set to use eMoGis Visua Analytics system.

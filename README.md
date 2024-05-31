@@ -8,7 +8,7 @@ Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) 
 
 ## Step 2: Install Node
 
-Follow this [link](https://nodejs.org/en/download/prebuilt-installer) to install Node. Prebuilt installer is the easiest way to do perform installation.
+Follow this [link](https://nodejs.org/en/download/prebuilt-installer) to install Node. Prebuilt installer is the easiest way to perform installation.
 
 # Project Setup
 
@@ -69,13 +69,17 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
 - Open a terminal inside the eMoGis folder. Run the following commands in the terminal:
 
   ```bash
+  # Navigate to the backend directory
   cd backend
+  # Start the server
   python server.py
   ```
 
 - Open another terminal inside the eMoGis folder. Run the following commands in the terminal:
   ```bash
+  # Navigate to the frontend directory
   cd frontend
+  # Start the web application
   npm start
   ```
   This will open a tab in your browser and you're all set to use eMoGis system.

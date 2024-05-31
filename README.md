@@ -71,15 +71,19 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
   ```bash
   # Navigate to the backend directory
   cd backend
+
   # Start the server
   python server.py
   ```
 
 - Open another terminal inside the eMoGis folder. Run the following commands in the terminal:
+
   ```bash
   # Navigate to the frontend directory
   cd frontend
+
   # Start the web application
   npm start
   ```
+
   This will open a tab in your browser and you're all set to use eMoGis system.

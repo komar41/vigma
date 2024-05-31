@@ -2,15 +2,12 @@
 
 [Video guide]() of all the steps for Windows users.
 
-## Step 1: Install Anaconda
+## Software Installations
 
-Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
+- Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
+- Follow this [link](https://nodejs.org/en/download/prebuilt-installer) to install Node. Prebuilt installer is the easiest way to perform installation.
 
-## Step 2: Install Node
-
-Follow this [link](https://nodejs.org/en/download/prebuilt-installer) to install Node. Prebuilt installer is the easiest way to perform installation.
-
-# Project Setup
+## Project Setup
 
 Download a zipped version of emogis from [here](https://github.com/komar41/eMoGis). Check the image below for reference on how to download the zip file from the link.
 
@@ -64,7 +61,7 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
   npm install --legacy-peer-deps
   ```
 
-# Run the application
+## Run the application
 
 - Open a terminal inside the eMoGis folder. Run the following commands in the terminal:
 

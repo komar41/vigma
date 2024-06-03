@@ -79,7 +79,7 @@ print(df.head())
 
 ### `extract_stp()`
 
-- Reads joint angle (CSV) and demographic data (CSV) files, processes the data, and calculates step parameters for one trial.
+- Reads joint angle (CSV) and demographic data (CSV) files, processes the data, and calculates step parameters for **one trial**. Returns the resulting tuple of step parameters for the trial.
 
 **Parameters:**
 
@@ -110,7 +110,7 @@ print("RstepLength: %f, LstepLength: %f, timeRswing: %f, timeLswing: %f, timeRGa
 
 ### `get_stp_params()`
 
-- Extracts step parameters for all trials of a patient, returns the resulting DataFrame, and optionally saves the result as a CSV file.
+- Reads joint angle (CSV) and demographic data (CSV) files, processes the data, and calculates step parameters for **all trials** of a patient. Returns the resulting DataFrame, and optionally saves the result as a CSV file.
 
 **Parameters:**
 
@@ -390,3 +390,5 @@ patient_id = "022318xz"
 
 emogis.load_data(file_dir, patient_id, group='healthy_controls')
 ```
+
+<Heading- Data Formats. For RAW CSVs. Add SS of csv. SEE grf jnt step formats from here- add link to first notebook SSs.>

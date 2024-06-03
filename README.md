@@ -96,6 +96,8 @@ This short [video]() illustrates how to setup the project.
 
 This short [video]() illustrates how to run the application and generate visualizations.
 
+<Heading- Data Formats. For GRF JNT STEP. Add SS of csvs.>
+
 ## Use the Python API
 
 Follow this [link](https://github.com/komar41/eMoGis/blob/main/notebooks/README.md) to learn how to use the **eMoGis** python API. You can also watch this short [video tutorial]() to learn the usage of the Python API.

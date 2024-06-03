@@ -1,11 +1,11 @@
 # How to use
 
-The API for **eMoGis** can be summarized for the following tasks:
+The API for **eMoGis** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
 
-- Format conversion.
-- Feature extraction.
-- Data proessing.
-- Other utilities: plotting, loading data to user interface, etc.
+- **Format Conversion**: Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
+- **Feature Extraction**: Extract meaningful features from the motion capture data, such as joint angles, step parameters, and more.
+- **Data Processing**: Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
+- **Utility Functions**: Plot data for visualization, load data into user interfaces, and organize data for analysis.
 
 We have provided some mock data to let the users test the utilities of the library. The mock data should be inside **"eMoGis/notebooks/data"** folder. You should follow the same hierarchy and naming conventions for data storage displayed in the image below.
 
@@ -88,7 +88,7 @@ print(df.head())
 ```Python
 import emogis
 
-file_dir = "./data/healthy"
+file_dir = "./data"
 patient_id = "081517ap"
 trial = 8
 
@@ -120,7 +120,7 @@ print("RstepLength: %f, LstepLength: %f, timeRswing: %f, timeLswing: %f, timeRGa
 ```Python
 from emogis
 
-file_dir = "./data/healthy"
+file_dir = "./data"
 patient_id = "081517ap"
 
 df = get_stp_params(file_dir, patient_id, save=True, replace=True)
@@ -158,7 +158,7 @@ patient_id = "022318xz"
 trial = 4
 
 df_imputed = emogis.knn_impute(file_dir = file_dir, patient_id = patient_id, trial = trial
-                                 data_type = 'jnt', save = False)
+                                 data_type = 'jnt', save = False) # same for mice_impute, interpolate_impute
 
 print(df_imputed.head())
 ```
@@ -257,6 +257,77 @@ print(df_filtered.head())
 
 - `DataFrame`: The resulting DataFrame after conversion.
 
+**Example:**
+
+```Python
+import emogis
+
+file_dir = './data'
+patient_id = "022318xz"
+trial = 4
+
+df_normalized = emogis.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
+
+print(df_normalized.head())
+```
+
+### `mark_step_times()`
+
+- Marks the step times for a trial and saves the step information to a CSV file.
+
+**Parameters:**
+
+- `file_dir (str)`: The directory where the data files are located.
+- `patient_id (str)`: The ID of the patient.
+- `trial (int)`: The trial number.
+- `L (list)`: List of tuples containing left foot step times (touch down, toe off).
+- `R (list)`: List of tuples containing right foot step times (touch down, toe off).
+- `trialtype (str)`: The type of trial (e.g., 'walk')
+
+- `**kwargs`: Additional keyword arguments, including:
+  - `dataframe (DataFrame)`: The DataFrame to be normalized. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
+
+**Returns:**
+
+- `None`: Saves the step times to a CSV file.
+
+**Example:**
+
+```Python
+import emogis
+
+file_dir = './data'
+patient_id = "022318xz"
+trial = 4
+
+Left = [(2.285, 2.9783), (3.4, 4.0833)]
+Right = [(2.8083, 3.5617), (3.9283, 4.7083)]
+trialtype = 'walk'
+
+emogis.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
+```
+
+## Utility functions
+
+### `plot()`
+
+- Plots data from a specified trial data file or dataframe, with options to 1) highlight steps, and 2) plotting for a specified gait cycle.
+
+**Parameters:**
+
+- `data_type (str)`: The type of data being imputed: 'grf' or 'jnt' (default is 'jnt').
+- `steps (bool)`: Whether to highlight step times in the plot (default is 'False').
+- `cycle`: Whether to normalize the data to a cycle (default is 'False').
+- `**kwargs`: Additional keyword arguments, including:
+  - `dataframe (DataFrame)`: The DataFrame to be plotted. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
+  - `file_dir (str)`: The directory where the data files are located.
+  - `patient_id (str)`: The ID of the patient.
+  - `trial (int)`: The trial number.
+
+**Returns:**
+
+- `None`: Displays the plot.
+
 **Example 1:**
 
 ```Python
@@ -266,10 +337,9 @@ file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df_filtered = emogis.filter_data(file_dir = file_dir, patient_id = patient_id, trial = trial
-                                 data_type = 'jnt', save = False)
-
-print(df_filtered.head())
+emogis.plot(data_type='jnt',
+               file_dir = file_dir, patient_id = patient_id, trial = trial,
+                    steps = True)
 ```
 
 **Example 2:**
@@ -281,13 +351,30 @@ file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df = emogis.motionToJointAngle(file_dir, patient_id, trial)
-df_imputed = emogis.mice_impute(dataframe = df,
-                                    data_type = 'jnt')
-df_filtered = emogis.filter_data(dataframe = df,
-                                    data_type = 'jnt',
-                                        save = True, replace = True,
-                                            file_dir = file_dir, patient_id = patient_id, trial = trial)
+df_normalized = emogis.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
 
-print(df_filtered.head())
+emogis.plot(df = df_normalized, data_type = 'jnt', cycle = True, hip = 'N')
+```
+
+### `load_data()`
+
+- Loads data files for a patient, categorizes them under a group (e.g., stroke) and uploads it to the directory of the visual analytics system.
+
+**Parameters:**
+
+- `file_dir (str)`: The directory where the data files are located.
+- `patient_id (str)`: The ID of the patient.
+- `group (str)`: The group or category for the processed data (default is 'misc').
+  **Returns:**
+- `None`: Copies the processed data to the specified directory.
+
+**Example:**
+
+```Python
+import emogis
+
+file_dir = './data'
+patient_id = "022318xz"
+
+emogis.load_data(file_dir, patient_id, group='healthy_controls')
 ```

@@ -14,7 +14,7 @@ This short [video]() illustrates how to perform these software installations.
 
 Download a zipped version of emogis from [here](https://github.com/komar41/eMoGis). Check the image below for reference on how to download the zip file from the link.
 
-<img src="download.png" width="600">
+<img src="download.png" width="800">
 
 Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
 

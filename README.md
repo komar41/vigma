@@ -14,6 +14,8 @@ This short [video]() illustrates how to perform these software installations.
 
 Download a zipped version of emogis from [here](https://github.com/komar41/eMoGis). Check the image below for reference on how to download the zip file from the link.
 
+<img src="download.png" width="600">
+
 Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
 
 - Run the following commands in the terminal to install the necessary dependencies for the **eMoGis** Python library (Ignore the lines with hash (**#**). Those are comments explaining each command):
@@ -94,4 +96,4 @@ This short [video]() illustrates how to run the application and generate visuali
 
 ## Use the Python API
 
-Follow this [link](https://github.com/komar41/eMoGis/blob/Docker/notebooks/README.md) to learn how to use the **eMoGis** python API. You can also watch this short [video tutorial]() to learn the usage of the Python API.
+Follow this [link](https://github.com/komar41/eMoGis/blob/main/notebooks/README.md) to learn how to use the **eMoGis** python API. You can also watch this short [video tutorial]() to learn the usage of the Python API.

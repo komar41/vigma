@@ -11,7 +11,7 @@ We have provided some mock data to let the users test the utilities of the libra
 
 <img src="data_storage.png" width="400">
 
-You can also check out this [notebook](https://github.com/komar41/eMoGis/blob/Docker/notebooks/_tutorial.ipynb) that illustrates how to use all functionalities of **eMoGis** Python API.
+You can also check out this [notebook](https://github.com/komar41/eMoGis/blob/main/notebooks/_tutorial.ipynb) that illustrates how to use all functionalities of **eMoGis** Python API.
 
 <a name="format-conversion"></a>
 

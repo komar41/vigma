@@ -365,7 +365,7 @@ trial = 4
 
 df_normalized = emogis.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
 
-emogis.plot(df = df_normalized, data_type = 'jnt', cycle = True, hip = 'N')
+emogis.plot(df = df_normalized, data_type = 'jnt', cycle = True)
 ```
 
 ### `load_data()`

@@ -126,7 +126,7 @@ print("RstepLength: %f, LstepLength: %f, timeRswing: %f, timeLswing: %f, timeRGa
 **Example:**
 
 ```Python
-from emogis
+import emogis
 
 file_dir = "./data"
 patient_id = "081517ap"

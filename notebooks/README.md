@@ -1,6 +1,6 @@
-# How to use
+# eMoGis Python: How to Use
 
-The API for **eMoGis** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
+The python API for **eMoGis** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
 
 - [**Format Conversion**](#format-conversion): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
 - [**Feature Extraction**](#feature-extraction): Extract meaningful features from the motion capture data, such as joint angles, step parameters, and more.
@@ -11,7 +11,7 @@ We have provided some mock data to let the users test the utilities of the libra
 
 <a name="format-conversion"></a>
 
-## Format Conversion
+## 1. Format Conversion
 
 ### `trcToCSV()` / `matToCSV()` / `c3dToCSV()`
 
@@ -43,7 +43,7 @@ print(df.head())
 
 <a name="feature-extraction"></a>
 
-## Feature Extraction
+## 2. Feature Extraction
 
 ### `motionToJointAngle()`
 
@@ -133,7 +133,7 @@ print(df.head())
 
 <a name="data-processing"></a>
 
-## Data Processing
+## 3. Data Processing
 
 ### `interpolate_impute()` / `knn_impute()` / `mice_impute()`
 
@@ -315,7 +315,7 @@ emogis.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
 
 <a name="utility-functions"></a>
 
-## Utility functions
+## 4. Utility functions
 
 ### `plot()`
 

@@ -2,12 +2,14 @@
 
 The API for **eMoGis** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
 
-- **Format Conversion**: Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
-- **Feature Extraction**: Extract meaningful features from the motion capture data, such as joint angles, step parameters, and more.
-- **Data Processing**: Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
-- **Utility Functions**: Plot data for visualization, load data into user interfaces, and organize data for analysis.
+- [**Format Conversion**](#format-conversion): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
+- [**Feature Extraction**](#feature-extraction): Extract meaningful features from the motion capture data, such as joint angles, step parameters, and more.
+- [**Data Processing**](#data-processing): Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
+- [**Utility Functions**](#utility-functions): Plot data for visualization, load data into user interfaces, and organize data for analysis.
 
 We have provided some mock data to let the users test the utilities of the library. The mock data should be inside **"eMoGis/notebooks/data"** folder. You should follow the same hierarchy and naming conventions for data storage displayed in the image below.
+
+<a name="format-conversion"></a>
 
 ## Format Conversion
 
@@ -38,6 +40,8 @@ df = emogis.trcToCSV(file_dir, patient_id, trial_no) # Same for: emogis.matToCSV
 
 print(df.head())
 ```
+
+<a name="feature-extraction"></a>
 
 ## Feature Extraction
 
@@ -126,6 +130,8 @@ patient_id = "081517ap"
 df = get_stp_params(file_dir, patient_id, save=True, replace=True)
 print(df.head())
 ```
+
+<a name="data-processing"></a>
 
 ## Data Processing
 
@@ -306,6 +312,8 @@ trialtype = 'walk'
 
 emogis.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
 ```
+
+<a name="utility-functions"></a>
 
 ## Utility functions
 

@@ -1,12 +1,14 @@
 # Installation Guide
 
-[Video guide]() of all the steps for Windows users.
+This guide provides detailed steps to install and set up the eMoGis system, including software installations, project setup, and running the application.
 
 ## Software Installations
 
 - Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
-- Follow this [link](https://nodejs.org/en/download/prebuilt-installer) to install Node. Prebuilt installer is the easiest way to perform installation.
-- Visual Studio Code
+- Follow this [link](https://nodejs.org/en/download/) to install Node. Prebuilt binaries/installer is the easiest way to perform installation.
+- Follow this [link](https://code.visualstudio.com/download) to download and install Visual Studio Code (vscode). You may use other code editors other than vscode as well.
+
+This short [video]() illustrates how to perform these software installations.
 
 ## Project Setup
 
@@ -62,9 +64,7 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
   npm install --legacy-peer-deps
   ```
 
-## Use the Python Library
-
-Follow this [link](https://github.com/komar41/eMoGis/blob/Docker/notebooks/README.md) to learn how to use the **eMoGis** python library.
+This short [video]() illustrates how to setup the project.
 
 ## Run the application
 
@@ -90,4 +90,8 @@ Follow this [link](https://github.com/komar41/eMoGis/blob/Docker/notebooks/READM
 
   This will open a tab in your browser and you're all set to use **eMoGis** visual analytics (VA) system. We added some mock data inside the **"eMoGis/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
 
-  Follow along this [video]() to learn how to load the data and use the VA system.
+This short [video]() illustrates how to run the application and generate visualizations.
+
+## Use the Python API
+
+Follow this [link](https://github.com/komar41/eMoGis/blob/Docker/notebooks/README.md) to learn how to use the **eMoGis** python API. You can also watch this short [video tutorial]() to learn the usage of the Python API.

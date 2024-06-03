@@ -9,7 +9,7 @@ The python API for **eMoGis** is designed to facilitate a variety of tasks relat
 
 We have provided some mock data to let the users test the utilities of the library. The mock data should be inside **"eMoGis/notebooks/data"** folder. You should follow the same hierarchy and naming conventions for data storage displayed in the image below.
 
-<img src="data_storage.png" width="400">
+<img src="data-storage.png" width="400">
 
 You can also check out this [notebook](https://github.com/komar41/eMoGis/blob/main/notebooks/_tutorial.ipynb) that illustrates how to use all functionalities of **eMoGis** Python API.
 

@@ -92,6 +92,8 @@ This short [video]() illustrates how to setup the project.
 
   This will open a tab in your browser and you're all set to use **eMoGis** visual analytics (VA) system. We added some mock data inside the **"eMoGis/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
 
+  <img src="data-storage.png" width="400">
+
 This short [video]() illustrates how to run the application and generate visualizations.
 
 ## Use the Python API

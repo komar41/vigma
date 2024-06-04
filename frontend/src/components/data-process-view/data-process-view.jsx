@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { LoadData } from "./loadData";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
+import { withStyles } from "@mui/styles";
 import axios from "axios";
 import LineChart from "../lineChart/lineChart";
 import { useTheme } from "@mui/material/styles";
@@ -8,6 +9,29 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import RadarChart from "../radar-chart/radar-chart";
 import BoxChart from "../box-chart/box-chart";
 import BoxTitle from "../box-chart/box-title";
+
+const styles = {
+  icon: {
+    position: "absolute",
+    top: 5,
+    left: 5,
+    width: "40px",
+    height: "40px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(25, 118, 210, 0.4)", // Change this to your preferred background color
+    color: "white",
+    borderRadius: "50%",
+    // fontSize: "1.2rem",
+  },
+};
+
+const Icon = withStyles(styles)(({ classes, children }) => (
+  <Typography className={classes.icon} style={{ fontSize: "1.2rem" }}>
+    {children}
+  </Typography>
+));
 
 export const DataProcessView = (props) => {
   const [activeGroupsRadar, setActiveGroupsRadar] = useState([true, true]);
@@ -222,8 +246,12 @@ export const DataProcessView = (props) => {
           item
           xs={12}
           sm={6}
-          style={{ height: isMdOrLarger ? "50%" : "33vh" }}
+          style={{
+            height: isMdOrLarger ? "50%" : "33vh",
+            position: "relative",
+          }}
         >
+          <Icon>1</Icon>
           <LineChart
             style={{ height: "100%", boxSizing: "border-box" }}
             chartData={lineChartsData[0]}
@@ -234,11 +262,15 @@ export const DataProcessView = (props) => {
           item
           xs={12}
           sm={6}
-          style={{ height: isMdOrLarger ? "50%" : "33vh" }}
+          style={{
+            height: isMdOrLarger ? "50%" : "33vh",
+            position: "relative",
+          }}
         >
+          <Icon>3</Icon>
           <LineChart
             style={{ height: "100%", boxSizing: "border-box" }}
-            chartData={lineChartsData[1]}
+            chartData={lineChartsData[2]}
           />
         </Grid>
       </Grid>
@@ -255,11 +287,15 @@ export const DataProcessView = (props) => {
           item
           xs={12}
           sm={6}
-          style={{ height: isLgOrLarger ? "50%" : "33vh" }}
+          style={{
+            height: isLgOrLarger ? "50%" : "33vh",
+            position: "relative",
+          }}
         >
+          <Icon>2</Icon>
           <LineChart
             style={{ height: "100%", boxSizing: "border-box" }}
-            chartData={lineChartsData[2]}
+            chartData={lineChartsData[1]}
           />
         </Grid>
 
@@ -267,8 +303,12 @@ export const DataProcessView = (props) => {
           item
           xs={12}
           sm={6}
-          style={{ height: isLgOrLarger ? "50%" : "33vh" }}
+          style={{
+            height: isLgOrLarger ? "50%" : "33vh",
+            position: "relative",
+          }}
         >
+          <Icon>4</Icon>
           <LineChart
             style={{ height: "100%", boxSizing: "border-box" }}
             chartData={lineChartsData[3]}

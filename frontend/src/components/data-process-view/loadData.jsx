@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
+import FlipIcon from "@mui/icons-material/Flip";
 
 import {
   ListSubheader,
@@ -375,10 +376,14 @@ export const LoadData = (props) => {
   const handleChange = (event) => {
     const { name, value, checked, type } = event.target;
 
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormData((prevState) => {
+      const newState = {
+        ...prevState,
+        [name]: type === "checkbox" ? checked : value,
+      };
+
+      return newState;
+    });
 
     if (name === "selectedColumn") {
       if (["AP", "ML", "VT"].includes(value)) {
@@ -448,6 +453,36 @@ export const LoadData = (props) => {
   const handleResetFilter = (e) => {
     setGlobalArray([]);
     setGlobalArray2([]);
+  };
+
+  const handleFlipParams = (e) => {
+    const {
+      panelOptions,
+      selectedCycle1,
+      selectedCycle2,
+      selectedFooting1,
+      selectedFooting2,
+    } = formData;
+
+    const updatedPanelOptions =
+      panelOptions === 1
+        ? 3
+        : panelOptions === 3
+        ? 1
+        : panelOptions === 2
+        ? 4
+        : 2;
+
+    const toggleSide = (side) => (side === "Right" ? "Left" : "Right");
+
+    setFormData({
+      ...formData,
+      panelOptions: updatedPanelOptions,
+      selectedCycle1: toggleSide(selectedCycle1),
+      selectedCycle2: toggleSide(selectedCycle2),
+      selectedFooting1: toggleSide(selectedFooting1),
+      selectedFooting2: toggleSide(selectedFooting2),
+    });
   };
 
   const handleSubmitForm = async (e) => {
@@ -893,7 +928,29 @@ export const LoadData = (props) => {
             alignItems: "center",
           }}
         >
-          <div style={{ flex: 1 }}></div> {/* Empty div for left space */}
+          <div
+            style={{ flex: 1, display: "flex", justifyContent: "flex-start" }}
+          >
+            <IconButton
+              style={{
+                marginTop: "-5px",
+                position: "relative",
+              }}
+              onClick={(e) => handleFlipParams(e)}
+              title="Flip parameter selections" // Simple browser tooltip
+            >
+              <FlipIcon />
+              <span
+                style={{
+                  position: "absolute",
+                  fontSize: "12px",
+                  opacity: 0,
+                }}
+              >
+                Flip parameter selections
+              </span>
+            </IconButton>
+          </div>
           <Button
             style={{ marginTop: "-5px" }}
             type="submit"
@@ -903,6 +960,7 @@ export const LoadData = (props) => {
           >
             Submit
           </Button>
+
           <div style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
             <IconButton
               style={{
@@ -911,7 +969,7 @@ export const LoadData = (props) => {
                 position: "relative",
               }}
               onClick={(e) => handleResetFilter(e)}
-              title="Reset Filters" // Simple browser tooltip
+              title="Reset filters" // Simple browser tooltip
             >
               <DeleteIcon />
               <span

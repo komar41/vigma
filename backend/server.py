@@ -96,6 +96,7 @@ def extract_stp(filepath, sid, trial):
     thigh = dem[dem['id'] == sid]['thigh'].values[0]
     shank = dem[dem['id'] == sid]['shank'].values[0]
 
+
     first_step = sts[sts['trial'] == trial].footing.values[0]
     trials = list(sts['trial'])
 
@@ -298,7 +299,7 @@ def process_form_data():
         group1Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group1Files]
         group2Files_loc = [fileLocation + file.split('/')[0] + '/' + file.split('/')[1].split('_')[0] + '/' + file.split('/')[1] for file in group2Files]
 
-        print(group2Files, group1Files)
+        # print(group2Files, group1Files)
         df_1, df_2, df_1_mnmx, df_2_mnmx = None, None, None, None
         dict_list_df1, dict_list_df2 = None, None
 

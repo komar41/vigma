@@ -403,14 +403,31 @@ const RadarChart = ({ chartData, labels, activeGroups, groupExploration }) => {
         .style("fill", "none")
         .style("pointer-events", "all") // Make sure the arc can trigger mouse events
         .on("mouseover", function (event) {
-          let tooltipContent = `Parameter:  ${dictStpParam[param]} <br> ${
-            labels["label1"]
-          }: ${meansDf1[param].toFixed(2)}`;
+          let tooltipContent = `Parameter:  ${dictStpParam[param]}`;
 
-          if (groupExploration) {
+          if (activeGroups[0]) {
+            tooltipContent += `<br> ${labels["label1"]}: ${meansDf1[
+              param
+            ].toFixed(2)}`;
+          }
+
+          // Check if meansDf1H object is not empty
+          if (activeGroups[0] && Object.keys(meansDf1H).length > 0) {
+            tooltipContent += `<br> ${labels["label1"]} (H): ${meansDf1H[
+              param
+            ].toFixed(2)}`;
+          }
+
+          if (activeGroups[1] && groupExploration) {
             tooltipContent += `<br>${labels["label2"]}: ${meansDf2[
               param
             ].toFixed(2)}`;
+
+            if (Object.keys(meansDf2H).length > 0) {
+              tooltipContent += `<br> ${labels["label2"]} (H): ${meansDf2H[
+                param
+              ].toFixed(2)}`;
+            }
           }
 
           tooltip

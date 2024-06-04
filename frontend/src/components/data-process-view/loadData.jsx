@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
+
 import {
   ListSubheader,
   Grid,
@@ -30,6 +33,8 @@ import "primeflex/primeflex.css";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 
+import { GlobalContext } from "../globalHighlight/GlobalContext";
+
 const names = [
   "RstepLength",
   "LstepLength",
@@ -51,6 +56,9 @@ const dictStpParam = {
 };
 
 export const LoadData = (props) => {
+  const { globalArray, setGlobalArray } = useContext(GlobalContext);
+  const { globalArray2, setGlobalArray2 } = useContext(GlobalContext);
+
   const [personName, setPersonName] = useState([]); // State for selected names
 
   const handleStpParam = (event) => {
@@ -351,7 +359,6 @@ export const LoadData = (props) => {
           const response = await axios.post("http://localhost:5000/send-data", {
             fileLocation: formData.fileLocation,
           });
-          console.log(response);
           NodeService.updateData(response.data);
           // Retrieve the updated tree structure
           NodeService.getTreeNodes().then((data) => setNodesGroup1(data));
@@ -437,6 +444,11 @@ export const LoadData = (props) => {
 
     return checkedFileTitles;
   }
+
+  const handleResetFilter = (e) => {
+    setGlobalArray([]);
+    setGlobalArray2([]);
+  };
 
   const handleSubmitForm = async (e) => {
     e.preventDefault();
@@ -620,7 +632,7 @@ export const LoadData = (props) => {
             size="small"
             fullWidth
             onClick={() => {
-              console.log("temp1FileLocation", formData.temp1FileLocation);
+              // console.log("temp1FileLocation", formData.temp1FileLocation);
               setFormData({
                 ...formData,
                 fileLocation: formData.temp1FileLocation,
@@ -877,10 +889,11 @@ export const LoadData = (props) => {
           lg={12}
           style={{
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "space-between",
             alignItems: "center",
           }}
         >
+          <div style={{ flex: 1 }}></div> {/* Empty div for left space */}
           <Button
             style={{ marginTop: "-5px" }}
             type="submit"
@@ -890,6 +903,28 @@ export const LoadData = (props) => {
           >
             Submit
           </Button>
+          <div style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+            <IconButton
+              style={{
+                marginTop: "-5px",
+                color: "red",
+                position: "relative",
+              }}
+              onClick={(e) => handleResetFilter(e)}
+              title="Reset Filters" // Simple browser tooltip
+            >
+              <DeleteIcon />
+              <span
+                style={{
+                  position: "absolute",
+                  fontSize: "12px",
+                  opacity: 0,
+                }}
+              >
+                Reset Filters
+              </span>
+            </IconButton>
+          </div>
         </Grid>
         {props.lgMatch && (
           <Grid item style={{ width: "100%", height: "100%" }}>

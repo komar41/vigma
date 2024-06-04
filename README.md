@@ -1,3 +1,5 @@
+<TODO- Intro. Add image of the system.>
+
 # Installation Guide
 
 This guide provides detailed steps to install and set up the eMoGis system, including software installations, project setup, and running the application.
@@ -96,7 +98,7 @@ This short [video]() illustrates how to setup the project.
 
 This short [video]() illustrates how to run the application and generate visualizations.
 
-<Heading- Data Formats. For GRF JNT STEP. Add SS of csvs.>
+<TODO- Heading- Data Formats. For GRF JNT STEP. Add SS of csvs.>
 
 ## Use the Python API
 

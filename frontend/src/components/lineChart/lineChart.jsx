@@ -4,12 +4,12 @@ import "./lineChart.css";
 import { GlobalContext } from "../globalHighlight/GlobalContext";
 
 const LineChart = ({ chartData }) => {
-  console.log(chartData.groupExploration, "groupExploration");
-  console.log(chartData.parameter, "attribute");
-  console.log(chartData.group1AllData, "group1AllData");
-  console.log(chartData.group2AllData, "group2AllData");
-  console.log(chartData.group1Data, "group1Data");
-  console.log(chartData.group2Data, "group2Data");
+  // console.log(chartData.groupExploration, "groupExploration");
+  // console.log(chartData.parameter, "attribute");
+  // console.log(chartData.group1AllData, "group1AllData");
+  // console.log(chartData.group2AllData, "group2AllData");
+  // console.log(chartData.group1Data, "group1Data");
+  // console.log(chartData.group2Data, "group2Data");
 
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
@@ -75,9 +75,6 @@ const LineChart = ({ chartData }) => {
       return newKeys;
     });
   };
-
-  // console.log(selectedKeysG1, "selectedKeysG1");
-  // console.log(selectedKeysG2, "selectedKeysG2");
 
   // Active groups
   const [activeGroups, setActiveGroups] = useState([true, true]);
@@ -795,6 +792,8 @@ const LineChart = ({ chartData }) => {
     activeGroups,
     selectedKeysRefG1.current,
     selectedKeysRefG2.current,
+    globalArray,
+    globalArray2,
   ]);
 
   // console.log(active, "active");

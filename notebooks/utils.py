@@ -224,6 +224,7 @@ def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
 
     if(steps == True):
         df_step = pd.read_csv('%s/%s/%sstep.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id']))
+        first_step = df_step[df_step['trial'] == kwargs['trial']].footing.values[0]
         tdowns1 = df_step[df_step['trial'] == kwargs['trial']][['touch down', 'touch down.2']].values.tolist()[0]
         tdowns2 = df_step[df_step['trial'] == kwargs['trial']][['touch down.1', 'touch down.3']].values.tolist()[0]
         toffs1 = df_step[df_step['trial'] == kwargs['trial']][['toe off', 'toe off.2']].values.tolist()[0]
@@ -310,7 +311,7 @@ def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
                 x=[tdown, tdown],
                 y=[y_range[0], y_range[1]],  # Use the determined or default y-range
                 mode="lines",
-                name='tdowns1',
+                name= 'tdowns (L)' if first_step == 'L' else 'tdowns (R)',
                 legendgroup='tdown1',
                 line=dict(color='RoyalBlue', width=2, dash='longdashdot'),
                 hoverinfo='x',
@@ -323,7 +324,7 @@ def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
                 x=[tdown, tdown],
                 y=[y_range[0], y_range[1]],  # Use the determined or default y-range
                 mode="lines",
-                name='tdowns2',
+                name='tdowns (R)' if first_step == 'L' else 'tdowns (L)',
                 legendgroup='tdown2',
                 line=dict(color='RoyalBlue', width=2, dash='longdashdot'),
                 hoverinfo='x',
@@ -336,7 +337,7 @@ def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
                 x=[toff, toff],
                 y=[y_range[0], y_range[1]],  # Use the determined or default y-range
                 mode="lines",
-                name='toffs1',
+                name='toffs (L)' if first_step == 'L' else 'toffs (R)',
                 legendgroup='toff1',
                 line=dict(color='rebeccapurple', width=2, dash='longdashdot'),
                 hoverinfo='x',
@@ -349,7 +350,7 @@ def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
                 x=[toff, toff],
                 y=[y_range[0], y_range[1]],  # Use the determined or default y-range
                 mode="lines",
-                name='toffs2',
+                name='toffs (R)' if first_step == 'L' else 'toffs (L)',
                 legendgroup='toff2',
                 line=dict(color='rebeccapurple', width=2, dash='longdashdot'),
                 hoverinfo='x',

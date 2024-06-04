@@ -689,14 +689,14 @@ export const LoadData = (props) => {
                 onChange={handleCheckboxChange}
                 name="allowGroupExploration"
                 color="primary"
-                size="large" // Makes the checkbox larger
+                size="small" // Makes the checkbox larger
               />
             }
             label="Dual group exploration"
             style={{ display: "flex", justifyContent: "center", width: "100%" }}
             labelPlacement="end"
             componentsProps={{
-              typography: { style: { fontSize: "1.1rem" } }, // Increases the label text size
+              typography: { style: { fontSize: "1rem" } }, // Increases the label text size
             }}
           />
         </Grid>

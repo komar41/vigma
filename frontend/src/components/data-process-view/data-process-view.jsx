@@ -316,6 +316,28 @@ export const DataProcessView = (props) => {
         </Grid>
       </Grid>
 
+      <Grid item xs={12} lg={4}>
+        <Grid item xs={12} style={{ height: "10vh" }}>
+          <BoxTitle
+            title="Spatiotemporal Summary"
+            labels={boxChartLabels}
+            chartData={boxChartData}
+            activeGroups={activeGroupsRadar}
+            setActiveGroups={setActiveGroupsRadar}
+            groupExploration={boxGroupExploration}
+          ></BoxTitle>
+        </Grid>
+        <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
+          <RadarChart
+            chartData={boxChartData}
+            labels={boxChartLabels}
+            style={{ boxSizing: "border-box" }}
+            activeGroups={activeGroupsRadar}
+            groupExploration={boxGroupExploration}
+          ></RadarChart>
+        </Grid>
+      </Grid>
+
       <Grid
         item
         container
@@ -354,27 +376,6 @@ export const DataProcessView = (props) => {
             ></BoxChart>
           </Grid>
         ))}
-      </Grid>
-      <Grid item xs={12} lg={4}>
-        <Grid item xs={12} style={{ height: "10vh" }}>
-          <BoxTitle
-            title="Spatiotemporal Comparison"
-            labels={boxChartLabels}
-            chartData={boxChartData}
-            activeGroups={activeGroupsRadar}
-            setActiveGroups={setActiveGroupsRadar}
-            groupExploration={boxGroupExploration}
-          ></BoxTitle>
-        </Grid>
-        <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
-          <RadarChart
-            chartData={boxChartData}
-            labels={boxChartLabels}
-            style={{ boxSizing: "border-box" }}
-            activeGroups={activeGroupsRadar}
-            groupExploration={boxGroupExploration}
-          ></RadarChart>
-        </Grid>
       </Grid>
     </Grid>
   );

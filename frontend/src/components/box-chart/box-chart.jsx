@@ -306,6 +306,7 @@ const BoxChart = ({
         })
       )
       .style("font-size", "12px")
+      .attr("opacity", 0.7)
       .style("font-family", "Roboto, sans-serif")
       .append("text")
       .attr("class", "axis-label")

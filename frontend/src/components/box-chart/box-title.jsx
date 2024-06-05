@@ -61,7 +61,8 @@ const BoxTitle = ({
         .text(title) // Use the title passed as prop
         .style("font-weight", "bold") // Make the text bold roboto
         .style("font-family", "Roboto, sans-serif")
-        .style("font-size", "18px");
+        .style("font-size", "18px")
+        .attr("opacity", 0.8);
 
       const legendYPosition = adjustedHeight / 4 + 10;
 

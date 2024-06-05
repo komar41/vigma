@@ -394,6 +394,7 @@ const LineChart = ({ chartData }) => {
       .style("font-size", "18px")
       .style("font-family", "Roboto, sans-serif")
       .style("font-weight", "bold")
+      .attr("opacity", 0.8)
       // .style("text-decoration", "underline")
       .text(dict[`${selectedColumn}`]);
 
@@ -408,7 +409,7 @@ const LineChart = ({ chartData }) => {
       )
       .style("text-anchor", "middle")
       .style("font-family", "Roboto, sans-serif")
-      .attr("opacity", 0.5)
+      .attr("opacity", 0.7)
       .text("Gait Cycle (%)");
 
     // Add y-axis label
@@ -421,7 +422,7 @@ const LineChart = ({ chartData }) => {
       .style("text-anchor", "middle")
       .style("font-family", "Roboto, sans-serif")
       // change opacity of the text
-      .style("opacity", 0.5);
+      .style("opacity", 0.7);
     if (
       selectedColumn === "AP" ||
       selectedColumn === "ML" ||

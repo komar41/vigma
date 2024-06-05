@@ -134,9 +134,10 @@ def get_stp_params(file_location, pid, save = False, replace = False):
     df = pd.DataFrame(stpParams, columns=['sid', 'trial', 'RstepLength', 'LstepLength', 'timeRswing', 'timeLswing', 'timeRgait', 'timeLgait', 'GaitSpeed'])
 
     if save == True:
-        if(replace == True):
-            df.to_csv(file_location + '/' + pid + '/' + pid + 'step.csv', index=False)
+        savepath = file_location + '/' + pid + '/' + pid + 'sptemp.csv'
+        if(replace == True or not os.path.exists(savepath)):
+            df.to_csv(file_location + '/' + pid + '/' + pid + 'sptmp.csv', index=False)
         else:
-            df.to_csv(file_location + '/' + pid + '/' + pid + 'step_n.csv', index=False)
+            df.to_csv(file_location + '/' + pid + '/' + pid + 'sptmp_n.csv', index=False)
 
     return df

@@ -49,7 +49,8 @@ def filter_data(data_type='jnt', cutoff=6, order=4, save=False, replace=False, *
         pid = kwargs['patient_id']
         trial = kwargs['trial']
         file_location = kwargs['file_dir']
-        if(replace):
+        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
+        if(replace or not os.path.exists(savepath)):
             df_filter.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
         else:
             df_filter.to_csv('%s/%s/%s_%s_%s_f.csv' % (file_location, pid, pid, trial, data_type), index=False)
@@ -76,7 +77,8 @@ def interpolate_impute(data_type='jnt', save = False, replace = False, **kwargs)
         pid = kwargs['patient_id']
         trial = kwargs['trial']
         file_location = kwargs['file_dir']
-        if(replace):
+        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
+        if(replace or not os.path.exists(savepath)):
             df_interpolate.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
         else:
             df_interpolate.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
@@ -114,7 +116,8 @@ def knn_impute(data_type = 'jnt', save = False, replace = False, **kwargs):
         pid = kwargs['patient_id']
         trial = kwargs['trial']
         file_location = kwargs['file_dir']
-        if(replace):
+        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
+        if(replace or not os.path.exists(savepath)):
             df_knn_imputed.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
         else:
             df_knn_imputed.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
@@ -147,7 +150,8 @@ def mice_impute(data_type='jnt', save = False, replace = False, **kwargs):
         pid = kwargs['patient_id']
         trial = kwargs['trial']
         file_location = kwargs['file_dir']
-        if(replace):
+        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
+        if(replace or not os.path.exists(savepath)):
             df_mice_imputed.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
         else:
             df_mice_imputed.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)

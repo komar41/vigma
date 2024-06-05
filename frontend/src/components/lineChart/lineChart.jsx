@@ -4,13 +4,6 @@ import "./lineChart.css";
 import { GlobalContext } from "../globalHighlight/GlobalContext";
 
 const LineChart = ({ chartData }) => {
-  // console.log(chartData.groupExploration, "groupExploration");
-  // console.log(chartData.parameter, "attribute");
-  // console.log(chartData.group1AllData, "group1AllData");
-  // console.log(chartData.group2AllData, "group2AllData");
-  // console.log(chartData.group1Data, "group1Data");
-  // console.log(chartData.group2Data, "group2Data");
-
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
   const tooltipRef = useRef(); // Ref for the tooltip

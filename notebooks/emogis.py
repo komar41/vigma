@@ -1,6 +1,6 @@
 from format_convert import *
 from feature_extraction import *
-from preprocessing import filter_data, interpolate_impute, knn_impute, mice_impute, normalize_data, mark_step_times
+from preprocessing import filter_data, interpolate_impute, knn_impute, mice_impute, normalize_data
 from utils import plot, load_data
 
 __all__ = [

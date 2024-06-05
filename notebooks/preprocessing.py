@@ -158,54 +158,6 @@ def mice_impute(data_type='jnt', save = False, replace = False, **kwargs):
 
     return df_mice_imputed
 
-''' mark step times '''
-
-def mark_step_times(file_dir, patient_id, trial, L, R, trialtype):
-
-    if(L[0][0] < L[1][0]):
-        p1, p2, p3, p4 = L[0], R[0], L[1], R[1]
-        f1, f2, f3, f4 = 'L', 'R', 'L', 'R'
-    else:
-        p1, p2, p3, p4 = R[0], L[0], R[1], L[1]
-        f1, f2, f3, f4 = 'R', 'L', 'R', 'L'
-
-    if os.path.exists('%s/%s/%sstep.csv' % (file_dir, patient_id, patient_id)):
-        df_step = pd.read_csv('%s/%s/%sstep.csv' % (file_dir, patient_id, patient_id))
-        
-        if not df_step[(df_step['trial'] == trial) & (df_step['trialtype'] == trialtype)].empty:
-            print('Step time for trial already exists. Do you want to overwrite: ? (y/n)')
-            answer = input()
-            if answer == 'y':
-                new_row = {'subject': patient_id, 'trial': trial, 'trialtype': trialtype, 'touch down': p1[0], 'toe off': p1[1], 'footing': f1, 'touch down.1': p2[0], 'toe off.1': p2[1], 'footing.1': f2, 'touch down.2': p3[0], 'toe off.2': p3[1], 'footing.2': f3, 'touch down.3': p4[0], 'toe off.3': p4[1], 'footing.3': f4}
-                df_step = df_step[(df_step['trial'] != trial) & (df_step['trialtype'] != trialtype)]
-                df_step = pd.concat([df_step, pd.DataFrame(new_row, index=[0])], ignore_index=True)
-
-                df_step = df_step.sort_values(by=['subject', 'trial'])
-                df_step = df_step.reset_index(drop=True)
-
-                df_step.columns = ['subject', 'trial', 'trialtype', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing']
-                df_step.to_csv('%s/%s/%sstep.csv' % (file_dir, patient_id, patient_id), index=False)
-            else:
-                print('Not overwriting')
-        
-        else:
-            new_row = {'subject': patient_id, 'trial': trial, 'trialtype': trialtype, 'touch down': p1[0], 'toe off': p1[1], 'footing': f1, 'touch down.1': p2[0], 'toe off.1': p2[1], 'footing.1': f2, 'touch down.2': p3[0], 'toe off.2': p3[1], 'footing.2': f3, 'touch down.3': p4[0], 'toe off.3': p4[1], 'footing.3': f4}
-            df_step = pd.concat([df_step, pd.DataFrame(new_row, index=[0])], ignore_index=True)
-
-            df_step = df_step.sort_values(by=['subject', 'trial'])
-            df_step = df_step.reset_index(drop=True)
-
-            df_step.columns = ['subject', 'trial', 'trialtype', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing']
-            df_step.to_csv('%s/%s/%sstep.csv' % (file_dir, patient_id, patient_id), index=False)
-
-    else:
-        new_row = {'subject': patient_id, 'trial': trial, 'trialtype': trialtype, 'touch down': p1[0], 'toe off': p1[1], 'footing': f1, 'touch down.1': p2[0], 'toe off.1': p2[1], 'footing.1': f2, 'touch down.2': p3[0], 'toe off.2': p3[1], 'footing.2': f3, 'touch down.3': p4[0], 'toe off.3': p4[1], 'footing.3': f4}
-        df_step = pd.DataFrame(new_row, index=[0])
-        df_step.columns = ['subject', 'trial', 'trialtype', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing', 'touch down', 'toe off', 'footing']
-        df_step.to_csv('%s/%s/%sstep.csv' % (file_dir, patient_id, patient_id), index=False)
-
-    return
-
 ''' normalize data '''
 
 def interpolate_data(df, min_points):

@@ -3,7 +3,7 @@
 The python API for **eMoGis** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
 
 - [**Format Conversion**](#format-conversion): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
-- [**Feature Extraction**](#feature-extraction): Extract meaningful features from the motion capture data, such as joint angles, step parameters, and more.
+- [**Feature Extraction**](#feature-extraction): Extract meaningful features from the motion capture data to joint angles, spatiotemporal parameters, step times, and more.
 - [**Data Processing**](#data-processing): Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
 - [**Utility Functions**](#utility-functions): Plot data for visualization, load data into user interfaces, and organize data for analysis.
 
@@ -75,6 +75,42 @@ trial = 4
 
 df = emogis.motionToJointAngle(file_dir, patient_id, trial, save=True)
 print(df.head())
+```
+
+### `mark_step_times()`
+
+- Marks the step times for a trial and saves the step information to a CSV file.
+
+**Parameters:**
+
+- `file_dir (str)`: The directory where the data files are located.
+- `patient_id (str)`: The ID of the patient.
+- `trial (int)`: The trial number.
+- `L (list)`: List of tuples containing left foot step times (touch down, toe off).
+- `R (list)`: List of tuples containing right foot step times (touch down, toe off).
+- `trialtype (str)`: The type of trial (e.g., 'walk')
+
+- `**kwargs`: Additional keyword arguments, including:
+  - `dataframe (DataFrame)`: The DataFrame to be normalized. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
+
+**Returns:**
+
+- `None`: Saves the step times to a CSV file.
+
+**Example:**
+
+```Python
+import emogis
+
+file_dir = './data'
+patient_id = "022318xz"
+trial = 4
+
+Left = [(2.285, 2.9783), (3.4, 4.0833)]
+Right = [(2.8083, 3.5617), (3.9283, 4.7083)]
+trialtype = 'walk'
+
+emogis.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
 ```
 
 ### `extract_stp()`
@@ -279,42 +315,6 @@ trial = 4
 df_normalized = emogis.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
 
 print(df_normalized.head())
-```
-
-### `mark_step_times()`
-
-- Marks the step times for a trial and saves the step information to a CSV file.
-
-**Parameters:**
-
-- `file_dir (str)`: The directory where the data files are located.
-- `patient_id (str)`: The ID of the patient.
-- `trial (int)`: The trial number.
-- `L (list)`: List of tuples containing left foot step times (touch down, toe off).
-- `R (list)`: List of tuples containing right foot step times (touch down, toe off).
-- `trialtype (str)`: The type of trial (e.g., 'walk')
-
-- `**kwargs`: Additional keyword arguments, including:
-  - `dataframe (DataFrame)`: The DataFrame to be normalized. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
-
-**Returns:**
-
-- `None`: Saves the step times to a CSV file.
-
-**Example:**
-
-```Python
-import emogis
-
-file_dir = './data'
-patient_id = "022318xz"
-trial = 4
-
-Left = [(2.285, 2.9783), (3.4, 4.0833)]
-Right = [(2.8083, 3.5617), (3.9283, 4.7083)]
-trialtype = 'walk'
-
-emogis.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
 ```
 
 <a name="utility-functions"></a>

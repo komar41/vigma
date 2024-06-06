@@ -206,8 +206,20 @@ def file_or_df(data):
     return df
 
 
-def save_csv(df, file_name):
-    df.to_csv(file_name, index=False)
+def save(file_dir, patient_id, trial, df, data_type='jnt', replace=False):
+    save_path = '%s/%s/%s_%s_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type)
+
+    if(replace or not os.path.exists(save_path)):
+        df.to_csv('%s/%s/%s_%s_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type), index=False)
+        print('File saved as %s_%s_%s.csv' % (patient_id, trial, data_type), '\n')
+
+    else:
+        i = 1
+        while os.path.exists(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '_' + data_type + '_' + str(i) + '.csv'):
+            i += 1
+        df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '_' + data_type + '_' + str(i) + '.csv', index=False)
+        print('File saved as %s_%s_%s_%s.csv' % (patient_id, trial, data_type, i), '\n')
+    
     return
 
 

@@ -6,24 +6,21 @@ import pandas as pd
 import os
 from preprocessing import knn_impute
 
-def motionToJointAngle(file_location, patient_id, trial, save = False):
-    '''
-    Convert motion file to joint angle file
-    Input: motion file (CSV)
-    Output: joint angle file (CSV)
-    '''
-    file = file_location + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '.csv'
-    df = pd.read_csv(file, header=None)
+def motionToJointAngle(save = False, replace = False, **kwargs):
 
-    columns = df.iloc[:2]
-    df = df.iloc[2:]
-    columns = columns.fillna('')
+    if('dataframe' in kwargs):
+        df = kwargs['dataframe']
+        columns = list(set(df.columns))
+    else:
+        df = pd.read_csv('%s/%s/%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial']), header=None)
+        columns = df.iloc[:2]
+        df = df.iloc[2:]
+        columns = columns.fillna('')
 
-    columns = pd.MultiIndex.from_arrays(columns.values.tolist())
-    df.columns = columns
+        columns = pd.MultiIndex.from_arrays(columns.values.tolist())
+        df.columns = columns
 
     columns = [c[0] for c in columns]
-
     columns = [c for c in columns if c not in ('frame#', 'time')]
     columns = list(set(columns))
 
@@ -34,20 +31,16 @@ def motionToJointAngle(file_location, patient_id, trial, save = False):
         df = df.rename(columns=rename_cols)
 
     df = extract_JNT_df(df)
-    
-    # Extract filename using regex
-    # regex = r"([^\\\/]+?)(?=\.csv)"
-    # match = re.search(regex, file_dir)
-    # filename = (match.group(1))
 
-    # pattern = r".+\/(?=[^\/]+\.csv)"
-    # match = re.search(pattern, file_dir)
-    # filepath = match.group(0) if match else None
-
-    if(save == True): df.to_csv(file_location + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '_jnt.csv', index=False)
-
-    # os.makedirs('data/output', exist_ok=True)
-    # df.to_csv('data/output/' + filename + '_jnt.csv', index=False)
+    if(save):
+        pid = kwargs['patient_id']
+        trial = kwargs['trial']
+        file_location = kwargs['file_dir']
+        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, 'jnt')
+        if(replace or not os.path.exists(savepath)):
+            df.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, 'jnt'), index=False)
+        else:
+            df.to_csv('%s/%s/%s_%s_%s_j.csv' % (file_location, pid, pid, trial, 'jnt'), index=False)
 
     return df
     

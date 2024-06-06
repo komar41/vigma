@@ -19,6 +19,8 @@ You can also check out this [notebook](https://github.com/komar41/eMoGis/blob/ma
 
 ## 1. Format Conversion
 
+<!-- Add replace to all three function parameters -->
+
 ### `trcToCSV()` / `matToCSV()` / `c3dToCSV()`
 
 - Converts a TRC or, MAT or, C3D file to a CSV file, stores in the same directory from where data is read and returns the resulting DataFrame.
@@ -393,4 +395,6 @@ patient_id = "022318xz"
 emogis.load_data(file_dir, patient_id, group='healthy_controls')
 ```
 
-<Heading- Data Formats. For RAW CSVs. Add SS of csv. SEE grf jnt step formats from here- add link to first notebook SSs.>
+<!-- Add save utility function-->
+
+<!-- Heading- Data Formats. For RAW CSVs. Add SS of csv. SEE grf jnt step formats from here- add link to first notebook SSs. -->

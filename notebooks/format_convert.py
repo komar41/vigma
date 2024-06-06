@@ -12,7 +12,7 @@ warnings.filterwarnings(
     "ignore", message="No analog data found in file.")
 
 
-def trcToCSV(file_dir, patient_id, trial_no):
+def trcToCSV(file_dir, patient_id, trial_no, replace = False):
     """
     To get metadata from trc file:
     mocap_data = TRCData()
@@ -59,12 +59,21 @@ def trcToCSV(file_dir, patient_id, trial_no):
     df_cols = pd.MultiIndex.from_tuples(col_tuples)
     df.columns = df_cols
 
-    df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv', index=False)
+    save_filepath = file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv'
+    if(replace or not os.path.exists(save_filepath)):
+        df.to_csv(save_filepath, index=False)
+        print('File saved as %s_%s.csv' % (patient_id, trial_no), '\n')
+    else:
+        i = 1
+        while os.path.exists(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '_' + str(i) + '.csv'):
+            i += 1
+        df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '_' + str(i) + '.csv', index=False)
+        print('File saved as %s_%s_%s.csv' % (patient_id, trial_no, i), '\n')
 
     return df
 
 
-def matToCSV(file_dir, patient_id, trial_no):
+def matToCSV(file_dir, patient_id, trial_no, replace = False):
     '''
     Read the MAT file into a Pandas dataframe.
     '''
@@ -108,12 +117,21 @@ def matToCSV(file_dir, patient_id, trial_no):
               column='time',
               value=col_time)
 
-    df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv', index=False)
+    save_filepath = file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv'
+    if(replace or not os.path.exists(save_filepath)):
+        df.to_csv(save_filepath, index=False)
+        print('File saved as %s_%s.csv' % (patient_id, trial_no), '\n')
+    else:
+        i = 1
+        while os.path.exists(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '_' + str(i) + '.csv'):
+            i += 1
+        df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '_' + str(i) + '.csv', index=False)
+        print('File saved as %s_%s_%s.csv' % (patient_id, trial_no, i), '\n')
 
     return df
 
 
-def c3dToCSV(file_dir, patient_id, trial_no):
+def c3dToCSV(file_dir, patient_id, trial_no, replace = False):
 
     file = file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.c3d'
     with open(file, "rb") as handle:
@@ -150,6 +168,15 @@ def c3dToCSV(file_dir, patient_id, trial_no):
                   column='time',
                   value=col_time)
 
-        df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv', index=False)
+    save_filepath = file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '.csv'
+    if(replace or not os.path.exists(save_filepath)):
+        df.to_csv(save_filepath, index=False)
+        print('File saved as %s_%s.csv' % (patient_id, trial_no), '\n')
+    else:
+        i = 1
+        while os.path.exists(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '_' + str(i) + '.csv'):
+            i += 1
+        df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial_no) + '_' + str(i) + '.csv', index=False)
+        print('File saved as %s_%s_%s.csv' % (patient_id, trial_no, i), '\n')
 
         return df

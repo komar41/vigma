@@ -338,7 +338,6 @@ const LineChart = ({ chartData }) => {
             .attr("stroke", "#fc8d62")
             .attr("stroke-dasharray", "10")
             .attr("opacity", 0.5)
-            // .attr("class", "line group1")
             .attr(
               "d",
               d3
@@ -346,6 +345,7 @@ const LineChart = ({ chartData }) => {
                 .x((d) => x(d.time))
                 .y((d) => y(d.col))
             );
+
           // Then, append the transparent, wider "hit area" path
           svg
             .append("path")
@@ -353,7 +353,6 @@ const LineChart = ({ chartData }) => {
             .attr("fill", "none")
             .attr("stroke", "transparent") // Invisible stroke
             .attr("stroke-width", 5) // Adjust the width to increase the hit area size
-            // .attr("class", "line group1")
             .attr(
               "d",
               d3
@@ -363,11 +362,46 @@ const LineChart = ({ chartData }) => {
             )
             .on("mouseover", function (event, d) {
               visibleLine.attr("class", "line-highlight");
-              tooltip.style("opacity", 0.9);
+
+              const [mouseX, mouseY] = d3.pointer(event);
+              const tooltipText = `${key}`;
+
+              // Append tooltip container
+              const tooltip = svg
+                .append("g")
+                .attr("class", "tooltip")
+                .style("pointer-events", "none")
+                .style("opacity", 0);
+
+              // Append tooltip text
+              const textElement = tooltip
+                .append("text")
+                .attr("x", mouseX + 15)
+                .attr("y", mouseY - 15)
+                .attr("fill", "black")
+                .text(tooltipText);
+
+              // Get the width of the text element
+              const textWidth = textElement.node().getBBox().width;
+
+              // Append tooltip background
               tooltip
-                .html(key) // Display the key as tooltip text
-                .style("left", event.pageX + 10 + "px") // Position tooltip right to the cursor
-                .style("top", event.pageY - 28 + "px");
+                .append("rect")
+                .attr("x", mouseX + 10)
+                .attr("y", mouseY - 28)
+                .attr("width", textWidth + 10) // Add some padding
+                .attr("height", 18) // Add some padding
+                .attr("rx", 4)
+                .attr("ry", 4)
+                .attr("fill", "white")
+                .attr("stroke", "black")
+                .attr("stroke-width", 0.5)
+                .style("opacity", 0.7);
+
+              // Move text to be on top of the rectangle
+              textElement.raise();
+
+              tooltip.style("opacity", 1);
             })
             .on("mouseout", function (d) {
               const isKeySelected = selectedKeysRefG1.current.includes(key);
@@ -375,9 +409,12 @@ const LineChart = ({ chartData }) => {
                 "class",
                 isKeySelected ? "line-highlight" : "line-normal"
               );
-              tooltip.style("opacity", 0);
+
+              // Remove tooltip
+              svg.selectAll(".tooltip").remove();
             })
             .on("click", () => handleLineClickG1(key, visibleLine));
+
           if (selectedKeysRefG1.current.includes(key)) {
             visibleLine.attr("class", "line-highlight");
           }
@@ -535,11 +572,45 @@ const LineChart = ({ chartData }) => {
             )
             .on("mouseover", function (event, d) {
               visibleLine.attr("class", "line-highlight-2");
-              tooltip.style("opacity", 0.9);
+              const [mouseX, mouseY] = d3.pointer(event);
+              const tooltipText = `${key}`;
+
+              // Append tooltip container
+              const tooltip = svg
+                .append("g")
+                .attr("class", "tooltip")
+                .style("pointer-events", "none")
+                .style("opacity", 0);
+
+              // Append tooltip text
+              const textElement = tooltip
+                .append("text")
+                .attr("x", mouseX + 15)
+                .attr("y", mouseY - 15)
+                .attr("fill", "black")
+                .text(tooltipText);
+
+              // Get the width of the text element
+              const textWidth = textElement.node().getBBox().width;
+
+              // Append tooltip background
               tooltip
-                .html(key) // Display the key as tooltip text
-                .style("left", event.pageX + 10 + "px") // Position tooltip right to the cursor
-                .style("top", event.pageY - 28 + "px");
+                .append("rect")
+                .attr("x", mouseX + 10)
+                .attr("y", mouseY - 28)
+                .attr("width", textWidth + 10) // Add some padding
+                .attr("height", 18) // Add some padding
+                .attr("rx", 4)
+                .attr("ry", 4)
+                .attr("fill", "white")
+                .attr("stroke", "black")
+                .attr("stroke-width", 0.5)
+                .style("opacity", 0.7);
+
+              // Move text to be on top of the rectangle
+              textElement.raise();
+
+              tooltip.style("opacity", 1);
             })
             .on("mouseout", function (d) {
               const isKeySelected = selectedKeysRefG2.current.includes(key);
@@ -547,7 +618,9 @@ const LineChart = ({ chartData }) => {
                 "class",
                 isKeySelected ? "line-highlight-2" : "line-normal-2"
               );
-              tooltip.style("opacity", 0);
+
+              // Remove tooltip
+              svg.selectAll(".tooltip").remove();
             })
             .on("click", () => handleLineClickG2(key, visibleLine));
 
@@ -804,30 +877,8 @@ const LineChart = ({ chartData }) => {
       {active ? (
         <>
           <svg ref={svgRef} style={{ width: "100%", height: "100%" }}></svg>
-          <div
-            ref={tooltipRef}
-            className="tooltip"
-            style={{
-              opacity: tooltipVisibility === "visible" ? 1 : 0,
-              position: "absolute",
-              left: `${tooltipPosition.left}px`,
-              top: `${tooltipPosition.top}px`,
-              pointerEvents: "none",
-              backgroundColor: "white",
-              padding: "5px",
-              border: "1px solid black",
-              // roboto font
-            }}
-          >
-            {tooltipContent}
-          </div>
         </>
       ) : (
-        /* <img
-          src="/placeholder.png"
-          alt="Placeholder"
-          style={{ width: "80%", height: "80%", marginTop: "10px" }}
-        /> */
         <div className="no-data"></div>
       )}
     </div>

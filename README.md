@@ -8,7 +8,7 @@ This guide provides detailed steps to install and set up the eMoGis system, incl
 
 - Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
 - Follow this [link](https://nodejs.org/en/download/) to install Node. Prebuilt binaries/installer is the easiest way to perform installation.
-- Follow this [link](https://code.visualstudio.com/download) to download and install Visual Studio Code (vscode). You may use code editors other than vscode as well.
+<!-- - Follow this [link](https://code.visualstudio.com/download) to download and install Visual Studio Code (vscode). You may use code editors other than vscode as well. -->
 
 This short [video]() illustrates how to perform these software installations.
 
@@ -34,7 +34,7 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
   conda activate ./envs
 
   # Install necessary Python libraries
-  conda install numpy pandas scipy scikit-learn matplotlib ipykernel fuzzywuzzy plotly
+  conda install numpy pandas scipy scikit-learn matplotlib ipykernel fuzzywuzzy plotly notebook
 
   # Install additional Python packages via pip
   pip install c3d

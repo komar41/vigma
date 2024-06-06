@@ -1,5 +1,7 @@
 # eMoGis Python: How to Use
 
+<!-- Open Anaconda Prompt. Change directory to emogis->notebook folder location. Open jupyter notebook. Create a new one or use _tutorial.ipynb. But mention that the notebook has to be inside emogis->notebooks folder. -->
+
 The python API for **eMoGis** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
 
 - [**Format Conversion**](#format-conversion): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.

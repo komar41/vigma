@@ -6,7 +6,6 @@ import { GlobalContext } from "../globalHighlight/GlobalContext";
 const LineChart = ({ chartData }) => {
   const svgRef = useRef();
   const containerRef = useRef(); // Ref for the container
-  const tooltipRef = useRef(); // Ref for the tooltip
 
   const [active, setActive] = useState(chartData.active);
   const selectedColumn = chartData.parameter;
@@ -23,11 +22,6 @@ const LineChart = ({ chartData }) => {
   const spreadOption = chartData.spreadOption;
 
   const [dimensions, setDimensions] = useState({ width: 450, height: 300 }); // State for dimensions
-
-  // New Tooltip states
-  const [tooltipContent] = useState("");
-  const [tooltipVisibility] = useState("hidden");
-  const [tooltipPosition] = useState({ left: 0, top: 0 });
 
   const { globalArray, setGlobalArray } = useContext(GlobalContext);
   const selectedKeysRefG1 = useRef(globalArray);
@@ -186,8 +180,6 @@ const LineChart = ({ chartData }) => {
 
     const overallAllDataMin = Math.min(group1AllMin, group2AllMin) - 0.005;
     const overallAllDataMax = Math.max(group1AllMax, group2AllMax) + 0.005;
-
-    const tooltip = d3.select(".tooltip");
 
     // Add Y axis
     var y = d3
@@ -694,8 +686,6 @@ const LineChart = ({ chartData }) => {
             const y2 = y(d2.m);
             circle2.attr("cx", x(d2.time)).attr("cy", y2).style("opacity", 1);
           }
-
-          const mouseY = d3.pointer(event)[1];
 
           // Define offsets and height adjustments
           const lineSpacing = 20; // Space between lines of text

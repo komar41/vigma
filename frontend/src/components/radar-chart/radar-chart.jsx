@@ -433,8 +433,8 @@ const RadarChart = ({ chartData, labels, activeGroups, groupExploration }) => {
           tooltip
             .style("display", "inline")
             .html(tooltipContent)
-            .style("left", event.pageX + 8 + "px")
-            .style("top", event.pageY + 8 + "px")
+            .style("left", event.pageX - 8 + "px")
+            .style("top", event.pageY - 8 + "px")
             .style("font-size", "12px");
         })
         .on("mouseout", function () {

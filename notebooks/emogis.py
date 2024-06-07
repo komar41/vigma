@@ -1,7 +1,7 @@
 from format_convert import *
 from feature_extraction import *
 from preprocessing import filter_data, interpolate_impute, knn_impute, mice_impute, normalize_data
-from utils import plot, load_data
+from utils import plot, load_data, save
 
 __all__ = [
     trcToCSV,
@@ -17,5 +17,6 @@ __all__ = [
     mark_step_times,
     normalize_data,
     plot,
-    load_data
+    load_data,
+    save
 ]

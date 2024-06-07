@@ -222,6 +222,13 @@ def save(file_dir, patient_id, trial, df, data_type='jnt', replace=False):
     
     return
 
+def read(file_dir, patient_id, trial, data_type='jnt'):
+    # jnt/grf/motion
+    
+    if(data_type == 'motion'): path = '%s/%s/%s_%s.csv' % (file_dir, patient_id, patient_id, trial)
+    path = '%s/%s/%s_%s_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type)
+    
+    return pd.read_csv(path)
 
 def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
 

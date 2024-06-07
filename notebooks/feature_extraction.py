@@ -1,25 +1,192 @@
 import re
 import math
-from utils import *
 import numpy as np
 import pandas as pd
 import os
+import time
+from fuzzywuzzy import fuzz
 from preprocessing import knn_impute
+from utils import remove_empty_columns
 
-def motionToJointAngle(save = False, replace = False, **kwargs):
+def closest_match(word, words_list):
+    '''
+    Find the closest match to a word in a list of words.
+    '''
+    max_v = 0
+    max_x = ''
 
-    if('dataframe' in kwargs):
-        df = kwargs['dataframe']
-        columns = list(set(df.columns))
+    if word == 'Left hip':
+        word_options = ['Left hip', 'Left  g trochanter']
+    elif word == 'Right hip':
+        word_options = ['Right hip', 'Right g trochanter']
+    elif word == 'Left toe':
+        word_options = ['Left toe', 'Left mth']
+    elif word == 'Right toe':
+        word_options = ['Right toe', 'Right mth']
     else:
-        df = pd.read_csv('%s/%s/%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial']), header=None)
-        columns = df.iloc[:2]
-        df = df.iloc[2:]
-        columns = columns.fillna('')
+        word_options = [word]
 
-        columns = pd.MultiIndex.from_arrays(columns.values.tolist())
-        df.columns = columns
+    for option in word_options:
+        for x in words_list:
+            ratio = fuzz.token_sort_ratio(option.lower(), x.lower())
+            if ratio > max_v:
+                max_v = ratio
+                max_x = x
 
+    return max_v, max_x
+
+
+def match_col_names(columns):
+    '''
+    Match column names to the expected format. 
+    If there are any missing, or if the names are not close enough to the expected format, return False. 
+    Else, return a dictionary of the column names to be renamed.
+    '''
+
+    # Left or lt, right or rt -> heel, toe, knee, ankle, hip or g trochanter, shoulder or mth
+    #
+    params = ['heel', 'toe', 'knee', 'ankle',
+              'hip', 'shoulder']
+
+    def lt(x): return 'Left '+x
+    def rt(x): return 'Right '+x
+    col_names = [f(x) for x in params for f in (lt, rt)]
+
+    # hip -> right.g.trochanter, left.g.trochanter
+    # toe -> right.mth, left.mth
+
+    missing_cols = []
+    rename_cols = {}
+    for c in col_names:
+        fuzz_ratio, cl_match = closest_match(c, columns)
+        rename_cols[cl_match] = c
+        if fuzz_ratio < 80:
+            missing_cols.append(c)
+
+    print('{:<25} {}'.format("Columns in CSV", 'Mapped Column'))
+    print('{:<25} {}'.format("______________", '_____________'))
+    for key, value in rename_cols.items():
+        print('{:<25} {}'.format(key, value))
+
+    # add 1 sec delay here
+    time.sleep(0.5)
+
+    check = input('\ncheck if column mapping is correct (y/n): ')
+
+    if (check == 'n') or (check == 'N'):
+        print('______________________________')
+        print('\nPossible missing columns in file: ', missing_cols,
+              '\nRename or add appropriate columns, and try again.')
+        return
+    else:
+        return rename_cols
+
+
+def cal_seg_angles(up_marker, low_marker):
+    '''
+    Calculate segment angles.
+    '''
+
+    xs = up_marker.iloc[:, 0] - low_marker.iloc[:, 0]
+    ys = up_marker.iloc[:, 2] - low_marker.iloc[:, 2]
+
+    angles = []
+    for x, y in zip(xs, ys):
+        if x == 0:
+            angle = math.pi / 2
+        else:
+            angle = math.atan2(y, x)
+
+        angles.append(math.degrees(angle))
+
+    return angles
+
+
+def extract_JNT_df(df):
+    '''
+    Extract joint angles from motion dataframe.
+    return: joint angle dataframe
+
+    Here, we calculate the angles between the segments like following:
+    foot (left, right) -> heel(up_marker), toe (low_marker)
+    shank (left, right) -> knee(up_marker), ankle (low_marker)
+    thigh (left, right) -> hip(up_marker), knee (low_marker)
+    trunk (left, right) -> (shoulder(up_marker) + hip(low_marker)) / 2
+    '''
+
+    def process_row(row, foot):
+        time_value = row['time']
+        foot_value = row[foot]
+        
+        if foot_value < -150:
+            row[foot] = foot_value + 360
+       
+        return row
+
+    df_jnt = pd.DataFrame()
+
+    df_jnt['time'] = df['time'].reset_index(drop=True)
+    df_jnt['#frame'] = df['frame#'].reset_index(drop=True)
+
+    seg = ['foot', 'shank', 'thigh', 'trunk']
+    mot = [('heel', 'toe'), ('knee', 'ankle'),
+           ('hip', 'knee'), ('shoulder', 'hip')]
+
+    
+    for i in range(len(seg)):
+        up_marker_rt = df['Right '+mot[i][0]].astype(float)
+        up_marker_lt = df['Left '+mot[i][0]].astype(float)
+        low_marker_rt = df['Right '+mot[i][1]].astype(float)
+        low_marker_lt = df['Left '+mot[i][1]].astype(float)
+
+        angles_rt = cal_seg_angles(up_marker_rt, low_marker_rt)
+        angles_rt = pd.Series(angles_rt, dtype=float)
+
+        angles_lt = cal_seg_angles(up_marker_lt, low_marker_lt)
+        angles_lt = pd.Series(angles_lt, dtype=float)
+
+        if (seg[i] == 'trunk'):
+            df_jnt['trunk'] = (angles_rt + angles_lt) / 2
+
+        else:
+            df_jnt['R'+seg[i]] = angles_rt
+            df_jnt['L'+seg[i]] = angles_lt
+
+    # print(df['Left hip'].iloc[:, 0].astype(float))
+    df_jnt['hipx'] = (df['Left hip'].iloc[:, 0].astype(float) + df['Right hip'].iloc[:, 0].astype(float)) / (2 * 1000)
+
+    if (df_jnt['Rfoot'] > 150).any():
+        df_jnt['Rfoot'] = df_jnt['Rfoot'] - 180
+    if(df_jnt['Lfoot'] > 150).any():
+        df_jnt['Lfoot'] = df_jnt['Lfoot'] - 180
+
+    # For 'Rfoot', 'Lfoot', if the value is < -150 add 360 to it
+    for foot in ['Rfoot', 'Lfoot']:
+        df_jnt[foot] = df_jnt[foot].astype(float)
+        df_jnt = df_jnt.apply(process_row, axis=1, args=(foot,))
+
+    start_time = 0
+    end_time = df_jnt['time'].iloc[-1]
+    new_time = np.arange(start_time, end_time, 1/120)
+    new_time = np.append(new_time, df_jnt['time'].iloc[-1])
+    # remove first element from new_time
+    new_time = new_time[1:]
+
+    new_df_jnt = pd.DataFrame(index=new_time)
+
+    # Interpolate the values for the new time intervals
+    for column in df_jnt.columns:
+        if column != 'time':
+            new_df_jnt[column] = np.interp(new_time, df_jnt['time'], df_jnt[column])
+
+    new_df_jnt['time'] = new_time
+    new_df_jnt = new_df_jnt.reset_index(drop=True)
+
+    return new_df_jnt
+
+def motionToJointAngle(df, save = False, replace = False):
+
+    columns = list(set(df.columns))
     columns = [c[0] for c in columns]
     columns = [c for c in columns if c not in ('frame#', 'time')]
     columns = list(set(columns))
@@ -32,21 +199,13 @@ def motionToJointAngle(save = False, replace = False, **kwargs):
 
     df = extract_JNT_df(df)
 
-    if(save):
-        pid = kwargs['patient_id']
-        trial = kwargs['trial']
-        file_location = kwargs['file_dir']
-        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, 'jnt')
-        if(replace or not os.path.exists(savepath)):
-            df.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, 'jnt'), index=False)
-        else:
-            df.to_csv('%s/%s/%s_%s_%s_j.csv' % (file_location, pid, pid, trial, 'jnt'), index=False)
-
     return df
     
-def extract_stp(filepath, pid, trial):
+def extract_sptmp(filepath, pid, trial):
     jnts = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_jnt.csv")
-    jnts = knn_impute(dataframe = jnts, data_type='jnt')
+    jnts  = remove_empty_columns(jnts)
+    jnts = knn_impute(jnts, data_type='jnt')
+    
     # grfs = pd.read_csv(filepath + '/' + pid + '/' + pid + "_" + str(trial) + "_grf.csv")
     dem = pd.read_csv(filepath + '/' + "demographic.csv")
 
@@ -104,7 +263,7 @@ def extract_stp(filepath, pid, trial):
 
     return RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed
 
-def get_stp_params(file_location, pid, save = False, replace = False):
+def get_sptmp_params(file_location, pid):
     files = os.listdir(file_location + "/" + pid)
 
     pattern = r'_(\d+)_'
@@ -121,17 +280,10 @@ def get_stp_params(file_location, pid, save = False, replace = False):
     stpParams = []
 
     for trial in trials:
-        RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed = extract_stp(file_location, pid, trial)
+        RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed = extract_sptmp(file_location, pid, trial)
         stpParams.append([pid, trial, RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed])
 
     df = pd.DataFrame(stpParams, columns=['sid', 'trial', 'RstepLength', 'LstepLength', 'timeRswing', 'timeLswing', 'timeRgait', 'timeLgait', 'GaitSpeed'])
-
-    if save == True:
-        savepath = file_location + '/' + pid + '/' + pid + 'sptemp.csv'
-        if(replace == True or not os.path.exists(savepath)):
-            df.to_csv(file_location + '/' + pid + '/' + pid + 'sptmp.csv', index=False)
-        else:
-            df.to_csv(file_location + '/' + pid + '/' + pid + 'sptmp_n.csv', index=False)
 
     return df
 
@@ -149,6 +301,7 @@ def mark_step_times(file_dir, patient_id, trial, L, R, trialtype):
         
         if not df_step[(df_step['trial'] == trial) & (df_step['trialtype'] == trialtype)].empty:
             print('Step time for trial already exists. Do you want to overwrite: ? (y/n)')
+            time.sleep(0.5)
             answer = input()
             if answer == 'y':
                 new_row = {'subject': patient_id, 'trial': trial, 'trialtype': trialtype, 'touch down': p1[0], 'toe off': p1[1], 'footing': f1, 'touch down.1': p2[0], 'toe off.1': p2[1], 'footing.1': f2, 'touch down.2': p3[0], 'toe off.2': p3[1], 'footing.2': f3, 'touch down.3': p4[0], 'toe off.3': p4[1], 'footing.3': f4}

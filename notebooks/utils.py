@@ -1,191 +1,7 @@
-from fuzzywuzzy import fuzz
-import math
 import pandas as pd
-import numpy as np
-from scipy.signal import argrelextrema
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 import os
 import plotly.graph_objects as go
 import shutil
-
-def closest_match(word, words_list):
-    '''
-    Find the closest match to a word in a list of words.
-    '''
-    max_v = 0
-    max_x = ''
-
-    if word == 'Left hip':
-        word_options = ['Left hip', 'Left  g trochanter']
-    elif word == 'Right hip':
-        word_options = ['Right hip', 'Right g trochanter']
-    elif word == 'Left toe':
-        word_options = ['Left toe', 'Left mth']
-    elif word == 'Right toe':
-        word_options = ['Right toe', 'Right mth']
-    else:
-        word_options = [word]
-
-    for option in word_options:
-        for x in words_list:
-            ratio = fuzz.token_sort_ratio(option.lower(), x.lower())
-            if ratio > max_v:
-                max_v = ratio
-                max_x = x
-
-    return max_v, max_x
-
-
-def match_col_names(columns):
-    '''
-    Match column names to the expected format. 
-    If there are any missing, or if the names are not close enough to the expected format, return False. 
-    Else, return a dictionary of the column names to be renamed.
-    '''
-
-    # Left or lt, right or rt -> heel, toe, knee, ankle, hip or g trochanter, shoulder or mth
-    #
-    params = ['heel', 'toe', 'knee', 'ankle',
-              'hip', 'shoulder']
-
-    def lt(x): return 'Left '+x
-    def rt(x): return 'Right '+x
-    col_names = [f(x) for x in params for f in (lt, rt)]
-
-    # hip -> right.g.trochanter, left.g.trochanter
-    # toe -> right.mth, left.mth
-
-    missing_cols = []
-    rename_cols = {}
-    for c in col_names:
-        fuzz_ratio, cl_match = closest_match(c, columns)
-        rename_cols[cl_match] = c
-        if fuzz_ratio < 80:
-            missing_cols.append(c)
-
-    print('{:<25} {}'.format("Columns in CSV", 'Mapped Column'))
-    print('{:<25} {}'.format("______________", '_____________'))
-    for key, value in rename_cols.items():
-        print('{:<25} {}'.format(key, value))
-
-    check = input('\ncheck if column mapping is correct (y/n): ')
-
-    if (check == 'n') or (check == 'N'):
-        print('______________________________')
-        print('\nPossible missing columns in file: ', missing_cols,
-              '\nRename or add appropriate columns, and try again.')
-        return
-    else:
-        return rename_cols
-
-
-def cal_seg_angles(up_marker, low_marker):
-    '''
-    Calculate segment angles.
-    '''
-
-    xs = up_marker.iloc[:, 0] - low_marker.iloc[:, 0]
-    ys = up_marker.iloc[:, 2] - low_marker.iloc[:, 2]
-
-    angles = []
-    for x, y in zip(xs, ys):
-        if x == 0:
-            angle = math.pi / 2
-        else:
-            angle = math.atan2(y, x)
-
-        angles.append(math.degrees(angle))
-
-    return angles
-
-
-def extract_JNT_df(df):
-    '''
-    Extract joint angles from motion dataframe.
-    return: joint angle dataframe
-
-    Here, we calculate the angles between the segments like following:
-    foot (left, right) -> heel(up_marker), toe (low_marker)
-    shank (left, right) -> knee(up_marker), ankle (low_marker)
-    thigh (left, right) -> hip(up_marker), knee (low_marker)
-    trunk (left, right) -> (shoulder(up_marker) + hip(low_marker)) / 2
-    '''
-    df_jnt = pd.DataFrame()
-
-    df_jnt['time'] = df['time'].reset_index(drop=True)
-    df_jnt['#frame'] = df['frame#'].reset_index(drop=True)
-
-    seg = ['foot', 'shank', 'thigh', 'trunk']
-    mot = [('heel', 'toe'), ('knee', 'ankle'),
-           ('hip', 'knee'), ('shoulder', 'hip')]
-
-    
-    for i in range(len(seg)):
-        up_marker_rt = df['Right '+mot[i][0]].astype(float)
-        up_marker_lt = df['Left '+mot[i][0]].astype(float)
-        low_marker_rt = df['Right '+mot[i][1]].astype(float)
-        low_marker_lt = df['Left '+mot[i][1]].astype(float)
-
-        angles_rt = cal_seg_angles(up_marker_rt, low_marker_rt)
-        angles_rt = pd.Series(angles_rt, dtype=float)
-
-        angles_lt = cal_seg_angles(up_marker_lt, low_marker_lt)
-        angles_lt = pd.Series(angles_lt, dtype=float)
-
-        if (seg[i] == 'trunk'):
-            df_jnt['trunk'] = (angles_rt + angles_lt) / 2
-
-        else:
-            df_jnt['R'+seg[i]] = angles_rt
-            df_jnt['L'+seg[i]] = angles_lt
-
-    # print(df['Left hip'].iloc[:, 0].astype(float))
-    df_jnt['hipx'] = (df['Left hip'].iloc[:, 0].astype(float) + df['Right hip'].iloc[:, 0].astype(float)) / (2 * 1000)
-
-    # For 'Rfoot', 'Lfoot', if the value is < -150 add 360 to it
-    for foot in ['Rfoot', 'Lfoot']:
-        df_jnt[foot] = df_jnt[foot].astype(float)
-        df_jnt[foot] = df_jnt[foot].apply(lambda x: x + 360 if x < -150 else x)
-
-    if (df_jnt['Rfoot'] > 150).any():
-        df_jnt['Rfoot'] = df_jnt['Rfoot'] - 180
-    if(df_jnt['Lfoot'] > 150).any():
-        df_jnt['Lfoot'] = df_jnt['Lfoot'] - 180
-    
-    return df_jnt
-
-
-def getTouchDownToeOff(patient, trial):
-    '''
-    Extract touch down and toe off times from step file.
-    return: touch down and toe off times
-    '''
-
-    df = pd.read_csv('data/input/20 trials/%sstep.csv' %
-                     (patient))  # read step file of one trial of a patient
-
-    touch_down_cols = [col for col in df.columns if 'touch down' in col]
-
-    # get all toe off columns
-    toe_off_cols = [col for col in df.columns if 'toe off' in col]
-
-    touch_downs = [df[df['trial'] == trial][col].values[0]
-                   for col in touch_down_cols]  # get all touch down values
-
-    toe_offs = [df[df['trial'] == trial][col].values[0]
-                for col in toe_off_cols]  # get all toe off values
-
-    return touch_downs, toe_offs
-
-
-def select_df(df, start_time, end_time):
-
-    df = df[(df['time'] >= start_time) & (
-        df['time'] <= end_time)]  # filter joint angle file
-
-    return df
-
 
 def remove_empty_columns(df):
     df = df.loc[:, ~df.columns.str.contains(
@@ -196,53 +12,74 @@ def remove_empty_columns(df):
 
     return df
 
+def save(df, file_dir, patient_id, trial = None, data_type = 'jnt', norm = False, cycle = 'L', replace = False):
 
-def file_or_df(data):
-    if (isinstance(data, pd.DataFrame)):
-        df = data
+    if(norm == True):
+        save_path = '%s/%s/%s_%s_%s_cyc_%s' % (file_dir, patient_id, patient_id, trial, data_type, cycle)
+        relative_path = '%s_%s_%s_cyc_%s' % (patient_id, trial, data_type, cycle)
+        
+    elif(data_type == 'sptmp_params'):
+        save_path = '%s/%s/%s_sptmp' % (file_dir, patient_id, patient_id)
+        relative_path = '%s_sptmp' % (patient_id)
+
+    elif(data_type == 'step_time'):
+        save_path = '%s/%s/%sstep' % (file_dir, patient_id, patient_id)
+        relative_path = '%sstep' % (patient_id)
+
     else:
-        df = pd.read_csv(data)
+        save_path = '%s/%s/%s_%s_%s' % (file_dir, patient_id, patient_id, trial, data_type)
+        relative_path = '%s_%s_%s' % (patient_id, trial, data_type)
 
-    return df
-
-
-def save(file_dir, patient_id, trial, df, data_type='jnt', replace=False):
-    save_path = '%s/%s/%s_%s_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type)
-
-    if(replace or not os.path.exists(save_path)):
-        df.to_csv('%s/%s/%s_%s_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type), index=False)
-        print('File saved as %s_%s_%s.csv' % (patient_id, trial, data_type), '\n')
+    if(replace or not os.path.exists(save_path+'.csv')):
+        df.to_csv(save_path+'.csv', index=False)
+        print('File saved as %s.csv' % (relative_path), '\n')
 
     else:
         i = 1
-        while os.path.exists(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '_' + data_type + '_' + str(i) + '.csv'):
+        while os.path.exists(save_path + '(' + str(i) + ')' + '.csv'):
             i += 1
-        df.to_csv(file_dir + '/' + patient_id + '/' + patient_id + '_' + str(trial) + '_' + data_type + '_' + str(i) + '.csv', index=False)
-        print('File saved as %s_%s_%s_%s.csv' % (patient_id, trial, data_type, i), '\n')
+        df.to_csv(save_path + '(' + str(i) + ')'  + '.csv', index=False)
+        print('File saved as %s(%s).csv' % (relative_path, i), '\n')
     
     return
 
-def read(file_dir, patient_id, trial, data_type='jnt'):
-    # jnt/grf/motion
+def read(file_dir, patient_id, trial = None, data_type = 'jnt', norm = False, cycle = 'L', i = None):
+    # jnt/grf/motion/stp_params/step_file/normalized_jnt or grf
     
-    if(data_type == 'motion'): path = '%s/%s/%s_%s.csv' % (file_dir, patient_id, patient_id, trial)
-    path = '%s/%s/%s_%s_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type)
+    if(data_type == 'motion'): path = '%s/%s/%s_%s' % (file_dir, patient_id, patient_id, trial)
+    elif(data_type == 'sptmp_params'): path = '%s/%s/%s_sptmp' % (file_dir, patient_id, patient_id)
+    elif(data_type == 'step_time'): path = '%s/%s/%sstep' % (file_dir, patient_id, patient_id)
+    elif(norm == True): path = '%s/%s/%s_%s_%s_cyc_%s' % (file_dir, patient_id, patient_id, trial, data_type, cycle)
+    else: path = '%s/%s/%s_%s_%s' % (file_dir, patient_id, patient_id, trial, data_type)
+
+    if i is not None:
+        path = path + '(' + str(i) + ')'
     
-    return pd.read_csv(path)
+    path = path + '.csv'
+    
+    if(data_type == 'motion'):
+        df = pd.read_csv(path, header=None)
 
-def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
+        columns = df.iloc[:2]
+        df = df.iloc[2:]
+        columns = columns.fillna('')
 
-    if('dataframe' in kwargs):
-        df = kwargs['dataframe']
+        columns = pd.MultiIndex.from_arrays(columns.values.tolist())
+        df.columns = columns
+
     else:
-        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
-    
+        df = pd.read_csv(path)
+        df = remove_empty_columns(df)
+
+    return df
+
+def plot(df, data_type='jnt', steps = False, cycle=False, **kwargs):
 
     if(cycle == True):
         steps = False
 
     if(steps == True):
-        df_step = pd.read_csv('%s/%s/%sstep.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id']))
+        df_step = kwargs['step_data']
         first_step = df_step[df_step['trial'] == kwargs['trial']].footing.values[0]
         tdowns1 = df_step[df_step['trial'] == kwargs['trial']][['touch down', 'touch down.2']].values.tolist()[0]
         tdowns2 = df_step[df_step['trial'] == kwargs['trial']][['touch down.1', 'touch down.3']].values.tolist()[0]
@@ -380,24 +217,34 @@ def plot(data_type='jnt', steps = False, cycle=False, **kwargs):
 
     return
 
-
+import re
 def load_data(file_location, patient_id, group='misc'):
     trial_ids = []
 
-    for filename in os.listdir('%s/%s' % (file_location, patient_id)):
-        if filename.startswith(patient_id):
-            parts = filename.split('_')
-            if len(parts) > 1:
-                trial_id = parts[1]
-                if trial_id not in trial_ids:
-                    trial_ids.append(trial_id)
+    def extract_numbers_from_filenames(folder_path):
+        # List all files in the folder
+        filenames = os.listdir(folder_path)
+        
+        # Regular expression pattern to match the numbers (10 and 11) in the filenames
+        pattern = re.compile(r'_(\d+)_')
 
-    for trial in trial_ids:
-        os.makedirs('../data-processed/%s/%s' % (group, patient_id), exist_ok=True)
-        shutil.copy('%s/%s/%s_%s_jnt.csv' % (file_location, patient_id, patient_id, trial), '../data-processed/%s/%s/%s_%s_%s.csv' % (group, patient_id, patient_id, trial, 'jnt'))
-        shutil.copy('%s/%s/%s_%s_grf.csv' % (file_location, patient_id, patient_id, trial), '../data-processed/%s/%s/%s_%s_%s.csv' % (group, patient_id, patient_id, trial, 'grf'))
+        extracted_numbers = set()  # Use a set to avoid duplicates
 
-    shutil.copy('%s/%s/%sstep.csv' % (file_location, patient_id, patient_id), '../data-processed/%s/%s/%sstep.csv' % (group, patient_id, patient_id))
-    shutil.copy('%s/%s/%sstp.csv' % (file_location, patient_id, patient_id), '../data-processed/%s/%s/%sstp.csv' % (group, patient_id, patient_id))
+        for filename in filenames:
+            match = pattern.search(filename)
+            if match:
+                extracted_numbers.add(match.group(1))
+        
+        return extracted_numbers
+
+    print(file_location)
+
+    # for trial in trial_ids:
+    #     os.makedirs('../data-processed/%s/%s' % (group, patient_id), exist_ok=True)
+    #     shutil.copy('%s/%s/%s_%s_jnt.csv' % (file_location, patient_id, patient_id, trial), '../data-processed/%s/%s/%s_%s_%s.csv' % (group, patient_id, patient_id, trial, 'jnt'))
+    #     shutil.copy('%s/%s/%s_%s_grf.csv' % (file_location, patient_id, patient_id, trial), '../data-processed/%s/%s/%s_%s_%s.csv' % (group, patient_id, patient_id, trial, 'grf'))
+
+    # shutil.copy('%s/%s/%sstep.csv' % (file_location, patient_id, patient_id), '../data-processed/%s/%s/%sstep.csv' % (group, patient_id, patient_id))
+    # shutil.copy('%s/%s/%sstp.csv' % (file_location, patient_id, patient_id), '../data-processed/%s/%s/%sstp.csv' % (group, patient_id, patient_id))
 
     return

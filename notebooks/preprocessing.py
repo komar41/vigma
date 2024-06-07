@@ -7,8 +7,6 @@ from sklearn.impute import IterativeImputer, KNNImputer
 import pandas as pd
 from scipy.interpolate import interp1d
 
-from utils import *
-
 ''' filtering '''
 
 def filter_signal(x, t, cutoff, order):
@@ -28,11 +26,7 @@ def filter_signal(x, t, cutoff, order):
     
     return xf_full
 
-def filter_data(data_type='jnt', cutoff=6, order=4, save=False, replace=False, **kwargs):
-    if('dataframe' in kwargs):
-        df = kwargs['dataframe']
-    else:
-        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
+def filter_data(df, data_type='jnt', cutoff=6, order=4):
 
     if('#frame' in df.columns): df_filter = df.drop(columns=['#frame'])
     df_filter = df_filter.astype(float)
@@ -44,26 +38,11 @@ def filter_data(data_type='jnt', cutoff=6, order=4, save=False, replace=False, *
     df_filter = df_filter.reset_index()
     if('#frame' in df.columns): df_filter['#frame'] = df['#frame']
 
-    if(save):
-        data_type = kwargs['data_type']
-        pid = kwargs['patient_id']
-        trial = kwargs['trial']
-        file_location = kwargs['file_dir']
-        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
-        if(replace or not os.path.exists(savepath)):
-            df_filter.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
-        else:
-            df_filter.to_csv('%s/%s/%s_%s_%s_f.csv' % (file_location, pid, pid, trial, data_type), index=False)
-
     return df_filter
 
 ''' missing value imputation '''
 
-def interpolate_impute(data_type='jnt', save = False, replace = False, **kwargs):
-    if('dataframe' in kwargs):
-        df = kwargs['dataframe']
-    else:
-        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
+def interpolate_impute(df, data_type='jnt'):
 
     if('#frame' in df.columns): df_interpolate = df.drop(columns=['#frame'])
     df_interpolate = df_interpolate.astype(float)
@@ -72,36 +51,14 @@ def interpolate_impute(data_type='jnt', save = False, replace = False, **kwargs)
     df_interpolate = df_interpolate.reset_index()
     if('#frame' in df.columns): df_interpolate['#frame'] = df['#frame']
 
-    if(save):
-        data_type = kwargs['data_type']
-        pid = kwargs['patient_id']
-        trial = kwargs['trial']
-        file_location = kwargs['file_dir']
-        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
-        if(replace or not os.path.exists(savepath)):
-            df_interpolate.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
-        else:
-            df_interpolate.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
-
     return df_interpolate
 
-def knn_impute(data_type = 'jnt', save = False, replace = False, **kwargs):
-    
-
-    if('dataframe' in kwargs):
-        df = kwargs['dataframe']
-    else:
-        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
-
-    df.columns = df.columns.str.strip()
-    if('' in df.columns):
-        df = df.drop(columns=[''])
+def knn_impute(df, data_type = 'jnt'):
 
     columns = ['time', '#frame']
     existing_columns_to_drop = [col for col in columns if col in df.columns]
 
     df_knn = df.drop(columns=existing_columns_to_drop)
-
     knn_imputer = KNNImputer(n_neighbors=5, weights='uniform')
 
     df_knn_imputed = pd.DataFrame(
@@ -111,24 +68,9 @@ def knn_impute(data_type = 'jnt', save = False, replace = False, **kwargs):
         if col in df.columns:
             df_knn_imputed[col] = df[col]
 
-    if(save):
-        data_type = kwargs['data_type']
-        pid = kwargs['patient_id']
-        trial = kwargs['trial']
-        file_location = kwargs['file_dir']
-        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
-        if(replace or not os.path.exists(savepath)):
-            df_knn_imputed.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
-        else:
-            df_knn_imputed.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
-
     return df_knn_imputed
 
-def mice_impute(data_type='jnt', save = False, replace = False, **kwargs):
-    if('dataframe' in kwargs):
-        df = kwargs['dataframe']
-    else:
-        df = pd.read_csv('%s/%s/%s_%s_%s.csv' % (kwargs['file_dir'], kwargs['patient_id'], kwargs['patient_id'], kwargs['trial'], data_type))
+def mice_impute(df, data_type='jnt'):
 
     columns = ['time', '#frame']
     existing_columns_to_drop = [col for col in columns if col in df.columns]
@@ -144,17 +86,6 @@ def mice_impute(data_type='jnt', save = False, replace = False, **kwargs):
     for col in columns:
         if col in df.columns:
             df_mice_imputed[col] = df[col]
-
-    if(save):
-        data_type = kwargs['data_type']
-        pid = kwargs['patient_id']
-        trial = kwargs['trial']
-        file_location = kwargs['file_dir']
-        savepath = '%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type)
-        if(replace or not os.path.exists(savepath)):
-            df_mice_imputed.to_csv('%s/%s/%s_%s_%s.csv' % (file_location, pid, pid, trial, data_type), index=False)
-        else:
-            df_mice_imputed.to_csv('%s/%s/%s_%s_%s_i.csv' % (file_location, pid, pid, trial, data_type), index=False)
 
     return df_mice_imputed
 
@@ -181,9 +112,8 @@ def interpolate_data(df, min_points):
     
     return interpolated_data
 
-def normalize_data(file_dir, patient_id, trial, data_type='jnt', cycle = 'L', save=False, **kwargs):
+def normalize_data(df, df_step, patient_id, trial, data_type='jnt', cycle = 'L'):
     def normalize(data, data_step):
-        df = None
         if(data_step['footing'].values[0] == 'L'):
             if(cycle == 'L'): df = data[(data['time'] >= data_step['touch down'].values[0]) & (data['time'] <= data_step['touch down.2'].values[0])]
             else: df = data[(data['time'] >= data_step['touch down.1'].values[0]) & (data['time'] <= data_step['touch down.3'].values[0])]
@@ -193,19 +123,9 @@ def normalize_data(file_dir, patient_id, trial, data_type='jnt', cycle = 'L', sa
 
         return df
 
-    if('dataframe' in kwargs):
-        data = kwargs['dataframe']
-    else:
-        if(data_type == 'grf'): data = pd.read_csv(file_dir + '/' + patient_id + '/' + patient_id + "_" + str(trial) + "_grf.csv")
-        elif(data_type == 'jnt'): data = pd.read_csv(file_dir + '/' + patient_id + '/' + patient_id + "_" + str(trial) + "_jnt.csv")
+    df_step = df_step[(df_step['trial'] == int(trial)) & (df_step['patient_id'] == patient_id)]
 
-    data_step = pd.read_csv("%s/%s/%sstep.csv" % (file_dir, patient_id, patient_id))
-    data_step = data_step[(data_step['trial'] == int(trial)) & (data_step['patient_id'] == patient_id)]
-
-    data = normalize(data, data_step)
+    data = normalize(df, df_step)
     data = interpolate_data(data, 100)
-
-    if(save):
-        data.to_csv('%s/%s/%s_%s_%s_cyc_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type, cycle), index=False)
 
     return data

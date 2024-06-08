@@ -217,25 +217,7 @@ def plot(df, data_type='jnt', steps = False, cycle=False, **kwargs):
 
     return
 
-import re
-def load_data(file_location, patient_id, group='misc'):
-    trial_ids = []
-
-    def extract_numbers_from_filenames(folder_path):
-        # List all files in the folder
-        filenames = os.listdir(folder_path)
-        
-        # Regular expression pattern to match the numbers (10 and 11) in the filenames
-        pattern = re.compile(r'_(\d+)_')
-
-        extracted_numbers = set()  # Use a set to avoid duplicates
-
-        for filename in filenames:
-            match = pattern.search(filename)
-            if match:
-                extracted_numbers.add(match.group(1))
-        
-        return extracted_numbers
+def load_VA(file_location, patient_id, group='misc'):
 
     print(file_location)
 

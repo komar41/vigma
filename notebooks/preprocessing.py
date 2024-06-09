@@ -123,7 +123,7 @@ def normalize_data(df, df_step, patient_id, trial, data_type='jnt', cycle = 'L')
 
         return df
 
-    df_step = df_step[(df_step['trial'] == int(trial)) & (df_step['patient_id'] == patient_id)]
+    df_step = df_step[(df_step['trial'] == int(trial)) & (df_step['subject'] == patient_id)]
 
     data = normalize(df, df_step)
     data = interpolate_data(data, 100)

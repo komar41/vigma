@@ -19,8 +19,8 @@ def save(df, file_dir, patient_id, trial = None, data_type = 'jnt', norm = False
         relative_path = '%s_%s_%s_cyc_%s' % (patient_id, trial, data_type, cycle)
         
     elif(data_type == 'sptmp_params'):
-        save_path = '%s/%s/%s_sptmp' % (file_dir, patient_id, patient_id)
-        relative_path = '%s_sptmp' % (patient_id)
+        save_path = '%s/%s/%ssptmp' % (file_dir, patient_id, patient_id)
+        relative_path = '%ssptmp' % (patient_id)
 
     elif(data_type == 'step_time'):
         save_path = '%s/%s/%sstep' % (file_dir, patient_id, patient_id)
@@ -43,7 +43,7 @@ def save(df, file_dir, patient_id, trial = None, data_type = 'jnt', norm = False
     
     return
 
-def read(file_dir, patient_id, trial = None, data_type = 'jnt', norm = False, cycle = 'L', i = None):
+def read(file_dir, patient_id, trial = None, data_type = 'jnt', norm = False, cycle = 'L', file_no = None):
     # jnt/grf/motion/stp_params/step_file/normalized_jnt or grf
     
     if(data_type == 'motion'): path = '%s/%s/%s_%s' % (file_dir, patient_id, patient_id, trial)
@@ -52,8 +52,8 @@ def read(file_dir, patient_id, trial = None, data_type = 'jnt', norm = False, cy
     elif(norm == True): path = '%s/%s/%s_%s_%s_cyc_%s' % (file_dir, patient_id, patient_id, trial, data_type, cycle)
     else: path = '%s/%s/%s_%s_%s' % (file_dir, patient_id, patient_id, trial, data_type)
 
-    if i is not None:
-        path = path + '(' + str(i) + ')'
+    if file_no is not None:
+        path = path + '(' + str(file_no) + ')'
     
     path = path + '.csv'
     
@@ -217,16 +217,45 @@ def plot(df, data_type='jnt', steps = False, cycle=False, **kwargs):
 
     return
 
-def load_VA(file_location, patient_id, group='misc'):
+def load_VA(file_dir, patient_id, data_type, trial = None, group='misc', norm = False, cycle = 'L'):
 
-    print(file_location)
+    # first check if ../backend/data/group exists. if not, create it
+    if(not os.path.exists("../backend/data/%s" % group)):
+        os.makedirs("../backend/data/%s" % group, exist_ok=True)
 
-    # for trial in trial_ids:
-    #     os.makedirs('../data-processed/%s/%s' % (group, patient_id), exist_ok=True)
-    #     shutil.copy('%s/%s/%s_%s_jnt.csv' % (file_location, patient_id, patient_id, trial), '../data-processed/%s/%s/%s_%s_%s.csv' % (group, patient_id, patient_id, trial, 'jnt'))
-    #     shutil.copy('%s/%s/%s_%s_grf.csv' % (file_location, patient_id, patient_id, trial), '../data-processed/%s/%s/%s_%s_%s.csv' % (group, patient_id, patient_id, trial, 'grf'))
+    save_path = "../backend/data/%s/%s" % (group, patient_id)
+    if(not os.path.exists(save_path)):
+        os.makedirs(save_path, exist_ok=True)
 
-    # shutil.copy('%s/%s/%sstep.csv' % (file_location, patient_id, patient_id), '../data-processed/%s/%s/%sstep.csv' % (group, patient_id, patient_id))
-    # shutil.copy('%s/%s/%sstp.csv' % (file_location, patient_id, patient_id), '../data-processed/%s/%s/%sstp.csv' % (group, patient_id, patient_id))
+    if(data_type == 'motion'): 
+        path = '%s/%s/%s_%s.csv' % (file_dir, patient_id, patient_id, trial)
+        file = '%s_%s.csv' % (patient_id, trial)
+    elif(data_type == 'sptmp_params'): 
+        path = '%s/%s/%ssptmp.csv' % (file_dir, patient_id, patient_id)
+        file = '%ssptmp.csv' % (patient_id)
+    elif(data_type == 'step_time'): 
+        path = '%s/%s/%sstep.csv' % (file_dir, patient_id, patient_id)
+        file = '%sstep.csv' % (patient_id)
+    elif(norm == True): 
+        path = '%s/%s/%s_%s_%s_cyc_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type, cycle)
+        file = '%s_%s_%s_cyc_%s.csv' % (patient_id, trial, data_type, cycle)
+    else: 
+        path = '%s/%s/%s_%s_%s.csv' % (file_dir, patient_id, patient_id, trial, data_type)
+        file = '%s_%s_%s.csv' % (patient_id, trial, data_type)
+
+    # first check if the file exists in the VA path
+    if(os.path.exists(save_path + '/' + file)):
+        print('File %s already exists. Do you want to overwrite (y/n)?' % (file), '\n')
+        response = input()
+        if(response == 'n'):
+            print('File %s not overwritten in VA system' % (file), '\n')
+            return
+        else:
+            os.remove(save_path + '/' + file)
+            shutil.copy(path, save_path + '/' + file)
+            print('File %s loaded in VA system under group %s' % (file, group), '\n')
+    else:
+        shutil.copy(path, save_path + '/' + file)
+        print('File %s loaded in VA system under group %s' % (file, group), '\n')
 
     return

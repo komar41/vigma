@@ -39,6 +39,7 @@ Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
   # Install additional Python packages via pip
   pip install c3d
   pip install --upgrade nbformat
+
   ```
 
 - Now, run the following commands in the terminal to install the necessary dependencies for the **server** side setup.

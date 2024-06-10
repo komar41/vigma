@@ -401,6 +401,8 @@ const BoxChart = ({
     activeGroups,
     selectedKeysRefG2.current,
     selectedKeysRefG1.current,
+    globalArray,
+    globalArray2,
   ]);
 
   return (

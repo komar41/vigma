@@ -102,7 +102,6 @@ const BoxChart = ({
       maxHighlight2 = d3.max(highlightData2, (d) => d[attribute]);
     }
 
-    console.log(stats.df1, "stats.df1", stats.df2, "stats.df2");
     const yScale = d3
       .scaleLinear()
       .domain([

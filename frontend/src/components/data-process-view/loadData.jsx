@@ -69,8 +69,8 @@ export const LoadData = (props) => {
 
     const selectedNames = typeof value === "string" ? value.split(",") : value;
 
-    if (selectedNames.length > 4) {
-      setErrorMessage("You can select up to 4 parameters");
+    if (selectedNames.length > 5) {
+      setErrorMessage("You can select up to 5 parameters");
       setOpenDialog(true);
       return;
     }
@@ -848,7 +848,7 @@ export const LoadData = (props) => {
           {!isStpOptionDisabled && (
             <FormControl variant="standard" fullWidth>
               <InputLabel id="demo-mutiple-checkbox-label">
-                Boxplots (up to 4)
+                Boxplots (up to 5)
               </InputLabel>
               <Select
                 labelId="demo-mutiple-checkbox-label"

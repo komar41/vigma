@@ -102,6 +102,7 @@ const BoxChart = ({
       maxHighlight2 = d3.max(highlightData2, (d) => d[attribute]);
     }
 
+    console.log(stats.df1, "stats.df1", stats.df2, "stats.df2");
     const yScale = d3
       .scaleLinear()
       .domain([
@@ -311,28 +312,20 @@ const BoxChart = ({
       .append("text")
       .attr("class", "axis-label")
       .attr("x", adjustedWidth / 2)
-      .attr("y", margin.bottom / 1.5)
+      .attr("y", margin.bottom / 1.25)
       .attr("text-anchor", "middle")
       .style("fill", "Black")
-      .style("font-size", "14px")
+      .style("font-size", "15px")
       .style("font-family", "Roboto, sans-serif")
-      .style("font-weight", "bold")
+      // .style("font-weight", "bold")
       .text(dictStpParam[attribute]);
 
-    // Draw box plots for df1 and df2
     ["df1", groupExploration ? "df2" : null].forEach((df, i) => {
       if (!df) return;
 
       const activeCount = activeGroups.filter(Boolean).length;
-      let xPos = xScale(df);
-      let boxWidth = xScale.bandwidth();
-
-      if (!groupExploration) {
-        boxWidth /= 2; // Halve the width of the boxplot
-        xPos = (adjustedWidth - boxWidth) / 2; // Center it in the x-axis
-      } else if (activeCount === 1) {
-        xPos = (adjustedWidth - boxWidth) / 2; // Center it in the x-axis if only one group is active
-      }
+      let boxWidth = xScale.bandwidth() / 1.4; // Increase the width of the boxplot
+      let xPos = xScale(df) + (xScale.bandwidth() - boxWidth) / 2; // Center the box within the tick
 
       if (!activeGroups[i]) return;
 

@@ -82,6 +82,9 @@ const BoxTitle = ({
         .append("rect")
         .attr("width", 20)
         .attr("height", 20)
+        // make the rect corners rounded
+        .attr("rx", 3)
+        .attr("ry", 3)
         .attr("fill", (d) => d.color)
         .attr("x", (d, i) => i * (legendData.length === 1 ? 0 : 200)) // Center if only one item
         .attr("y", 0) // Keep y position constant as all items are on the same horizontal line

@@ -814,6 +814,8 @@ const LineChart = ({ chartData }) => {
       .attr("y", (d) => d.y)
       .attr("width", 18)
       .attr("height", 18)
+      .attr("rx", 3)
+      .attr("ry", 3)
       .style("fill", (d) => d.color)
       .style("opacity", (d) => {
         // Determine initial opacity based on active groups

@@ -80,7 +80,7 @@ def extract_stp(filepath, sid, trial):
     
     jnts = pd.read_csv(filepath + "_jnt.csv")
     jnts = knn_impute(dataframe = jnts, data_type='jnt')
-    grfs = pd.read_csv(filepath + "_grf.csv")
+    # grfs = pd.read_csv(filepath + "_grf.csv")
 
     parent_dir = os.path.abspath(os.path.join(filepath, "../../"))
     demographic_file_path = os.path.join(parent_dir, "demographic.csv")
@@ -90,7 +90,7 @@ def extract_stp(filepath, sid, trial):
     sts = pd.read_csv(directory + "/" + sid + "step.csv")
 
     jnts.columns = jnts.columns.str.strip()
-    grfs.columns = grfs.columns.str.strip()
+    # grfs.columns = grfs.columns.str.strip()
     dem.columns = dem.columns.str.strip()
 
     thigh = dem[dem['id'] == sid]['thigh'].values[0]

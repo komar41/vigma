@@ -72,7 +72,7 @@ const LineChart = ({ chartData }) => {
     shank: "Shank",
     thigh: "Thigh",
     trunk: "Trunk",
-    hipx: "Hip",
+    hipx: "Hip Position",
     AP: "Asterior-Posterior",
     ML: "MedioLateral",
     VT: "Vertical",

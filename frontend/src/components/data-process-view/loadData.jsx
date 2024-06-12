@@ -104,18 +104,18 @@ export const LoadData = (props) => {
     "shank",
     "thigh",
     "trunk",
-    "hipx",
     "AP",
     "ML",
     "VT",
     "STP",
+    "hipx",
   ];
   const dict = {
     foot: "Foot",
     shank: "Shank",
     thigh: "Thigh",
     trunk: "Trunk",
-    hipx: "Hip",
+    hipx: "Hip Position",
     AP: "Asterior-Posterior",
     ML: "MedioLateral",
     VT: "Vertical",
@@ -815,7 +815,7 @@ export const LoadData = (props) => {
               >
                 Joint Angle
               </ListSubheader>
-              {selectedColumnOptions.slice(0, 5).map((option) => (
+              {selectedColumnOptions.slice(0, 4).map((option) => (
                 <MenuItem key={option} value={option}>
                   {dict[option]}
                 </MenuItem>
@@ -825,7 +825,7 @@ export const LoadData = (props) => {
               >
                 Ground Reaction Force
               </ListSubheader>
-              {selectedColumnOptions.slice(5, 8).map((option) => (
+              {selectedColumnOptions.slice(4, 7).map((option) => (
                 <MenuItem key={option} value={option}>
                   {dict[option]}
                 </MenuItem>
@@ -834,6 +834,16 @@ export const LoadData = (props) => {
                 style={{ textDecoration: "underline", fontSize: "1.1rem" }}
               >
                 Discrete Values
+              </ListSubheader>
+              {selectedColumnOptions.slice(7, 8).map((option) => (
+                <MenuItem key={option} value={option}>
+                  {dict[option]}
+                </MenuItem>
+              ))}
+              <ListSubheader
+                style={{ textDecoration: "underline", fontSize: "1.1rem" }}
+              >
+                Others
               </ListSubheader>
               {selectedColumnOptions.slice(8).map((option) => (
                 <MenuItem key={option} value={option}>

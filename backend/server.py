@@ -342,6 +342,9 @@ def process_form_data():
 
             # Option to save normalized CSV files in frontend
 
+        df_1 = df_1.replace({np.nan: None})
+        print(df_1)
+
         response = {
             'df1': df_1.to_dict(orient='records'),
             'df1_data': dict_list_df1,

@@ -56,3 +56,4 @@ backend/payload.json
 backend/requirements.txt
 
 notebooks/.ipynb_checkpoints
+notebooks/.DS_Store

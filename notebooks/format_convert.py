@@ -1,5 +1,4 @@
 import warnings
-import re
 import c3d
 from scipy.io import loadmat
 # from trc import TRCData

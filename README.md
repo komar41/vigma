@@ -2,7 +2,7 @@
 
 # Installation Guide
 
-This guide provides detailed steps to install and set up the eMoGis system, including software installations, project setup, and running the application.
+This guide provides detailed steps to install and set up the VIGMA system, including software installations, project setup, and running the application.
 
 ## Software Installations
 
@@ -14,13 +14,13 @@ This short [video]() illustrates how to perform these software installations.
 
 ## Project Setup
 
-Download a zipped version of emogis from [here](https://github.com/komar41/eMoGis). Check the image below for reference on how to download the zip file from the link.
+Download a zipped version of VIGMA from [here](https://github.com/komar41/vigma). Check the image below for reference on how to download the zip file from the link.
 
 <img src="download.png" width="800">
 
-Unzip the folder. Now, open a terminal inside the **eMoGis** folder.
+Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
 
-- Run the following commands in the terminal to install the necessary dependencies for the **eMoGis** Python library (Ignore the lines with hash (**#**). Those are comments explaining each command):
+- Run the following commands in the terminal to install the necessary dependencies for the **VIGMA** Python library (Ignore the lines with hash (**#**). Those are comments explaining each command):
 
   ```bash
   # Navigate to the notebooks directory
@@ -73,7 +73,7 @@ This short [video]() illustrates how to setup the project.
 
 ## Run the application
 
-- Open a terminal inside the eMoGis folder. Run the following commands in the terminal:
+- Open a terminal inside the VIGMA folder. Run the following commands in the terminal:
 
   ```bash
   # Navigate to the backend directory
@@ -83,7 +83,7 @@ This short [video]() illustrates how to setup the project.
   python server.py
   ```
 
-- Open another terminal inside the eMoGis folder. Run the following commands in the terminal:
+- Open another terminal inside the VIGMA folder. Run the following commands in the terminal:
 
   ```bash
   # Navigate to the frontend directory
@@ -93,7 +93,7 @@ This short [video]() illustrates how to setup the project.
   npm start
   ```
 
-  This will open a tab in your browser and you're all set to use **eMoGis** visual analytics (VA) system. We added some mock data inside the **"eMoGis/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
+  This will open a tab in your browser and you're all set to use **VIGMA** visual analytics (VA) system. We added some mock data inside the **"vigma/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
 
   <img src="data-storage.png" width="400">
 
@@ -103,4 +103,4 @@ This short [video]() illustrates how to run the application and generate visuali
 
 ## Use the Python API
 
-Follow this [link](https://github.com/komar41/eMoGis/blob/main/notebooks/README.md) to learn how to use the **eMoGis** python API. You can also watch this short [video tutorial]() to learn the usage of the Python API.
+Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** python API. You can also watch this short [video tutorial]() to learn the usage of the Python API.

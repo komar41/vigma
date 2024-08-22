@@ -1,19 +1,19 @@
-# eMoGis Python: How to Use
+# VIGMA Python: How to Use
 
-<!-- Open Anaconda Prompt. Change directory to emogis->notebook folder location. Open jupyter notebook. Create a new one or use _tutorial.ipynb. But mention that the notebook has to be inside emogis->notebooks folder. -->
+<!-- Open Anaconda Prompt. Change directory to vigma->notebook folder location. Open jupyter notebook. Create a new one or use _tutorial.ipynb. But mention that the notebook has to be inside vigma->notebooks folder. -->
 
-The python API for **eMoGis** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
+The python API for **VIGMA** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
 
 - [**Format Conversion**](#format-conversion): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
 - [**Feature Extraction**](#feature-extraction): Extract meaningful features from the motion capture data to joint angles, spatiotemporal parameters, step times, and more.
 - [**Data Processing**](#data-processing): Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
 - [**Utility Functions**](#utility-functions): Plot data for visualization, load data into user interfaces, and organize data for analysis.
 
-We have provided some mock data to let the users test the utilities of the library. The mock data should be inside **"eMoGis/notebooks/data"** folder. You should follow the same hierarchy and naming conventions for data storage displayed in the image below.
+We have provided some mock data to let the users test the utilities of the library. The mock data should be inside **"vigma/notebooks/data"** folder. You should follow the same hierarchy and naming conventions for data storage displayed in the image below.
 
 <img src="data-storage.png" width="400">
 
-You can also check out this [notebook](https://github.com/komar41/eMoGis/blob/main/notebooks/_tutorial.ipynb) that illustrates how to use all functionalities of **eMoGis** Python API.
+You can also check out this [notebook](https://github.com/komar41/vigma/blob/main/notebooks/_tutorial.ipynb) that illustrates how to use all functionalities of **VIGMA** Python API.
 
 <a name="format-conversion"></a>
 
@@ -38,13 +38,13 @@ You can also check out this [notebook](https://github.com/komar41/eMoGis/blob/ma
 **Example:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "041602jb"
 trial_no = 1
 
-df = emogis.trcToCSV(file_dir, patient_id, trial_no) # Same for: emogis.matToCSV or, emogis.c3dToCSV.
+df = vigma.trcToCSV(file_dir, patient_id, trial_no) # Same for: vigma.matToCSV or, vigma.c3dToCSV.
 
 print(df.head())
 ```
@@ -71,13 +71,13 @@ print(df.head())
 **Example:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = "./data"
 patient_id = "022318xz"
 trial = 4
 
-df = emogis.motionToJointAngle(file_dir, patient_id, trial, save=True)
+df = vigma.motionToJointAngle(file_dir, patient_id, trial, save=True)
 print(df.head())
 ```
 
@@ -104,7 +104,7 @@ print(df.head())
 **Example:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
@@ -114,7 +114,7 @@ Left = [(2.285, 2.9783), (3.4, 4.0833)]
 Right = [(2.8083, 3.5617), (3.9283, 4.7083)]
 trialtype = 'walk'
 
-emogis.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
+vigma.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
 ```
 
 ### `extract_stp()`
@@ -134,13 +134,13 @@ emogis.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
 **Example:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = "./data"
 patient_id = "081517ap"
 trial = 8
 
-step_params = emogis.extract_stp(file_dir, patient_id, trial)
+step_params = vigma.extract_stp(file_dir, patient_id, trial)
 
 print("Patient ID: %s, Trial: %d" % (patient_id, trial))
 
@@ -166,7 +166,7 @@ print("RstepLength: %f, LstepLength: %f, timeRswing: %f, timeLswing: %f, timeRGa
 **Example:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = "./data"
 patient_id = "081517ap"
@@ -201,13 +201,13 @@ print(df.head())
 **Example 1:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df_imputed = emogis.knn_impute(file_dir = file_dir, patient_id = patient_id, trial = trial
+df_imputed = vigma.knn_impute(file_dir = file_dir, patient_id = patient_id, trial = trial
                                  data_type = 'jnt', save = False) # same for mice_impute, interpolate_impute
 
 print(df_imputed.head())
@@ -216,14 +216,14 @@ print(df_imputed.head())
 **Example 2:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df = emogis.motionToJointAngle(file_dir, patient_id, trial)
-df_imputed = emogis.mice_impute(dataframe = df,
+df = vigma.motionToJointAngle(file_dir, patient_id, trial)
+df_imputed = vigma.mice_impute(dataframe = df,
                                     data_type = 'jnt',
                                         save = True, replace = True,
                                             file_dir = file_dir, patient_id = patient_id, trial = trial)
@@ -255,13 +255,13 @@ print(df_imputed.head())
 **Example 1:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df_filtered = emogis.filter_data(file_dir = file_dir, patient_id = patient_id, trial = trial
+df_filtered = vigma.filter_data(file_dir = file_dir, patient_id = patient_id, trial = trial
                                  data_type = 'jnt', save = False)
 
 print(df_filtered.head())
@@ -270,16 +270,16 @@ print(df_filtered.head())
 **Example 2:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df = emogis.motionToJointAngle(file_dir, patient_id, trial)
-df_imputed = emogis.mice_impute(dataframe = df,
+df = vigma.motionToJointAngle(file_dir, patient_id, trial)
+df_imputed = vigma.mice_impute(dataframe = df,
                                     data_type = 'jnt')
-df_filtered = emogis.filter_data(dataframe = df,
+df_filtered = vigma.filter_data(dataframe = df,
                                     data_type = 'jnt',
                                         save = True, replace = True,
                                             file_dir = file_dir, patient_id = patient_id, trial = trial)
@@ -310,13 +310,13 @@ print(df_filtered.head())
 **Example:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df_normalized = emogis.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
+df_normalized = vigma.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
 
 print(df_normalized.head())
 ```
@@ -347,13 +347,13 @@ print(df_normalized.head())
 **Example 1:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-emogis.plot(data_type='jnt',
+vigma.plot(data_type='jnt',
                file_dir = file_dir, patient_id = patient_id, trial = trial,
                     steps = True)
 ```
@@ -361,15 +361,15 @@ emogis.plot(data_type='jnt',
 **Example 2:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df_normalized = emogis.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
+df_normalized = vigma.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
 
-emogis.plot(df = df_normalized, data_type = 'jnt', cycle = True)
+vigma.plot(df = df_normalized, data_type = 'jnt', cycle = True)
 ```
 
 ### `load_data()`
@@ -387,12 +387,12 @@ emogis.plot(df = df_normalized, data_type = 'jnt', cycle = True)
 **Example:**
 
 ```Python
-import emogis
+import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
 
-emogis.load_data(file_dir, patient_id, group='healthy_controls')
+vigma.load_data(file_dir, patient_id, group='healthy_controls')
 ```
 
 <!-- Add save utility function-->

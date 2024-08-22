@@ -4,10 +4,10 @@
 
 The python API for **VIGMA** is designed to facilitate a variety of tasks related to motion/gait data. The main functionalities are grouped into the following categories:
 
-- [**Format Conversion**](#format-conversion): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
-- [**Feature Extraction**](#feature-extraction): Extract meaningful features from the motion capture data to joint angles, spatiotemporal parameters, step times, and more.
-- [**Data Processing**](#data-processing): Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
-- [**Utility Functions**](#utility-functions): Plot data for visualization, load data into user interfaces, and organize data for analysis.
+- [**Format harmonization**](#format-harmonization): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
+- [**Feature extraction**](#feature-extraction): Extract meaningful features from the motion capture data to joint angles, spatiotemporal parameters, step times, and more.
+- [**Data preparation**](#data-preparation): Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
+- [**Utility functions**](#utility-functions): Plot data for visualization, load data into user interfaces, and organize data for analysis.
 
 We have provided some mock data to let the users test the utilities of the library. The mock data should be inside **"vigma/notebooks/data"** folder. You should follow the same hierarchy and naming conventions for data storage displayed in the image below.
 
@@ -15,9 +15,9 @@ We have provided some mock data to let the users test the utilities of the libra
 
 You can also check out this [notebook](https://github.com/komar41/vigma/blob/main/notebooks/_tutorial.ipynb) that illustrates how to use all functionalities of **VIGMA** Python API.
 
-<a name="format-conversion"></a>
+<a name="format-harmonization"></a>
 
-## 1. Format Conversion
+## 1. Format harmonization
 
 <!-- Add replace to all three function parameters -->
 
@@ -30,6 +30,7 @@ You can also check out this [notebook](https://github.com/komar41/vigma/blob/mai
 - `file_dir (str)`: The directory where the TRC/MAT/C3D file is located.
 - `patient_id (str)`: The ID of the patient.
 - `trial_no (int)`: The trial number.
+- `replace (bool)` [<span style="color:red">optional</span>]: If set to True, it will overwrite the existing CSV file. If False or not provided, the function will create a new CSV file.
 
 **Returns:**
 
@@ -51,18 +52,17 @@ print(df.head())
 
 <a name="feature-extraction"></a>
 
-## 2. Feature Extraction
+## 2. Feature extraction
 
 ### `motionToJointAngle()`
 
-- Reads a motion file (CSV), processes its contents to extract joint angles, and optionally saves the result as a CSV file.
+- Processes the contents of a DataFrame to extract joint angles and optionally saves the result as a CSV file.
 
 **Parameters:**
 
-- `file_dir (str)`: The directory where the motion file is located.
-- `patient_id (str)`: The ID of the patient.
-- `trial (int)`: The trial number.
-- `save (bool)`: Whether to save the resulting DataFrame as a CSV file (default is False). Saves the joint angle file in the same directory.
+- `df (DataFrame)`: The DataFrame containing motion data that needs to be processed.
+- `save (bool)` [<span style="color:red">optional</span>]: Whether to save the resulting DataFrame as a CSV file (default is False). Saves the joint angle file in the same directory.
+- `replace (bool)` [<span style="color:red">optional</span>]: If set to True, it will overwrite the existing CSV file. If False or not provided, the function will create a new CSV file.
 
 **Returns:**
 
@@ -73,12 +73,13 @@ print(df.head())
 ```Python
 import vigma
 
-file_dir = "./data"
-patient_id = "022318xz"
-trial = 4
+file_dir = './data'
+patient_id = "041602jb"
+trial_no = 1
 
-df = vigma.motionToJointAngle(file_dir, patient_id, trial, save=True)
-print(df.head())
+df_motion = emogis.read(file_dir, patient_id, trial = trial_no, data_type = 'motion')
+df_angle = emogis.motionToJointAngle(df)
+print(df_angle.head())
 ```
 
 ### `mark_step_times()`
@@ -93,9 +94,6 @@ print(df.head())
 - `L (list)`: List of tuples containing left foot step times (touch down, toe off).
 - `R (list)`: List of tuples containing right foot step times (touch down, toe off).
 - `trialtype (str)`: The type of trial (e.g., 'walk')
-
-- `**kwargs`: Additional keyword arguments, including:
-  - `dataframe (DataFrame)`: The DataFrame to be normalized. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
 
 **Returns:**
 
@@ -117,7 +115,7 @@ trialtype = 'walk'
 vigma.mark_step_times(file_dir, patient_id, trial, Left, Right, trialtype)
 ```
 
-### `extract_stp()`
+### `extract_sptmp()`
 
 - Reads joint angle (CSV) and demographic data (CSV) files, processes the data, and calculates step parameters for **one trial**. Returns the resulting tuple of step parameters for the trial.
 
@@ -140,7 +138,7 @@ file_dir = "./data"
 patient_id = "081517ap"
 trial = 8
 
-step_params = vigma.extract_stp(file_dir, patient_id, trial)
+step_params = vigma.extract_sptmp(file_dir, patient_id, trial)
 
 print("Patient ID: %s, Trial: %d" % (patient_id, trial))
 
@@ -148,16 +146,14 @@ print("RstepLength: %f, LstepLength: %f, timeRswing: %f, timeLswing: %f, timeRGa
       % (step_params[0], step_params[1], step_params[2], step_params[3], step_params[4], step_params[5], step_params[6]))
 ```
 
-### `get_stp_params()`
+### `get_sptmp_params()`
 
-- Reads joint angle (CSV) and demographic data (CSV) files, processes the data, and calculates step parameters for **all trials** of a patient. Returns the resulting DataFrame, and optionally saves the result as a CSV file.
+- Reads joint angle (CSV) and demographic data (CSV) files, processes the data, and calculates step parameters for **all trials** of a patient. Returns the resulting DataFrame.
 
 **Parameters:**
 
 - `file_dir (str)`: The directory where the data files are located.
 - `patient_id (str)`: The ID of the patient.
-- `save (bool)`: Whether to save the resulting DataFrame as a CSV file (default is False).
-- `replace (bool)`: Whether to replace the existing step parameters CSV file (default is False). Should only be true when save is true.
 
 **Returns:**
 
@@ -171,137 +167,22 @@ import vigma
 file_dir = "./data"
 patient_id = "081517ap"
 
-df = get_stp_params(file_dir, patient_id, save=True, replace=True)
+df = get_sptmp_params(file_dir, patient_id)
 print(df.head())
 ```
 
-<a name="data-processing"></a>
+<a name="data-preparation"></a>
 
-## 3. Data Processing
+## 3. Data preparation
 
 ### `interpolate_impute()` / `knn_impute()` / `mice_impute()`
 
-- Imputes missing data in a dataset using different imputation methods: linear interpolation, K-Nearest Neighbors (KNN), or Multiple Imputation by Chained Equations (MICE).
+- Imputes missing data in a dataframe using different imputation methods: linear interpolation, K-Nearest Neighbors (KNN), or Multiple Imputation by Chained Equations (MICE).
 
 **Parameters:**
 
-- `data_type (str)`: The type of data being imputed: 'grf' or 'jnt' (default is 'jnt').
-- `save (bool)`: Whether to save the resulting DataFrame as a CSV file (default is False). If `save` is true, user must provide _file dir_, _patient_id_, and _trial_.
-- `replace (bool)`: Whether to replace the existing file if saving (default is False). Should only be true when save is true.
-- `**kwargs`: Additional keyword arguments, including:
-  - `dataframe (DataFrame)`: The DataFrame to be imputed. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
-  - `file_dir (str)`: The directory where the data file is located.
-  - `patient_id (str)`: The ID of the patient.
-  - `trial (int)`: The trial number.
-
-**Returns:**
-
-- `DataFrame`: The resulting DataFrame after conversion.
-
-**Example 1:**
-
-```Python
-import vigma
-
-file_dir = './data'
-patient_id = "022318xz"
-trial = 4
-
-df_imputed = vigma.knn_impute(file_dir = file_dir, patient_id = patient_id, trial = trial
-                                 data_type = 'jnt', save = False) # same for mice_impute, interpolate_impute
-
-print(df_imputed.head())
-```
-
-**Example 2:**
-
-```Python
-import vigma
-
-file_dir = './data'
-patient_id = "022318xz"
-trial = 4
-
-df = vigma.motionToJointAngle(file_dir, patient_id, trial)
-df_imputed = vigma.mice_impute(dataframe = df,
-                                    data_type = 'jnt',
-                                        save = True, replace = True,
-                                            file_dir = file_dir, patient_id = patient_id, trial = trial)
-
-print(df_imputed.head())
-```
-
-### `filter_data()`
-
-- Butterworth filters data using a specified cutoff frequency and order, then returns the filtered DataFrame.
-
-**Parameters:**
-
-- `data_type (str)`: The type of data being imputed: 'grf' or 'jnt' (default is 'jnt').
-- `cutoff (int)`: Cutoff frequency for the filter (default is `6`).
-- `order (int)`: Order of the filter (default is `4`).
-- `save (bool)`: Whether to save the resulting DataFrame as a CSV file (default is False). If `save` is true, user must provide _file dir_, _patient_id_, and _trial_.
-- `replace (bool)`: Whether to replace the existing file if saving (default is False). Should only be true when save is true.
-- `**kwargs`: Additional keyword arguments, including:
-  - `dataframe (DataFrame)`: The DataFrame to be imputed. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
-  - `file_dir (str)`: The directory where the data file is located.
-  - `patient_id (str)`: The ID of the patient.
-  - `trial (int)`: The trial number.
-
-**Returns:**
-
-- `DataFrame`: The resulting DataFrame after conversion.
-
-**Example 1:**
-
-```Python
-import vigma
-
-file_dir = './data'
-patient_id = "022318xz"
-trial = 4
-
-df_filtered = vigma.filter_data(file_dir = file_dir, patient_id = patient_id, trial = trial
-                                 data_type = 'jnt', save = False)
-
-print(df_filtered.head())
-```
-
-**Example 2:**
-
-```Python
-import vigma
-
-file_dir = './data'
-patient_id = "022318xz"
-trial = 4
-
-df = vigma.motionToJointAngle(file_dir, patient_id, trial)
-df_imputed = vigma.mice_impute(dataframe = df,
-                                    data_type = 'jnt')
-df_filtered = vigma.filter_data(dataframe = df,
-                                    data_type = 'jnt',
-                                        save = True, replace = True,
-                                            file_dir = file_dir, patient_id = patient_id, trial = trial)
-
-print(df_filtered.head())
-```
-
-### `normalize_data()`
-
-- Normalizes a data file to a specific gait cycle and interpolates it to 100 points. Requires step times (CSV) to be available.
-
-**Parameters:**
-
-- `file_dir (str)`: The directory where the data files are located.
-- `patient_id (str)`: The ID of the patient.
-- `trial (int)`: The trial number.
-- `data_type (str)`: The type of data being imputed: 'grf' or 'jnt' (default is 'jnt').
-- `cycle (str)`: The gait cycle to normalize to ('L' for left, 'R' for right; default is 'L').
-- `save (bool)`: Whether to save the resulting DataFrame as a CSV file (default is False).
-
-- `**kwargs`: Additional keyword arguments, including:
-  - `dataframe (DataFrame)`: The DataFrame to be normalized. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
+- `df (DataFrame)`: The DataFrame containing the data to be imputed.
+- `data_type (str)` [<span style="color:red">optional</span>]: The type of data being imputed (default is 'jnt').
 
 **Returns:**
 
@@ -316,7 +197,77 @@ file_dir = './data'
 patient_id = "022318xz"
 trial = 4
 
-df_normalized = vigma.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
+# Example: Imputing missing data in a joint angle DataFrame
+df_motion = vigma.read(file_dir, patient_id, trial=trial_no, data_type='motion')
+df_angle = vigma.motionToJointAngle(df_motion)
+df_imputed = vigma.mice_impute(df_angle, data_type='jnt')
+
+print(df_imputed.head())
+```
+
+### `filter_data()`
+
+- Butterworth filters a dataframe using a specified cutoff frequency and order, then returns the filtered DataFrame.
+
+**Parameters:**
+
+- `df (DataFrame)`: The DataFrame containing the data to be filtered.
+- `data_type (str)` [<span style="color:red">optional</span>]: The type of data being filtered (default is 'jnt').
+- `cutoff (int)` [<span style="color:red">optional</span>]: Cutoff frequency for the filter (default is `6`).
+- `order (int)` [<span style="color:red">optional</span>]: Order of the filter (default is `4`).
+
+
+**Returns:**
+
+- `DataFrame`: The resulting DataFrame after conversion.
+
+**Example:**
+
+```Python
+import vigma
+
+file_dir = './data'
+patient_id = "022318xz"
+trial = 4
+
+df_motion = vigma.read(file_dir, patient_id, trial=trial_no, data_type='motion')
+df_angle = vigma.motionToJointAngle(df_motion)
+df_imputed = vigma.mice_impute(df_angle, data_type = 'jnt')
+df_filtered = vigma.filter_data(df_imputed, data_type = 'jnt')
+
+print(df_filtered.head())
+```
+
+### `normalize_data()`
+
+- Normalizes a dataframe to a specific gait cycle and interpolates it to 100 points.
+
+**Parameters:**
+
+- `df (DataFrame)`: The DataFrame containing the data to be normalized.
+- `df_step (DataFrame)`: The DataFrame containing the step times for the patient's trials.
+- `patient_id (str)`: The ID of the patient.
+- `trial (int)`: The trial number.
+- `data_type (str)` [<span style="color:red">optional</span>]: The type of data being normalized: 'grf', 'jnt', or others (default is 'jnt').
+- `cycle (str)` [<span style="color:red">optional</span>]: The gait cycle to normalize to ('L' for left, 'R' for right; default is 'L').
+
+**Returns:**
+
+- `DataFrame`: The resulting DataFrame after conversion.
+
+**Example:**
+
+```Python
+import vigma
+
+file_dir = './data'
+patient_id = "022318xz"
+trial = 4
+
+df_grf = emogis.read(file_dir, patient_id, trial = t, data_type = 'grf')
+df_step = emogis.read(file_dir, patient_id, data_type = 'step_time')
+
+df_normalized = vigma.normalize_data(df_grf, df_step, patient_id, trial = 4, data_type = 'grf', cycle = 'L')
 
 print(df_normalized.head())
 ```

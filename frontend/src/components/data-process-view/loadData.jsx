@@ -116,7 +116,7 @@ export const LoadData = (props) => {
     thigh: "Thigh",
     trunk: "Trunk",
     hipx: "Hip Position",
-    AP: "Asterior-Posterior",
+    AP: "Anterior-Posterior",
     ML: "MedioLateral",
     VT: "Vertical",
     STP: "Spatiotemporal",

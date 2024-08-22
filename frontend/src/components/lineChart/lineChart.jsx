@@ -66,14 +66,14 @@ const LineChart = ({ chartData }) => {
   // Active groups
   const [activeGroups, setActiveGroups] = useState([true, true]);
 
-  // Map selectedColumn from ['Foot', 'Shank', 'Thigh', 'Trunk', 'Hip', 'Asterior-Posterior', 'MedioLateral', 'Vertical', 'Spatiotemporal'] -> ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT', 'STP']
+  // Map selectedColumn from ['Foot', 'Shank', 'Thigh', 'Trunk', 'Hip', 'Anterior-Posterior', 'MedioLateral', 'Vertical', 'Spatiotemporal'] -> ['foot', 'shank', 'thigh', 'trunk', 'hipx', 'AP', 'ML', 'VT', 'STP']
   const dict = {
     foot: "Foot",
     shank: "Shank",
     thigh: "Thigh",
     trunk: "Trunk",
     hipx: "Hip Position",
-    AP: "Asterior-Posterior",
+    AP: "Anterior-Posterior",
     ML: "MedioLateral",
     VT: "Vertical",
     STP: "Spatiotemporal",

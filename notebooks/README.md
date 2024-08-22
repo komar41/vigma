@@ -7,13 +7,14 @@ The python API for **VIGMA** is designed to facilitate a variety of tasks relate
 - [**Format harmonization**](#format-harmonization): Convert motion capture files from various formats (TRC, MAT, C3D) to CSV files for easier handling and analysis.
 - [**Feature extraction**](#feature-extraction): Extract meaningful features from the motion capture data to joint angles, spatiotemporal parameters, step times, and more.
 - [**Data preparation**](#data-preparation): Impute missing data, normalize data to specific gait cycles, and filter data to remove noise.
-- [**Utility functions**](#utility-functions): Plot data for visualization, load data into user interfaces, and organize data for analysis.
+- [**Data managment**](#data-management): Save and read data files, load data into the Visual Analytics (VA) system.
+- [**Utility functions**](#utility-functions): Plot data for visualization.
 
 We have provided some mock data to let the users test the utilities of the library. The mock data should be inside **"vigma/notebooks/data"** folder. You should follow the same hierarchy and naming conventions for data storage displayed in the image below.
 
 <img src="data-storage.png" width="400">
 
-You can also check out this [notebook](https://github.com/komar41/vigma/blob/main/notebooks/_tutorial.ipynb) that illustrates how to use all functionalities of **VIGMA** Python API.
+You can also check out this [notebook](https://github.com/komar41/vigma/blob/main/notebooks/tutorial.ipynb) that illustrates how to use all functionalities of **VIGMA** Python API.
 
 <a name="format-harmonization"></a>
 
@@ -262,78 +263,36 @@ import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
-trial = 4
+trial_no = 4
 
-df_grf = emogis.read(file_dir, patient_id, trial = t, data_type = 'grf')
+df_grf = emogis.read(file_dir, patient_id, trial = trial_no, data_type = 'grf')
 df_step = emogis.read(file_dir, patient_id, data_type = 'step_time')
 
-df_normalized = vigma.normalize_data(df_grf, df_step, patient_id, trial = 4, data_type = 'grf', cycle = 'L')
+df_normalized = vigma.normalize_data(df_grf, df_step, patient_id, trial_no, data_type = 'grf', cycle = 'L')
 
 print(df_normalized.head())
 ```
 
-<a name="utility-functions"></a>
+<a name="data-management"></a>
 
-## 4. Utility functions
+## 4. Data Management
 
-### `plot()`
-
-- Plots data from a specified trial data file or dataframe, with options to 1) highlight steps, and 2) plotting for a specified gait cycle.
+### `save()`
+- Saves a DataFrame as a CSV file, handling different types of data and conditions such as normalization and whether to replace existing files.
 
 **Parameters:**
-
-- `data_type (str)`: The type of data being imputed: 'grf' or 'jnt' (default is 'jnt').
-- `steps (bool)`: Whether to highlight step times in the plot (default is 'False').
-- `cycle`: Whether to normalize the data to a cycle (default is 'False').
-- `**kwargs`: Additional keyword arguments, including:
-  - `dataframe (DataFrame)`: The DataFrame to be plotted. If not provided, the function reads from a CSV file located via _file dir_, _patient_id_, and _trial_.
-  - `file_dir (str)`: The directory where the data files are located.
-  - `patient_id (str)`: The ID of the patient.
-  - `trial (int)`: The trial number.
+- `df (DataFrame)`: The DataFrame to be saved.
+- `file_dir (str)`: The directory where the file should be saved.
+- `patient_id (str)`: The ID of the patient.
+- `trial (int)` [<span style="color:red">optional</span>]: The trial number (required for certain data types).
+- `data_type (str)` [<span style="color:red">optional</span>]: The type of data being saved: 'jnt', 'grf', 'motion', 'sptmp_params', or 'step_time' (default is 'jnt').
+- `norm (bool)` [<span style="color:red">optional</span>]: Indicates whether the data has been normalized (default is False).
+- `cycle (str)` [<span style="color:red">optional</span>]: The gait cycle ('L' for left, 'R' for right) used in normalization (default is 'L').
+- `replace (bool)` [<span style="color:red">optional</span>]: If True, overwrite the existing file. If False, create a new file with a unique name if the file already exists (default is False).
 
 **Returns:**
 
-- `None`: Displays the plot.
-
-**Example 1:**
-
-```Python
-import vigma
-
-file_dir = './data'
-patient_id = "022318xz"
-trial = 4
-
-vigma.plot(data_type='jnt',
-               file_dir = file_dir, patient_id = patient_id, trial = trial,
-                    steps = True)
-```
-
-**Example 2:**
-
-```Python
-import vigma
-
-file_dir = './data'
-patient_id = "022318xz"
-trial = 4
-
-df_normalized = vigma.normalize_data(file_dir, patient_id, trial, data_type = 'jnt', cycle='L', save = False)
-
-vigma.plot(df = df_normalized, data_type = 'jnt', cycle = True)
-```
-
-### `load_data()`
-
-- Loads data files for a patient, categorizes them under a group (e.g., stroke) and uploads it to the directory of the visual analytics system.
-
-**Parameters:**
-
-- `file_dir (str)`: The directory where the data files are located.
-- `patient_id (str)`: The ID of the patient.
-- `group (str)`: The group or category for the processed data (default is 'misc').
-  **Returns:**
-- `None`: Copies the processed data to the specified directory.
+- `None`.
 
 **Example:**
 
@@ -342,10 +301,107 @@ import vigma
 
 file_dir = './data'
 patient_id = "022318xz"
+trial_no = 4
 
-vigma.load_data(file_dir, patient_id, group='healthy_controls')
+df_motion = vigma.read(file_dir, patient_id, trial=trial_no, data_type='motion')
+df_angle = vigma.motionToJointAngle(df_motion)
+df_imputed = vigma.mice_impute(df_angle, data_type='jnt')
+df_filtered = vigma.filter_data(df_imputed, data_type='jnt')
+
+vigma.save(df_filtered, file_dir, patient_id, trial_no, data_type='jnt', norm=False, replace=True)
 ```
 
-<!-- Add save utility function-->
+### `read()`
+
+- Reads a CSV file corresponding to a specific patient, trial, and data type, returning the data as a DataFrame. The function supports different data types and normalized data.
+
+**Parameters:**
+
+- `file_dir (str)`: The directory where the data files are located.
+- `patient_id (str)`: The ID of the patient.
+- `trial (int)` [<span style="color:red">optional</span>]: The trial number (required for certain data types).
+- `data_type (str)` [<span style="color:red">optional</span>]: The type of data to be read: 'jnt', 'grf', 'motion', 'sptmp_params', or 'step_time' (default is 'jnt').
+- `norm (bool)` [<span style="color:red">optional</span>]: Indicates whether to read normalized data (default is False).
+- `cycle (str)` [<span style="color:red">optional</span>]: The gait cycle ('L' for left, 'R' for right) used in normalization (default is 'L').
+- `file_no (int)` [<span style="color:red">optional</span>]: The specific version of the file to read if multiple versions exist.
+
+**Returns:**
+
+- `DataFrame`: The data read from the CSV file.
+
+**Example:**
+
+```Python
+import vigma
+
+file_dir = './data'
+patient_id = "022318xz"
+trial_no = 4
+
+df = vigma.read(file_dir, patient_id, trial=trial_no, data_type='jnt')
+print(df.head())
+```
+
+
+### `load_VA()`
+- Loads a data file into the VA (Visual Analytics) system under a specified group. The function first checks if the file already exists in the VA system and prompts the user to overwrite it if necessary.
+
+**Parameters:**
+- file_dir (str): The directory where the original data file is located.
+- patient_id (str): The ID of the patient.
+- data_type (str): The type of data to be loaded: 'motion', 'sptmp_params', 'step_time', or normalized data.
+- trial (int) [<span style="color:red">optional</span>]: The trial number (required for certain data types).
+- group (str) [<span style="color:red">optional</span>]: The group under which the data is to be loaded in the VA system (default is 'misc').
+- norm (bool) [<span style="color:red">optional</span>]: Indicates whether to load normalized data (default is False).
+- cycle (str) [<span style="color:red">optional</span>]: The gait cycle ('L' for left, 'R' for right) used in normalization (default is 'L').
+
+**Returns:**
+- `None`.
+
+```Python
+import vigma
+
+file_dir = './data'
+patient_id = "022318xz"
+trial_no = 4
+
+vigma.load_VA(file_dir, patient_id, data_type='jnt', trial=trial_no, group='misc', norm=False, cycle='L')
+```
+
+<a name="utility-functions"></a>
+
+## 5. Utility functions
+
+### `plot()`
+
+- Plots data from a DataFrame, with options to plot joint angles, ground reaction forces (GRF), or other types of data, and to include step events in the plot.
+
+**Parameters:**
+- `df (DataFrame)`: The DataFrame containing the data to be plotted.
+- `data_type (str)` [<span style="color:red">optional</span>]: The type of data to be plotted: 'jnt' for joint angles, 'grf' for ground reaction forces, or others (default is 'jnt').
+- `steps` (bool) [<span style="color:red">optional</span>]: If `True`, step events (toe-offs and touchdowns) will be plotted (default is `False`). Requires step data to be provided in `kwargs`.
+- `cycle (bool)` [<span style="color:red">optional</span>]: If `True`, the data will be plotted against the gait cycle percentage instead of time (default is `False`). Overrides steps if both are set to `True`.
+- `kwargs`: Additional keyword arguments to be passed to the plot function, including:
+  - `step_data (DataFrame)`: The DataFrame containing step events (required if `steps` is `True`).
+  - `trial (int)`: The trial number (required if `steps` is `True`).
+
+**Returns:**
+- `None`.
+
+**Example:**
+
+```Python
+import vigma
+
+file_dir = './data'
+patient_id = "022318xz"
+trial_no = 4
+
+df = vigma.read(file_dir, patient_id, trial=trial_no, data_type='jnt')
+step_data = vigma.read(file_dir, patient_id, data_type='step_time')
+
+vigma.plot(df, data_type='jnt', steps=True, cycle=False, step_data=step_data, trial=trial_no)
+```
 
 <!-- Heading- Data Formats. For RAW CSVs. Add SS of csv. SEE grf jnt step formats from here- add link to first notebook SSs. -->
+

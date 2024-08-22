@@ -9,7 +9,7 @@ This project, VIGMA, is designed to visualize and analyze gait data, providing a
     <b>The VIGMA Framework</b>
 </div>
 
-# Installation Guide
+## Installation Guide
 
 This guide provides detailed steps to install and set up the VIGMA system, including software installations, project setup, and running the application.
 

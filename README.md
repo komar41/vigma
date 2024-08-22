@@ -1,5 +1,14 @@
 <TODO- Intro. Add image of the system.>
 
+# VIGMA: The Visual Gait and Motion Analytics Framework
+This project, VIGMA, is designed to visualize and analyze gait data, providing a comprehensive tool for understanding mobility and balance in various patient populations. VIGMA integrates data processing, analysis, and visualization within a user-friendly framework, making it accessible to researchers, clinicians, and practitioners. The system supports the exploration of disease progression, comparisons across multiple patient groups, and offers advanced visual analytics capabilities. Our goal is to facilitate deeper insights into gait disorders and aid in the development of tailored treatment plans and rehabilitation strategies. VIGMA is open-source and available for use and contribution at [github.com/komar41/VIGMA](https://github.com/komar41/VIGMA).
+
+![image](teaser.png)
+
+<div align="center">
+    <b>The VIGMA Framework</b>
+</div>
+
 # Installation Guide
 
 This guide provides detailed steps to install and set up the VIGMA system, including software installations, project setup, and running the application.
@@ -10,7 +19,7 @@ This guide provides detailed steps to install and set up the VIGMA system, inclu
 - Follow this [link](https://nodejs.org/en/download/) to install Node. Prebuilt binaries/installer is the easiest way to perform installation.
 <!-- - Follow this [link](https://code.visualstudio.com/download) to download and install Visual Studio Code (vscode). You may use code editors other than vscode as well. -->
 
-This short [video]() illustrates how to perform these software installations.
+<!-- This short [video]() illustrates how to perform these software installations. -->
 
 ## Project Setup
 
@@ -69,7 +78,7 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
   npm install --legacy-peer-deps
   ```
 
-This short [video]() illustrates how to setup the project.
+<!-- This short [video]() illustrates how to setup the project. -->
 
 ## Run the application
 
@@ -97,10 +106,11 @@ This short [video]() illustrates how to setup the project.
 
   <img src="data-storage.png" width="400">
 
-This short [video]() illustrates how to run the application and generate visualizations.
+<!-- This short [video]() illustrates how to run the application and generate visualizations. -->
 
 <TODO- Heading- Data Formats. For GRF JNT STEP. Add SS of csvs.>
 
 ## Use the Python API
 
-Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** python API. You can also watch this short [video tutorial]() to learn the usage of the Python API.
+Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** python API. 
+<!-- You can also watch this short [video tutorial]() to learn the usage of the Python API. -->

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response, send_file, render_template
+from flask import Flask, jsonify, request, Response, send_file, render_template, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
@@ -313,18 +313,25 @@ def process_form_data():
             
             if(col == 'AP' or col == 'ML' or col == 'VT'): type = 'grf'
             else: type = 'jnt'
+
+            # create another dictionary to store patient group for each file. For instance, stroke_patients/011918ds_20 will be 011918ds_20: stroke_patients
+            dict_group1 = {file.split('/')[1].split('_')[0] + "_" + file.split('/')[1].split('_')[1]: file.split('/')[0] for file in group1Files}
+            dict_group2 = {file.split('/')[1].split('_')[0] + "_" + file.split('/')[1].split('_')[1]: file.split('/')[0] for file in group2Files}
+
             group1FilesLoc = [file + '_%s.csv'%type for file in group1Files_loc]
             group2FilesLoc = [file + '_%s.csv'%type for file in group2Files_loc]
 
             dict_df_1, df_1 = process_data(fileLocation, group1FilesLoc, col_1, footing1, cycle1)
             df_1.columns = ['time'] + [col[-1] for col in df_1.columns if col != 'time']
             dict_list_df1 = {key: df.to_dict(orient='records') for key, df in dict_df_1.items()}
+            # add g1 to keys of dict_list_df1 so that keys will be like key_g1
+            # dict_list_df1 = {key + '_g1': value for key, value in dict_list_df1.items()}
 
             if(group2Files):
                 dict_df_2, df_2 = process_data(fileLocation, group2FilesLoc, col_2, footing2, cycle2)
                 df_2.columns = ['time'] + [col[-1] for col in df_2.columns if col != 'time']
                 dict_list_df2 = {key: df.to_dict(orient='records') for key, df in dict_df_2.items()}
-
+                # dict_list_df2 = {key + '_g2': value for key, value in dict_list_df2.items()}
 
             # Add Local, global minima and maxima to the charts
             # l_minima_1 = argrelextrema(df_1['m'].values, np.less)[0].tolist()
@@ -343,11 +350,12 @@ def process_form_data():
             # Option to save normalized CSV files in frontend
 
         # df_1 = df_1.replace({np.nan: None})
-        # print(df_1)
 
+        print(dict_group1)
         response = {
             'df1': df_1.to_dict(orient='records'),
             'df1_data': dict_list_df1,
+            'df1_patient_group': dict_group1,
             'df1_mnmx': df_1_mnmx
         }
 
@@ -355,6 +363,7 @@ def process_form_data():
             response.update({
                 'df2': df_2.to_dict(orient='records'),
                 'df2_data': dict_list_df2,
+                'df2_patient_group': dict_group2,
                 'df2_mnmx': df_2_mnmx
             })
 
@@ -366,6 +375,50 @@ def process_form_data():
 
 # df: time, l, m, u
 # df: sid, trial, RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed
+
+
+@app.route('/get_start_end_time', methods=['POST'])
+def get_start_end_time():
+    # Get data from the request
+    data = request.json
+    fileLocation = data['fileLocation']
+    patient_group = data['patient_group']
+    patient_id = data['patient_id']
+    trial = data['trial']
+    footing = data['footing']
+    cycle = data['cycle']
+    
+    # Logic to compute start and end time
+    data_step = pd.read_csv(f"{fileLocation}/{patient_group}/{patient_id}/{patient_id}step.csv")
+    data_step = data_step[(data_step['trial'] == int(trial)) & (data_step['subject'] == patient_id)]
+    
+    if data_step['footing'].values[0] == 'L':
+        if cycle == 'L':
+            start_time = data_step['touch down'].values[0]
+            end_time = data_step['touch down.2'].values[0]
+        else:
+            start_time = data_step['touch down.1'].values[0]
+            end_time = data_step['touch down.3'].values[0]
+    else:
+        if cycle == 'L':
+            start_time = data_step['touch down.1'].values[0]
+            end_time = data_step['touch down.3'].values[0]
+        else:
+            start_time = data_step['touch down'].values[0]
+            end_time = data_step['touch down.2'].values[0]
+    
+    # Return start and end time as JSON response
+    return jsonify({'start_time': start_time, 'end_time': end_time})
+
+# Define the base directory where all your data (videos and other files) are located
+DATA_DIRECTORY = os.path.join(os.getcwd(), 'data')
+
+# Route to serve files from the data directory and its subdirectories
+@app.route('/data/<path:filepath>')
+def serve_data(filepath):
+    # Serve the requested file from the data directory
+    return send_from_directory(DATA_DIRECTORY, filepath)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

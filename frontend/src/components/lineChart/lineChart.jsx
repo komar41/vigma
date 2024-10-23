@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
+import axios from "axios";
 import * as d3 from "d3";
 import "./lineChart.css";
 import { GlobalContext } from "../globalHighlight/GlobalContext";
@@ -37,6 +38,86 @@ const LineChart = ({ chartData }) => {
     selectedKeysRefG2.current = globalArray2;
   }, [globalArray2]);
 
+  const sendDataToServer = async (
+    fileLocation,
+    patient_group,
+    patient_id,
+    trial,
+    footing,
+    cycle
+  ) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/get_start_end_time", // Your server endpoint
+        {
+          fileLocation, // Variables sent as JSON payload
+          patient_group,
+          patient_id,
+          trial,
+          footing,
+          cycle,
+        }
+      );
+
+      // Extract start_time and end_time from the response
+      const { start_time, end_time } = response.data;
+
+      return { start_time, end_time };
+    } catch (error) {
+      console.error("Error in POST request:", error);
+      throw error;
+    }
+  };
+
+  const openVideoPopup = (
+    videoPath,
+    startTime,
+    endTime,
+    patient_id,
+    trial_id
+  ) => {
+    const newWindow = window.open("", "_blank", "width=400,height=400");
+
+    console.log(patient_id, trial_id);
+    // Set the title of the popup dynamically using patient_id and trial_id
+    newWindow.document.title = `${patient_id}_${trial_id}`;
+
+    // Open and write content into the new document
+    newWindow.document.open(); // Ensure we are starting with a fresh document
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>${patient_id}_${trial_id}</title> <!-- Set title inside the document as well -->
+        </head>
+        <body>
+          <video id="video" width="100%" height="100%" controls autoplay>
+            <source src="${videoPath}" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <script>
+            const video = document.getElementById('video');
+            video.currentTime = ${startTime}; // Start at the specified time
+  
+            video.addEventListener('timeupdate', () => {
+              const currentTime = video.currentTime;
+              if (video.currentTime >= ${endTime}) {
+                video.pause();
+                video.currentTime = ${startTime}; // Reset to start time after pause
+              }
+            });
+  
+            video.addEventListener('play', () => {
+              if (video.currentTime < ${startTime} || video.currentTime > ${endTime}) {
+                video.currentTime = ${startTime};
+              }
+            });
+          </script>
+        </body>
+      </html>
+    `);
+    newWindow.document.close(); // Close the document to finalize writing
+  };
+
   const handleLineClickG1 = (key, visibleLine) => {
     setGlobalArray((prevKeys) => {
       const newKeys = prevKeys.includes(key)
@@ -50,6 +131,21 @@ const LineChart = ({ chartData }) => {
     });
   };
 
+  const handleLineClickG1Conditional = (key, visibleLine) => {
+    setGlobalArray((prevKeys) => {
+      // If the key is already in prevKeys, don't change anything
+      if (prevKeys.includes(key)) {
+        return prevKeys; // Return prevKeys without changes
+      }
+
+      // If the key is not in prevKeys, add it and highlight the line
+      const newKeys = [...prevKeys, key];
+      visibleLine.attr("class", "line-highlight");
+
+      return newKeys; // Update the state with the new key added
+    });
+  };
+
   const handleLineClickG2 = (key, visibleLine) => {
     setGlobalArray2((prevKeys) => {
       const newKeys = prevKeys.includes(key)
@@ -60,6 +156,21 @@ const LineChart = ({ chartData }) => {
         newKeys.includes(key) ? "line-highlight-2" : "line-normal-2"
       );
       return newKeys;
+    });
+  };
+
+  const handleLineClickG2Conditional = (key, visibleLine) => {
+    setGlobalArray2((prevKeys) => {
+      // If the key is already in prevKeys, don't change anything
+      if (prevKeys.includes(key)) {
+        return prevKeys; // Return prevKeys without changes
+      }
+
+      // If the key is not in prevKeys, add it and highlight the line
+      const newKeys = [...prevKeys, key];
+      visibleLine.attr("class", "line-highlight-2");
+
+      return newKeys; // Update the state with the new key added
     });
   };
 
@@ -323,6 +434,7 @@ const LineChart = ({ chartData }) => {
       } else if (spreadOption === "All data") {
         // Add all lines
         Object.entries(group1AllData).forEach(([key, array]) => {
+          let clickTimeout;
           const visibleLine = svg
             .append("path")
             .datum(array)
@@ -356,6 +468,7 @@ const LineChart = ({ chartData }) => {
               visibleLine.attr("class", "line-highlight");
 
               const [mouseX, mouseY] = d3.pointer(event);
+              // console.log("mouseover", mouseX, mouseY);
               const tooltipText = `${key}`;
 
               // Append tooltip container
@@ -405,7 +518,102 @@ const LineChart = ({ chartData }) => {
               // Remove tooltip
               svg.selectAll(".tooltip").remove();
             })
-            .on("click", () => handleLineClickG1(key, visibleLine));
+            .on("click", (event) => {
+              // Clear any previous timeout to prevent interference with dblclick
+              clearTimeout(clickTimeout);
+
+              // Delay the execution of the click handler to detect if a dblclick is coming
+              clickTimeout = setTimeout(() => {
+                // const [mouseX, mouseY] = d3.pointer(event, svg.node());
+                // console.log("click", mouseX, mouseY);
+                handleLineClickG1(key, visibleLine);
+              }, 250); // 250ms delay to distinguish between click and dblclick
+            })
+            .on("dblclick", (event) => {
+              // Clear the click timeout since this is a double-click
+              clearTimeout(clickTimeout);
+
+              const [mouseX, mouseY] = d3.pointer(event, svg.node());
+              // console.log("dblclick", mouseX, mouseY);
+
+              // Create a button-like element at the mouse position
+              const buttonGroup = svg
+                .append("g")
+                .attr("class", "video-button")
+                .attr("transform", `translate(${mouseX}, ${mouseY})`)
+                .style("cursor", "pointer") // Add pointer cursor to indicate it's clickable
+                .on("click", async () => {
+                  // Make the click handler async
+                  handleLineClickG1Conditional(key, visibleLine);
+
+                  let patient_id = key.split("_")[0];
+                  let trial = key.split("_")[1];
+
+                  try {
+                    // console.log(chartData);
+                    // Use await to wait for the result from sendDataToServer
+                    const result = await sendDataToServer(
+                      chartData.fileLocation,
+                      chartData.patientGroup1[`${key}`],
+                      patient_id,
+                      trial,
+                      chartData.group1GaitCycle,
+                      chartData.group1Footing
+                    );
+
+                    // Destructure start_time and end_time from the result
+                    const { start_time, end_time } = result;
+
+                    // console.log("Start time:**", start_time);
+                    // console.log("End time:**", end_time);
+
+                    // Open the video popup with the specified start and end times
+                    // video location is http://localhost:5000/data/chartData.patientGroup1[`${key}`]/patient_id/patient_id_trial.mp4
+                    const videoPath = `http://localhost:5000/data/${
+                      chartData.patientGroup1[`${key}`]
+                    }/${patient_id}/${patient_id}_${trial}_video.mp4`;
+                    // console.log("Video path:", videoPath);
+                    openVideoPopup(
+                      videoPath,
+                      start_time,
+                      end_time,
+                      patient_id,
+                      trial
+                    );
+                  } catch (error) {
+                    console.error("Error fetching start and end times:", error);
+                  }
+                });
+
+              // Create the background rectangle for the button
+              buttonGroup
+                .append("rect")
+                .attr("x", 10) // Adjust for padding
+                .attr("y", -15) // Adjust for positioning
+                .attr("width", 60)
+                .attr("height", 25)
+                .attr("rx", 5)
+                .attr("ry", 5)
+                .attr("fill", "#fc8d62")
+                .attr("stroke", "#ccc")
+                .style("opacity", 0.8);
+
+              // Create the text inside the button
+              buttonGroup
+                .append("text")
+                .attr("x", 10 + 60 / 2) // Half of the width (60) + starting x position (10)
+                .attr("y", 0)
+                .attr("fill", "white")
+                .attr("text-anchor", "middle") // Center the text horizontally
+                .attr("dominant-baseline", "middle") // Vertically center the text
+                .text("Video");
+
+              setTimeout(() => {
+                buttonGroup.remove();
+              }, 2000);
+
+              svg.select(".video-button").style("opacity", 1);
+            });
 
           if (selectedKeysRefG1.current.includes(key)) {
             visibleLine.attr("class", "line-highlight");
@@ -529,6 +737,7 @@ const LineChart = ({ chartData }) => {
               })
           );
       } else if (spreadOption === "All data") {
+        let clickTimeout;
         // Add all lines
         Object.entries(group2AllData).forEach(([key, array]) => {
           const visibleLine = svg
@@ -614,7 +823,100 @@ const LineChart = ({ chartData }) => {
               // Remove tooltip
               svg.selectAll(".tooltip").remove();
             })
-            .on("click", () => handleLineClickG2(key, visibleLine));
+            // .on("click", () => handleLineClickG2(key, visibleLine));
+            .on("click", (event) => {
+              // Clear any previous timeout to prevent interference with dblclick
+              clearTimeout(clickTimeout);
+
+              clickTimeout = setTimeout(() => {
+                handleLineClickG2(key, visibleLine);
+              }, 250); // 250ms delay to distinguish between click and dblclick
+            })
+            .on("dblclick", (event) => {
+              // Clear the click timeout since this is a double-click
+              clearTimeout(clickTimeout);
+
+              const [mouseX, mouseY] = d3.pointer(event, svg.node());
+              // console.log("dblclick", mouseX, mouseY);
+
+              // Create a button-like element at the mouse position
+              const buttonGroup = svg
+                .append("g")
+                .attr("class", "video-button")
+                .attr("transform", `translate(${mouseX}, ${mouseY})`)
+                .style("cursor", "pointer") // Add pointer cursor to indicate it's clickable
+                .on("click", async () => {
+                  // Make the click handler async
+                  handleLineClickG2Conditional(key, visibleLine);
+
+                  let patient_id = key.split("_")[0];
+                  let trial = key.split("_")[1];
+
+                  try {
+                    // console.log(chartData);
+                    // Use await to wait for the result from sendDataToServer
+                    const result = await sendDataToServer(
+                      chartData.fileLocation,
+                      chartData.patientGroup2[`${key}`],
+                      patient_id,
+                      trial,
+                      chartData.group1GaitCycle,
+                      chartData.group1Footing
+                    );
+
+                    // Destructure start_time and end_time from the result
+                    const { start_time, end_time } = result;
+
+                    // console.log("Start time:**", start_time);
+                    // console.log("End time:**", end_time);
+
+                    // Open the video popup with the specified start and end times
+                    // video location is http://localhost:5000/data/chartData.patientGroup1[`${key}`]/patient_id/patient_id_trial.mp4
+                    const videoPath = `http://localhost:5000/data/${
+                      chartData.patientGroup2[`${key}`]
+                    }/${patient_id}/${patient_id}_${trial}_video.mp4`;
+                    // console.log("Video path:", videoPath);
+                    openVideoPopup(
+                      videoPath,
+                      start_time,
+                      end_time,
+                      patient_id,
+                      trial
+                    );
+                  } catch (error) {
+                    console.error("Error fetching start and end times:", error);
+                  }
+                });
+
+              // Create the background rectangle for the button
+              buttonGroup
+                .append("rect")
+                .attr("x", 10) // Adjust for padding
+                .attr("y", -15) // Adjust for positioning
+                .attr("width", 60)
+                .attr("height", 25)
+                .attr("rx", 5)
+                .attr("ry", 5)
+                .attr("fill", "#66c2a5")
+                .attr("stroke", "#ccc")
+                .style("opacity", 0.8);
+
+              // Create the text inside the button
+              buttonGroup
+                .append("text")
+                .attr("x", 10 + 60 / 2) // Half of the width (60) + starting x position (10)
+                .attr("y", 0)
+                .attr("fill", "white")
+                .attr("text-anchor", "middle") // Center the text horizontally
+                .attr("dominant-baseline", "middle") // Vertically center the text
+                .text("Video");
+
+              setTimeout(() => {
+                buttonGroup.remove();
+              }, 2000);
+
+              svg.select(".video-button").style("opacity", 1);
+            });
 
           if (selectedKeysRefG2.current.includes(key)) {
             visibleLine.attr("class", "line-highlight-2");

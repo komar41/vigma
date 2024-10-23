@@ -39,22 +39,9 @@ export const DataProcessView = (props) => {
 
   const [lineChartsData, setLineChartsData] = useState([
     {
-      active: false,
-      plotNumber: 2,
-      group1Data: [],
-      group2Data: [],
-      group1AllData: [],
-      group2AllData: [],
-      group1Label: "",
-      group2Label: "",
-      selectedFooting1: "",
-      selectedFooting2: "",
-      selectedCycle1: "",
-      selectedCycle2: "",
-      spreadOption: "",
-      groupExploration: false,
-    }, // Chart 2
-    {
+      fileLocation: "",
+      patientGroup1: "",
+      patientGroup2: "",
       active: false,
       plotNumber: 1,
       group1Data: [],
@@ -69,8 +56,26 @@ export const DataProcessView = (props) => {
       selectedCycle2: "",
       spreadOption: "",
       groupExploration: false,
+    }, // Chart 2
+    {
+      fileLocation: "",
+      active: false,
+      plotNumber: 2,
+      group1Data: [],
+      group2Data: [],
+      group1AllData: [],
+      group2AllData: [],
+      group1Label: "",
+      group2Label: "",
+      selectedFooting1: "",
+      selectedFooting2: "",
+      selectedCycle1: "",
+      selectedCycle2: "",
+      spreadOption: "",
+      groupExploration: false,
     }, // Chart 1
     {
+      fileLocation: "",
       active: false,
       plotNumber: 3,
       group1Data: [],
@@ -87,6 +92,7 @@ export const DataProcessView = (props) => {
       groupExploration: false,
     }, // Chart 3
     {
+      fileLocation: "",
       active: false,
       plotNumber: 4,
       group1Data: [],
@@ -103,6 +109,7 @@ export const DataProcessView = (props) => {
       groupExploration: false,
     }, // Chart 4
     {
+      fileLocation: "",
       active: false,
       plotNumber: 5,
       group1Data: [],
@@ -161,6 +168,9 @@ export const DataProcessView = (props) => {
       const group1AllData = response.data.df1_data;
       const group2AllData = response.data.df2_data;
 
+      const group1patientgroups = response.data.df1_patient_group;
+      const group2patientgroups = response.data.df2_patient_group;
+
       if (response.status !== 200) {
         console.error("Error while processing form data:", response);
         return;
@@ -191,6 +201,9 @@ export const DataProcessView = (props) => {
           const chartIndex = formData.panelOptions - 1; // Assuming panelOptions is 1-based
           const newChartData = { ...newData[chartIndex] }; // Assume chartIndex is defined and points to the chart data to update
 
+          newChartData.fileLocation = formData.fileLocation; // Update with actual file location
+          newChartData.patientGroup1 = group1patientgroups;
+          newChartData.patientGroup2 = group2patientgroups;
           // Here, update the chart data properties based on the formData and response
           newChartData.active = true; // Example of setting chart as active, adapt as necessary
           newChartData.parameter = formData.selectedColumn; // Assuming this is the parameter to use

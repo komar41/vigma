@@ -333,46 +333,31 @@ def process_form_data():
                 dict_list_df2 = {key: df.to_dict(orient='records') for key, df in dict_df_2.items()}
                 # dict_list_df2 = {key + '_g2': value for key, value in dict_list_df2.items()}
 
-            # Add Local, global minima and maxima to the charts
-            # l_minima_1 = argrelextrema(df_1['m'].values, np.less)[0].tolist()
-            # l_maxima_1 = argrelextrema(df_1['m'].values, np.greater)[0].tolist()
-            # l_minima_2 = argrelextrema(df_2['m'].values, np.less)[0].tolist()
-            # l_maxima_2 = argrelextrema(df_2['m'].values, np.greater)[0].tolist()
-
-            # g_minima_1 = df_1['m'].idxmin()
-            # g_maxima_1 = df_1['m'].idxmax()
-            # g_minima_2 = df_2['m'].idxmin()
-            # g_maxima_2 = df_2['m'].idxmax()
-
-            # df_1_mnmx = {'l_minima': l_minima_1, 'l_maxima': l_maxima_1, 'g_minima': g_minima_1, 'g_maxima': g_maxima_1}
-            # df_2_mnmx = {'l_minima': l_minima_2, 'l_maxima': l_maxima_2, 'g_minima': g_minima_2, 'g_maxima': g_maxima_2}
-
-            # Option to save normalized CSV files in frontend
-
-        # df_1 = df_1.replace({np.nan: None})
-
-        print(dict_group1)
+        # print(dict_group1)
         response = {
             'df1': df_1.to_dict(orient='records'),
             'df1_data': dict_list_df1,
-            'df1_patient_group': dict_group1,
             'df1_mnmx': df_1_mnmx
         }
+
+        if(col != 'STP'):
+            response.update({
+                'df1_patient_group': dict_group1
+            })
 
         if group2Files:
             response.update({
                 'df2': df_2.to_dict(orient='records'),
                 'df2_data': dict_list_df2,
-                'df2_patient_group': dict_group2,
                 'df2_mnmx': df_2_mnmx
             })
+            if(col != 'STP'):
+                response.update({
+                    'df2_patient_group': dict_group2,
+                })
 
         return jsonify(response)
-        
-        #return jsonify({'df1': 'df_1', 'df2': 'df_2', 'df1_mnmx': 'df_1_mnmx', 'df2_mnmx': 'df_2_mnmx'})
-    # else: 
-    #     return render_template('index.html')
-
+    
 # df: time, l, m, u
 # df: sid, trial, RstepLength, LstepLength, timeRswing, timeLswing, timeRgait, timeLgait, GaitSpeed
 

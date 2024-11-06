@@ -59,6 +59,8 @@ const dictStpParam = {
 export const LoadData = (props) => {
   const { globalArray, setGlobalArray } = useContext(GlobalContext);
   const { globalArray2, setGlobalArray2 } = useContext(GlobalContext);
+  const { globalArrayVideo, setGlobalArrayVideo } = useContext(GlobalContext);
+  const { globalArray2Video, setGlobalArray2Video } = useContext(GlobalContext);
 
   const [personName, setPersonName] = useState([]); // State for selected names
 
@@ -148,9 +150,14 @@ export const LoadData = (props) => {
   const handleCheckboxChange = (event) => {
     setAllowGroupExploration(event.target.checked);
   };
-  // one group change
 
-  // console.log(allowGroupExploration, "allowGroupExploration");
+  // video;
+  const [allowVideo, setAllowVideo] = useState(false);
+  const handleCheckboxChangeVideo = (event) => {
+    const isChecked = event.target.checked;
+    setAllowVideo(isChecked);
+    props.handleVideoSelectionChange(isChecked);
+  };
 
   function PlotOption() {
     let content;
@@ -407,6 +414,7 @@ export const LoadData = (props) => {
         setIsPanelDisabled(true);
         setIsSpreadDisabled(true);
         setIsStpOptionDisabled(false);
+        // setAllowVideo(false);
       } else {
         setDynamicFootingOptions(["Left", "Right"]);
         setIsFootingDisabled(false);
@@ -453,6 +461,8 @@ export const LoadData = (props) => {
   const handleResetFilter = (e) => {
     setGlobalArray([]);
     setGlobalArray2([]);
+    setGlobalArrayVideo([]);
+    setGlobalArray2Video([]);
   };
 
   const handleFlipParams = (e) => {
@@ -692,7 +702,25 @@ export const LoadData = (props) => {
                 size="small" // Makes the checkbox larger
               />
             }
-            label="Dual group exploration"
+            label="Dual group"
+            style={{ display: "flex", justifyContent: "center", width: "100%" }}
+            labelPlacement="end"
+            componentsProps={{
+              typography: { style: { fontSize: "1rem" } }, // Increases the label text size
+            }}
+          />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={allowVideo}
+                onChange={handleCheckboxChangeVideo}
+                name="allowVideo"
+                color="primary"
+                size="small" // Makes the checkbox larger
+              />
+            }
+            label="Video"
             style={{ display: "flex", justifyContent: "center", width: "100%" }}
             labelPlacement="end"
             componentsProps={{

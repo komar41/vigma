@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { LoadData } from "./loadData";
 import { Grid, Typography } from "@mui/material";
 import { withStyles } from "@mui/styles";
@@ -9,6 +9,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import RadarChart from "../radar-chart/radar-chart";
 import BoxChart from "../box-chart/box-chart";
 import BoxTitle from "../box-chart/box-title";
+import { GlobalContext } from "../globalHighlight/GlobalContext";
+import VideoPlayer from "../video-player/video-player";
 
 const styles = {
   icon: {
@@ -34,6 +36,14 @@ const Icon = withStyles(styles)(({ classes, children }) => (
 ));
 
 export const DataProcessView = (props) => {
+  const [isChecked, setIsChecked] = useState(false);
+  const { globalArrayVideo } = useContext(GlobalContext);
+  // Handler to update the checkbox state in the parent
+  const handleVideoSelectionChange = (checked) => {
+    setIsChecked(checked);
+  };
+  // onCheckboxChange={handleCheckboxChange}
+
   const [activeGroupsRadar, setActiveGroupsRadar] = useState([true, true]);
   const [activeGroupsBox, setActiveGroupsBox] = useState([true, true]);
 
@@ -241,10 +251,16 @@ export const DataProcessView = (props) => {
   };
 
   const isMdOrLarger = useMediaQuery(theme.breakpoints.up("md"));
+
+  console.log(isChecked);
+
   return (
     <Grid container>
       <Grid item xs={12} md={6} lg={3} style={loadDataStyle}>
-        <LoadData handleFormSubmitParent={handleFormDataSubmit} />
+        <LoadData
+          handleFormSubmitParent={handleFormDataSubmit}
+          handleVideoSelectionChange={handleVideoSelectionChange}
+        />
       </Grid>
 
       <Grid
@@ -329,67 +345,99 @@ export const DataProcessView = (props) => {
         </Grid>
       </Grid>
 
-      <Grid item xs={12} lg={4}>
-        <Grid item xs={12} style={{ height: "10vh" }}>
-          <BoxTitle
-            title="Spatiotemporal Summary"
-            labels={boxChartLabels}
-            chartData={boxChartData}
-            activeGroups={activeGroupsRadar}
-            setActiveGroups={setActiveGroupsRadar}
-            groupExploration={boxGroupExploration}
-          ></BoxTitle>
-        </Grid>
-        <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
-          <RadarChart
-            chartData={boxChartData}
-            labels={boxChartLabels}
-            style={{ boxSizing: "border-box" }}
-            activeGroups={activeGroupsRadar}
-            groupExploration={boxGroupExploration}
-          ></RadarChart>
-        </Grid>
-      </Grid>
-
-      <Grid
-        item
-        container
-        {...containerGridSize}
-        lg={8}
-        style={{ display: "flex" }}
-      >
-        <Grid item xs={12} style={{ height: "10vh", padding: 0, margin: 0 }}>
-          <BoxTitle
-            title={"Spatiotemporal Distributions"}
-            labels={boxChartLabels}
-            chartData={boxChartData}
-            activeGroups={activeGroupsBox}
-            setActiveGroups={setActiveGroupsBox}
-            groupExploration={boxGroupExploration}
-          ></BoxTitle>
-        </Grid>
-        {definedAttributes.map((attribute, index) => (
-          <Grid
-            key={index}
-            item
-            {...chartGridSize}
-            style={{
-              height: "26vh",
-              marginTop: "-30px",
-              maxWidth: definedAttributes.length <= 3 ? "300px" : "none", // Set a max width if 1 or 2 charts
-              flexGrow: 0, // Prevent stretching
-            }}
+      <>
+        {isChecked ? (
+          <div
+            style={{ display: "flex", overflowX: "auto", marginTop: "-10px" }}
           >
-            <BoxChart
-              chartData={boxChartData}
-              attribute={attribute}
-              labels={boxChartLabels}
-              activeGroups={activeGroupsBox}
-              groupExploration={boxGroupExploration}
-            ></BoxChart>
-          </Grid>
-        ))}
-      </Grid>
+            {/* Render your cards here */}
+            {globalArrayVideo.map((videoData, index) => (
+              <div
+                key={index}
+                style={{ maxWidth: "380px", margin: "0 10px", flexShrink: 0 }}
+              >
+                <VideoPlayer
+                  videoPath={videoData.videoPath}
+                  start_time={videoData.start_time}
+                  end_time={videoData.end_time}
+                  patient_id={videoData.patient_id}
+                  trial={videoData.trial}
+                  group={videoData.group}
+                  label={videoData.label}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <Grid item xs={12} lg={4}>
+              <Grid item xs={12} style={{ height: "10vh" }}>
+                <BoxTitle
+                  title="Spatiotemporal Summary"
+                  labels={boxChartLabels}
+                  chartData={boxChartData}
+                  activeGroups={activeGroupsRadar}
+                  setActiveGroups={setActiveGroupsRadar}
+                  groupExploration={boxGroupExploration}
+                />
+              </Grid>
+              <Grid item xs={12} style={{ height: "26vh", marginTop: "-30px" }}>
+                <RadarChart
+                  chartData={boxChartData}
+                  labels={boxChartLabels}
+                  style={{ boxSizing: "border-box" }}
+                  activeGroups={activeGroupsRadar}
+                  groupExploration={boxGroupExploration}
+                />
+              </Grid>
+            </Grid>
+
+            <Grid
+              item
+              container
+              {...containerGridSize}
+              lg={8}
+              style={{ display: "flex" }}
+            >
+              <Grid
+                item
+                xs={12}
+                style={{ height: "10vh", padding: 0, margin: 0 }}
+              >
+                <BoxTitle
+                  title={"Spatiotemporal Distributions"}
+                  labels={boxChartLabels}
+                  chartData={boxChartData}
+                  activeGroups={activeGroupsBox}
+                  setActiveGroups={setActiveGroupsBox}
+                  groupExploration={boxGroupExploration}
+                />
+              </Grid>
+              {definedAttributes.map((attribute, index) => (
+                <Grid
+                  key={index}
+                  item
+                  {...chartGridSize}
+                  style={{
+                    height: "26vh",
+                    marginTop: "-30px",
+                    maxWidth: definedAttributes.length <= 3 ? "300px" : "none",
+                    flexGrow: 0,
+                  }}
+                >
+                  <BoxChart
+                    chartData={boxChartData}
+                    attribute={attribute}
+                    labels={boxChartLabels}
+                    activeGroups={activeGroupsBox}
+                    groupExploration={boxGroupExploration}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </>
+        )}
+      </>
     </Grid>
   );
 };

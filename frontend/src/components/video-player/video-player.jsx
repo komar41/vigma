@@ -14,6 +14,7 @@ const VideoPlayer = ({
   videoPath,
   start_time,
   end_time,
+  current_time,
   patient_id,
   trial,
   group,
@@ -28,7 +29,12 @@ const VideoPlayer = ({
     // Remove the item based on patient_id and trial
     setGlobalArrayVideo((prev) =>
       prev.filter(
-        (item) => !(item.patient_id === patient_id && item.trial === trial)
+        (item) =>
+          !(
+            item.patient_id === patient_id &&
+            item.trial === trial &&
+            item.group === group
+          )
       )
     );
 
@@ -51,8 +57,6 @@ const VideoPlayer = ({
     }
   };
 
-  //   console.log(globalArrayVideo);
-
   useEffect(() => {
     const video = videoRef.current;
 
@@ -62,10 +66,31 @@ const VideoPlayer = ({
 
       const handleTimeUpdate = () => {
         // Pause the video and reset to start time when it reaches end_time
+
         if (video.currentTime >= end_time) {
           video.pause();
           video.currentTime = start_time;
         }
+        const normalizedTime =
+          ((video.currentTime - start_time) / (end_time - start_time)) * 100;
+
+        // console.log("Mapped Current Time (0-100):", Math.round(normalizedTime));
+        // update the global state with the current time
+        setGlobalArrayVideo((prev) =>
+          prev.map((item) => {
+            if (
+              item.patient_id === patient_id &&
+              item.trial === trial &&
+              item.group === group
+            ) {
+              return {
+                ...item,
+                current_time: Math.round(normalizedTime),
+              };
+            }
+            return item;
+          })
+        );
       };
 
       const handlePlay = () => {
@@ -112,7 +137,7 @@ const VideoPlayer = ({
       {/* Display title with patient and trial IDs */}
       <CardContent style={{ paddingBottom: "8px", paddingTop: "8px" }}>
         <Typography variant="h8" style={{ fontWeight: "bold", color: "#fff" }}>
-          {label} | Patient ID: {patient_id} | Trial: {trial}
+          {label} | Patient: {patient_id} | Trial: {trial}
         </Typography>
       </CardContent>
 

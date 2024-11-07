@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import "./lineChart.css";
 import { GlobalContext } from "../globalHighlight/GlobalContext";
 
-import { Button, Dialog, DialogTitle, DialogActions } from "@mui/material";
+import { Button, Dialog, DialogActions } from "@mui/material";
 
 const LineChart = ({ chartData }) => {
   const svgRef = useRef();
@@ -77,7 +77,7 @@ const LineChart = ({ chartData }) => {
 
   const handleLineClickG1 = async (key, visibleLine) => {
     let keyExists;
-    setGlobalArray((prevKeys) => {
+    await setGlobalArray((prevKeys) => {
       keyExists = prevKeys.includes(key);
       const newKeys = prevKeys.includes(key)
         ? prevKeys.filter((k) => k !== key)
@@ -90,10 +90,11 @@ const LineChart = ({ chartData }) => {
     });
 
     if (keyExists) {
+      console.log("Removing from globalArrayVideo g1");
       // Remove from globalArrayVideo
-      console.log("Removing from globalArrayVideo");
+      // console.log("Removing from globalArrayVideo");
       setGlobalArrayVideo((prevKeys) => {
-        console.log("prevKeys", prevKeys);
+        // console.log("prevKeys", prevKeys);
         let newKeys = prevKeys.filter(
           (item) =>
             !(
@@ -102,7 +103,7 @@ const LineChart = ({ chartData }) => {
               item.group === "g1"
             )
         );
-        console.log("newKeys", newKeys);
+        // console.log("newKeys", newKeys);
         return newKeys;
       });
       return;
@@ -138,6 +139,7 @@ const LineChart = ({ chartData }) => {
 
       const group = "g1";
       const label = group1Label;
+      const current_time = 0;
 
       // Update globalArrayVideo without duplicates
       setGlobalArrayVideo((prevKeys) => {
@@ -147,6 +149,7 @@ const LineChart = ({ chartData }) => {
             videoPath,
             start_time,
             end_time,
+            current_time,
             patient_id,
             trial,
             group,
@@ -154,7 +157,7 @@ const LineChart = ({ chartData }) => {
           },
         ];
       });
-      console.log("globalArrayVideo", globalArrayVideo);
+      // console.log("globalArrayVideo", globalArrayVideo);
     } catch (error) {
       console.error("Error fetching start and end times:", error);
     }
@@ -162,8 +165,10 @@ const LineChart = ({ chartData }) => {
 
   const handleLineClickG2 = async (key, visibleLine) => {
     let keyExists;
-    setGlobalArray2((prevKeys) => {
+    await setGlobalArray2((prevKeys) => {
       keyExists = prevKeys.includes(key);
+      // console.log("prevKeys", prevKeys);
+      // console.log("key", key);
       const newKeys = prevKeys.includes(key)
         ? prevKeys.filter((k) => k !== key)
         : [...prevKeys, key];
@@ -174,11 +179,13 @@ const LineChart = ({ chartData }) => {
       return newKeys;
     });
 
+    // console.log("keyexists", keyExists);
     if (keyExists) {
       // Remove from globalArrayVideo
-      console.log("Removing from globalArrayVideo");
+      // console.log("Removing from globalArrayVideo");
+      console.log("Removing from globalArrayVideo g2");
       setGlobalArrayVideo((prevKeys) => {
-        console.log("prevKeys", prevKeys);
+        // console.log("prevKeys", prevKeys);
         let newKeys = prevKeys.filter(
           (item) =>
             !(
@@ -187,9 +194,10 @@ const LineChart = ({ chartData }) => {
               item.group === "g2"
             )
         );
-        console.log("newKeys", newKeys);
+        // console.log("newKeys", newKeys);
         return newKeys;
       });
+
       return;
     }
 
@@ -223,6 +231,7 @@ const LineChart = ({ chartData }) => {
 
       const group = "g2";
       const label = group2Label;
+      const current_time = 0;
 
       // Update globalArrayVideo without duplicates
       setGlobalArrayVideo((prevKeys) => {
@@ -232,6 +241,7 @@ const LineChart = ({ chartData }) => {
             videoPath,
             start_time,
             end_time,
+            current_time,
             patient_id,
             trial,
             group,
@@ -239,7 +249,7 @@ const LineChart = ({ chartData }) => {
           },
         ];
       });
-      console.log("globalArrayVideo", globalArrayVideo);
+      // console.log("globalArrayVideo", globalArrayVideo);
     } catch (error) {
       console.error("Error fetching start and end times:", error);
     }
@@ -510,6 +520,8 @@ const LineChart = ({ chartData }) => {
       } else if (spreadOption === "All data") {
         // Add all lines
         Object.entries(group1AllData).forEach(([key, array]) => {
+          // console.log("key", key);
+          // console.log("array", array);
           let clickTimeout;
           const visibleLine = svg
             .append("path")
@@ -595,19 +607,33 @@ const LineChart = ({ chartData }) => {
               svg.selectAll(".tooltip").remove();
             })
             .on("click", (event) => {
-              // Clear any previous timeout to prevent interference with dblclick
-              clearTimeout(clickTimeout);
-
-              // Delay the execution of the click handler to detect if a dblclick is coming
-              clickTimeout = setTimeout(() => {
-                // const [mouseX, mouseY] = d3.pointer(event, svg.node());
-                // console.log("click", mouseX, mouseY);
-                handleLineClickG1(key, visibleLine);
-              }, 250); // 250ms delay to distinguish between click and dblclick
+              handleLineClickG1(key, visibleLine);
             });
 
           if (selectedKeysRefG1.current.includes(key)) {
             visibleLine.attr("class", "line-highlight");
+
+            // iterate the globalArrayVideo, add circle based on the current time if group is g1
+            globalArrayVideo.forEach((item) => {
+              if (
+                item.patient_id === key.split("_")[0] &&
+                item.trial === key.split("_")[1] &&
+                item.group === "g1"
+              ) {
+                const circleDataPoint = array.find(
+                  (point) => point.time === item.current_time
+                );
+                svg
+                  .append("circle")
+                  .attr("cx", x(circleDataPoint.time))
+                  .attr("cy", y(circleDataPoint.col))
+                  .attr("r", 5)
+                  .attr("fill", "#fc8d62")
+                  .attr("stroke", "#b30000")
+                  .attr("stroke-width", 0.5)
+                  .attr("opacity", 0.8);
+              }
+            });
           }
         });
       }
@@ -728,7 +754,6 @@ const LineChart = ({ chartData }) => {
               })
           );
       } else if (spreadOption === "All data") {
-        let clickTimeout;
         // Add all lines
         Object.entries(group2AllData).forEach(([key, array]) => {
           const visibleLine = svg
@@ -817,15 +842,33 @@ const LineChart = ({ chartData }) => {
             // .on("click", () => handleLineClickG2(key, visibleLine));
             .on("click", (event) => {
               // Clear any previous timeout to prevent interference with dblclick
-              clearTimeout(clickTimeout);
-
-              clickTimeout = setTimeout(() => {
-                handleLineClickG2(key, visibleLine);
-              }, 250); // 250ms delay to distinguish between click and dblclick
+              handleLineClickG2(key, visibleLine);
             });
 
           if (selectedKeysRefG2.current.includes(key)) {
             visibleLine.attr("class", "line-highlight-2");
+
+            // iterate the globalArrayVideo, add circle based on the current time if group is g2
+            globalArrayVideo.forEach((item) => {
+              if (
+                item.patient_id === key.split("_")[0] &&
+                item.trial === key.split("_")[1] &&
+                item.group === "g2"
+              ) {
+                const circleDataPoint = array.find(
+                  (point) => point.time === item.current_time
+                );
+                svg
+                  .append("circle")
+                  .attr("cx", x(circleDataPoint.time))
+                  .attr("cy", y(circleDataPoint.col))
+                  .attr("r", 5)
+                  .attr("fill", "#66c2a5")
+                  .attr("stroke", "#006600")
+                  .attr("stroke-width", 0.5)
+                  .attr("opacity", 0.8);
+              }
+            });
           }
         });
       }
@@ -1064,6 +1107,7 @@ const LineChart = ({ chartData }) => {
     selectedKeysRefG2.current,
     globalArray,
     globalArray2,
+    globalArrayVideo,
   ]);
 
   // console.log(active, "active");

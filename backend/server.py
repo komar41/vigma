@@ -161,7 +161,7 @@ def interpolate_data(df, min_points):
     for col in cols:
         if(col != 'time'):
             interpolation_function = interp1d(indices, df[col], kind='linear')
-            interpolated_indices = np.linspace(0, len(df) - 1, min_points)
+            interpolated_indices = np.linspace(0, len(df) - 1, min_points + 1)
             interpolated_data[col] = interpolation_function(interpolated_indices)
 
     t = np.linspace(0, 100, len(interpolated_data))

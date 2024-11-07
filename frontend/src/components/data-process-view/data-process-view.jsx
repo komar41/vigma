@@ -252,7 +252,7 @@ export const DataProcessView = (props) => {
 
   const isMdOrLarger = useMediaQuery(theme.breakpoints.up("md"));
 
-  console.log(isChecked);
+  // console.log(isChecked);
 
   return (
     <Grid container>
@@ -351,6 +351,7 @@ export const DataProcessView = (props) => {
             style={{ display: "flex", overflowX: "auto", marginTop: "-10px" }}
           >
             {/* Render your cards here */}
+            {/* {console.log(globalArrayVideo)} */}
             {globalArrayVideo.map((videoData, index) => (
               <div
                 key={index}
@@ -360,6 +361,7 @@ export const DataProcessView = (props) => {
                   videoPath={videoData.videoPath}
                   start_time={videoData.start_time}
                   end_time={videoData.end_time}
+                  current_time={videoData.current_time}
                   patient_id={videoData.patient_id}
                   trial={videoData.trial}
                   group={videoData.group}

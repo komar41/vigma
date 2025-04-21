@@ -126,17 +126,17 @@ To replicate the the results of Fig. 1 presented in the paper, follow the steps 
 
 - After project setup and running the application, navigate to the web interface in your browser. You can use the following link to access the web interface: [http://localhost:3000](http://localhost:3000).
 
-- From the control panel of the interface, set file location to: "C:\Users\qshah\Documents\vigma\backend\data". Here, "C:\Users\qshah\Documents\vigma" is the path to the VIGMA folder on your local machine. You can change this path according to your local setup. For macOS, the path would be something like "/Users/qshah/Documents/vigma/backend/data".
-- Click "SET" on the control panel to set the file location.
-- Enable "Dual group" checkbox to enable dual group analysis.
-- For Group 1 files, select the patient trials for "011918ds" under the stroke_patients group. For Group 2 files, select the patient trials for "081017bf".
-- Label the groups as "S1" and "S2" respectively. You can change the labels according to your preference.
-- Now, for Plot no 1 to 4, select the following options and Submit to generate four time-series ensemble view plots:
-  - Plot no 1: Select parameter "Thigh" under "Joint Angle"; select "Right" for both Group 1 limb and Group 2 limb; select "Right" for both Group 1 gait cycle and Group 2 gait cycle; and lastly select "All data" for Plot option.
-  - Plot no 2: Select parameter "Trunk" under "Joint Angle"; select "Right" for both Group 1 gait cycle and Group 2 gait cycle; and lastly select "All data" for Plot option.
-  - Plot no 3: Select parameter "Anterior-Posterior" under "Ground Reaction Force"; select "Left" for both Group 1 limb and Group 2 limb; select "Left" for both Group 1 gait cycle and Group 2 gait cycle; and lastly select "Spread" for Plot option.
-  - Plot no 4: Select parameter "Mediolateral" under "Ground Reaction Force"; select "Left" for both Group 1 limb and Group 2 limb; select "Left" for both Group 1 gait cycle and Group 2 gait cycle; and lastly select "Spread" for Plot option.
-- Now Select parameter "Spatiotemporal" under "Discrete Values". And under Boxplots (up to 5) dropdown, select "Step Length (R), Step Length (L), Swing Time (R), Swing Time (L)" and then Submit to generate spatiotemporal summary and spatiotemporal distribution views.
+- From the **control panel** of the interface, set **file location** to: "C:\Users\qshah\Documents\vigma\backend\data". Here, "C:\Users\qshah\Documents\vigma" is the path to the VIGMA folder on your local machine. You can change this path according to your local setup. For macOS, the path would be something like "/Users/qshah/Documents/vigma/backend/data".
+- Click **"SET"** on the control panel to set the file location.
+- Enable **"Dual group"** checkbox to enable dual group analysis.
+- For **Group 1 files**, select the patient trials for "011918ds" under the stroke_patients group. For **Group 2 files**, select the patient trials for "081017bf".
+- **Label the groups** as "S1" and "S2" respectively. You can change the labels according to your preference.
+- Now, for **Plot no 1 to 4**, select the following options to generate four time-series ensemble view plots:
+  - Plot no 1: **Select parameter** "Thigh" under "Joint Angle"; select "Right" for both **Group 1 limb** and **Group 2 limb**; select "Right" for both **Group 1 gait cycle** and **Group 2 gait cycle**; and lastly select "All data" for **Plot option**. Press **Submit** to generate the plot.
+  - Plot no 2: **Select parameter** "Trunk" under "Joint Angle"; select "Right" for both **Group 1 gait cycle** and **Group 2 gait cycle**; and lastly select "All data" for **Plot option**. Press **Submit** to generate the plot.
+  - Plot no 3: **Select parameter** "Anterior-Posterior" under "Ground Reaction Force"; select "Left" for both **Group 1 limb** and **Group 2 limb**; select "Left" for both **Group 1 gait cycle** and **Group 2 gait cycle**; and lastly select "Spread" for **Plot option**. Press **Submit** to generate the plot.
+  - Plot no 4: **Select parameter** "Mediolateral" under "Ground Reaction Force"; select "Left" for both **Group 1 limb** and **Group 2 limb**; select "Left" for both **Group 1 gait cycle** and **Group 2 gait cycle**; and lastly select "Spread" for **Plot option**. Press **Submit** to generate the plot.
+- Now **Select parameter** "Spatiotemporal" under "Discrete Values". And under **Boxplots (up to 5) dropdown**, select "Step Length (R), Step Length (L), Swing Time (R), Swing Time (L)" and then **Submit** to generate spatiotemporal summary and spatiotemporal distribution views.
 
 ## License
 

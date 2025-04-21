@@ -119,3 +119,7 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
 Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** python API.
 
 <!-- You can also watch this short [video tutorial]() to learn the usage of the Python API. -->
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

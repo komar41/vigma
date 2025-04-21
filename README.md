@@ -122,13 +122,7 @@ Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.m
 
 ## Replicate the results
 
-To replicate the the results of Fig. 1 presented in the paper, follow the steps for **"Project Setup"** and **"Run the Application"** as described above. After running the application, you can generate the visualizations by following the steps below:
-
-### Computational notebooks
-
-After project setup and running the application, navigate to the **notebooks** folder. Here, you will find a Jupter notebook named "teaser.ipynb". Open this notebook and run the cells sequentially. It includes explanations and code snippets to help you understand each step.
-
-### Visualization frontend
+To replicate the the results of Fig. 1 presented in the paper, follow the steps for **"Project Setup"** and **"Run the Application"** as described above. You have to then navigate to the **notebooks** folder. Here, you will find a Jupter notebook named **"teaser.ipynb"**. Open this notebook and run the cells sequentially. It includes explanations and code snippets to help you understand each step. For replicating the **visualization frontend**, follow the steps below:
 
 - After project setup and running the application, navigate to the web interface in your browser. You can use the following link to access the web interface: [http://localhost:3000](http://localhost:3000).
 

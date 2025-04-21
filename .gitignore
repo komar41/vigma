@@ -3,7 +3,7 @@ frontend/node_modules
 **/.pnp
 **.pnp.js
 backend/envs
-backend/data
+# backend/data
 backend/__pycache__
 backend/.DS_Store
 BackendFlask/envs
@@ -43,7 +43,7 @@ yarn-error.log*
 frontend/misc
 
 notebooks/envs
-notebooks/data
+# notebooks/data
 notebooks/__pycache__
 
 docker-compose.yml

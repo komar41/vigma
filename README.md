@@ -140,4 +140,4 @@ To replicate the the results of Fig. 1 presented in the paper, follow the steps 
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. Free for both commercial and research use.

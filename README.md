@@ -40,7 +40,7 @@ Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxi
 
 This guide provides detailed steps to install and set up the VIGMA system, including software installations, project setup, and running the application. You can install VIGMA using Docker, which will handle the orchestration of all required servers automatically, or install each component manually for more control and customization.
 
-**Place gait data files in the ``backend/data/`` directory.**
+**⚠️ Important: Place all gait data files in the ``backend/data/`` directory. In VIGMA's interface, reference them with paths relative to the root of the cloned repository.**
 
 ### Installing via Docker
 

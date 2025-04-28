@@ -165,8 +165,15 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
 <TODO- Heading- Data Formats. For GRF JNT STEP. Add SS of csvs.>
 
 ## Using the Python API
+- If you are using the Docker installation, simply navigate to [http://localhost:8888/](http://localhost:8888/) and start using the Python API inside existing or new Jupyter notebooks.
+- If you did a manual installation, then open a terminal inside the notebooks folder. Then use the following commands:
+```
+conda activate ./envs
+jupyter notebook
+```
+Now start using the Python API inside existing or new Jupyter notebooks.
 
-Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
+⚠️ Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
 
 <!-- You can also watch this short [video tutorial]() to learn the usage of the Python API. -->
 

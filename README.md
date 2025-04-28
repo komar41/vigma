@@ -17,6 +17,18 @@ Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxi
     <b>The VIGMA Framework</b>
 </div>
 
+## Table of Contents
+
+- [Demonstration](#demonstration)
+- [Installation Guide](#installation-guide)
+  - [Installing via Docker](#installing-via-docker)
+  - [Installing Manually](#installing-manually)
+    - [Project Setup](#project-setup)
+    - [Run the Application](#run-the-application)
+- [Using the Python API](#using-the-python-api)
+- [Replicating the Results](#replicating-the-results)
+- [License](#license)
+
 ## Demonstration
 
 <div align="center">
@@ -49,6 +61,8 @@ docker-compose up --build
 This will build and start all required services: the backend the and frontend. VIGMA's frontend will be available at http://localhost:3000. Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
 
 ### Installing Manually
+
+If you want to install VIGMA manually, you should:
 
 - Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
 - Follow this [link](https://nodejs.org/en/download/) to install Node. Prebuilt binaries/installer is the easiest way to perform installation.

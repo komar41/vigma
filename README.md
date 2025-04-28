@@ -40,6 +40,8 @@ Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxi
 
 This guide provides detailed steps to install and set up the VIGMA system, including software installations, project setup, and running the application. You can install VIGMA using Docker, which will handle the orchestration of all required servers automatically, or install each component manually for more control and customization.
 
+**⚠️ Important: Place all gait data files in the ``backend/data/`` directory. In VIGMA's interface, reference them with paths relative to the root of the cloned repository.**
+
 ### Installing via Docker
 
 Docker is the easiest way to get VIGMA up and running. It handles the orchestration of all necessary components: the backend and the frontend.
@@ -62,7 +64,7 @@ This will build and start all required services: the backend the and frontend. V
 
 ### Installing Manually
 
-If you want to install VIGMA manually, you should:
+VIGMA uses Python 3.11. If you want to install VIGMA manually, you should:
 
 - Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
 - Follow this [link](https://nodejs.org/en/download/) to install Node. Prebuilt binaries/installer is the easiest way to perform installation.

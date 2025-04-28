@@ -20,7 +20,7 @@ Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxi
 ## Demonstration
 
 <div align="center">
-  <video src="https://github.com/komar41/vigma/raw/refs/heads/main/VIGMA-compressed.mp4" />
+  <video src="https://github.com/komar41/vigma/blob/main/VIGMA-compressed.mp4" />
 </div>
 
 ## Installation Guide

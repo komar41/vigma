@@ -26,9 +26,29 @@ Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxi
 
 ## Installation Guide
 
-This guide provides detailed steps to install and set up the VIGMA system, including software installations, project setup, and running the application.
+This guide provides detailed steps to install and set up the VIGMA system, including software installations, project setup, and running the application. You can install VIGMA using Docker, which will handle the orchestration of all required servers automatically, or install each component manually for more control and customization.
 
-## Software Installations
+### Installing via Docker
+
+Docker is the easiest way to get VIGMA up and running. It handles the orchestration of all necessary components: the backend and the frontend.
+
+Prerequisites:
+- [Docker](https://docs.docker.com/get-started/get-docker/)
+
+After cloning the repository, run the full VIGMA stack with:
+
+```console
+docker compose up --build
+```
+
+For older Docker versions, the following command may be required instead:
+```console
+docker-compose up --build
+```
+
+This will build and start all required services: the backend the and frontend. VIGMA's frontend will be available at http://localhost:3000. Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
+
+### Installing Manually
 
 - Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
 - Follow this [link](https://nodejs.org/en/download/) to install Node. Prebuilt binaries/installer is the easiest way to perform installation.
@@ -36,7 +56,7 @@ This guide provides detailed steps to install and set up the VIGMA system, inclu
 
 <!-- This short [video]() illustrates how to perform these software installations. -->
 
-## Project Setup
+#### Project Setup
 
 Download a zipped version of VIGMA from [here](https://github.com/komar41/vigma). Check the image below for reference on how to download the zip file from the link.
 
@@ -95,7 +115,7 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
 
 <!-- This short [video]() illustrates how to setup the project. -->
 
-## Run the application
+#### Run the application
 
 - Open a terminal inside the VIGMA folder. Run the following commands in the terminal:
 
@@ -128,13 +148,13 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
 
 <TODO- Heading- Data Formats. For GRF JNT STEP. Add SS of csvs.>
 
-## Use the Python API
+## Using the Python API
 
-Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** python API.
+Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
 
 <!-- You can also watch this short [video tutorial]() to learn the usage of the Python API. -->
 
-## Replicate the results
+## Replicating the Results
 
 To replicate the the results of Fig. 1 presented in the paper, follow the steps for **"Project Setup"** and **"Run the Application"** as described above. You have to then navigate to the **notebooks** folder. Here, you will find a Jupter notebook named **"teaser.ipynb"**. Open this notebook and run the cells sequentially. It includes explanations and code snippets to help you understand each step. For replicating the **visualization frontend**, follow the steps below:
 

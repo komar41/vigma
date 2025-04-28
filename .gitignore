@@ -33,6 +33,8 @@ frontend/node_modules
 **.vscode
 *.sublime-workspace
 
+.DS_Store
+
 # Miscellaneous
 /.DS_Store
 /*.log
@@ -46,10 +48,7 @@ notebooks/envs
 # notebooks/data
 notebooks/__pycache__
 
-docker-compose.yml
-frontend/Dockerfile
 frontend/.env
-backend/Dockerfile
 backend/app.py
 backend/data.json
 backend/payload.json

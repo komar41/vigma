@@ -6,13 +6,13 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "5000:5000"
     environment:
       - FLASK_RUN_HOST=0.0.0.0
-      - FLASK_RUN_PORT=8000
+      - FLASK_RUN_PORT=5000
       - FLASK_APP=server.py
     volumes:
-      - ./notebooks:/app/notebooks
+      - ./backend/data:/app/backend/data
 
   frontend:
     build:

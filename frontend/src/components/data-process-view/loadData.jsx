@@ -367,6 +367,7 @@ export const LoadData = (props) => {
           const response = await axios.post("http://localhost:5000/send-data", {
             fileLocation: formData.fileLocation,
           });
+          console.log("Response from backend:", response.data);
           NodeService.updateData(response.data);
           // Retrieve the updated tree structure
           NodeService.getTreeNodes().then((data) => setNodesGroup1(data));

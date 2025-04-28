@@ -52,7 +52,7 @@ frontend/.env
 backend/app.py
 backend/data.json
 backend/payload.json
-backend/requirements.txt
+# backend/requirements.txt
 
 notebooks/.ipynb_checkpoints
 notebooks/.DS_Store

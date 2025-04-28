@@ -4,10 +4,23 @@
 
 This project, VIGMA, is designed to visualize and analyze gait data, providing a comprehensive tool for understanding mobility and balance in various patient populations. VIGMA integrates data processing, analysis, and visualization within a user-friendly framework, making it accessible to researchers, clinicians, and practitioners. The system supports the exploration of disease progression, comparisons across multiple patient groups, and offers advanced visual analytics capabilities. Our goal is to facilitate deeper insights into gait disorders and aid in the development of tailored treatment plans and rehabilitation strategies. VIGMA is open-source and available for use and contribution at [github.com/komar41/VIGMA](https://github.com/komar41/VIGMA).
 
+For a complete description of the framework, please check our paper:
+
+**VIGMA: An Open-Access Framework for Visual Gait and Motion Analytics**  
+*Kazi Shahrukh Omar, Shuaijie Wang, Ridhuparan Kungumaraju, Tanvi Bhatt, Fabio Miranda*  
+IEEE Transactions on Visualization and Computer Graphics (To appear)  
+Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxiv.org/abs/2504.17960)]
+
 ![image](teaser.png)
 
 <div align="center">
     <b>The VIGMA Framework</b>
+</div>
+
+## Demonstration
+
+<div align="center">
+  <video src="https://github.com/komar41/vigma/raw/refs/heads/main/VIGMA-compressed.mp4" />
 </div>
 
 ## Installation Guide

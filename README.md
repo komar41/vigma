@@ -177,7 +177,6 @@ To replicate the the results of Fig. 1 presented in the paper, first complete th
 - After installation, navigate to the web interface in your browser. You can use the following link to access the web interface: [http://localhost:3000](http://localhost:3000).
 
 - From the **control panel** of the interface, set **File location** to: "C:\Users\qshah\Documents\vigma\backend\data". Here, "C:\Users\qshah\Documents\vigma" is the path to the VIGMA folder on your local machine. You can change this path according to your local setup. For macOS, the path would be something like "/Users/qshah/Documents/vigma/backend/data". 
-
 ⚠️ Note: If you're using Docker for installation, set the **File location** to just "Data", since the folder is already mapped inside the container.
 - Click **"SET"** on the control panel to set the file location.
 - Enable **"Dual group"** checkbox to enable dual group analysis.

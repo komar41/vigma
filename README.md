@@ -171,7 +171,7 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
 conda activate ./envs
 jupyter notebook
 ```
-Now start using the Python API inside existing or new Jupyter notebooks.
+Afterward, you can start using the Python API inside existing or new Jupyter notebooks.
 
 ⚠️ Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
 
@@ -179,7 +179,7 @@ Now start using the Python API inside existing or new Jupyter notebooks.
 
 ## Replicating the Results
 
-To replicate the the results of Fig. 1 presented in the paper, first complete the installation either using Docker or manually as described above. You have to then navigate to the **notebooks** folder. Here, you will find a Jupyter notebook named **"teaser.ipynb"**. Open this notebook and run the cells sequentially. It includes explanations and code snippets to help you understand each step. For replicating the **visualization frontend**, follow the steps below:
+To replicate the the results of Fig. 1 presented in the paper, first complete the installation either using Docker or manually as described above. Once installed, launch Jupyter Notebook either by navigating directly to [http://localhost:8888/](http://localhost:8888/) (if using Docker) or by activating the conda environment and then running Jupyter Notebook inside the notebooks folder (if installed manually). You have to then navigate to a Jupyter notebook named **"teaser.ipynb"**. Open this notebook and run the cells sequentially. It includes explanations and code snippets to help you understand each step. For replicating the **visualization frontend**, follow the steps below:
 
 - After installation, navigate to the web interface in your browser. You can use the following link to access the web interface: [http://localhost:3000](http://localhost:3000).
 

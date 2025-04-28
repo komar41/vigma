@@ -62,7 +62,7 @@ This will build and start all required services: the backend the and frontend. V
 
 ### Installing Manually
 
-If you want to install VIGMA manually, you should:
+VIGMA uses Python 3.11. If you want to install VIGMA manually, you should:
 
 - Follow this [guide](https://docs.anaconda.com/free/anaconda/install/index.html) to install Anaconda.
 - Follow this [link](https://nodejs.org/en/download/) to install Node. Prebuilt binaries/installer is the easiest way to perform installation.

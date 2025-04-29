@@ -63,6 +63,8 @@ docker-compose up --build
 
 This will build and start all required services: the backend the and frontend. VIGMA's frontend will be available at http://localhost:3000. Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
 
+Jump to [here](#data) for data details and [here](#using-the-python-api) for the Python API details.
+
 ### Installing Manually
 
 VIGMA uses Python 3.11. If you want to install VIGMA manually, you should:

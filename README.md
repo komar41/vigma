@@ -25,6 +25,7 @@ Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxi
   - [Installing Manually](#installing-manually)
     - [Project Setup](#project-setup)
     - [Run the Application](#run-the-application)
+- [Data](#data)
 - [Using the Python API](#using-the-python-api)
 - [Replicating the Results](#replicating-the-results)
 - [License](#license)
@@ -61,6 +62,8 @@ docker-compose up --build
 ```
 
 This will build and start all required services: the backend the and frontend. VIGMA's frontend will be available at http://localhost:3000. Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
+
+Jump to [here](#data) for data details and [here](#using-the-python-api) for the Python API details.
 
 ### Installing Manually
 
@@ -155,8 +158,11 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
   # Start the web application
   npm start
   ```
+This will open a tab in your browser and you're all set to use **VIGMA** visual analytics (VA) system. 
 
-  This will open a tab in your browser and you're all set to use **VIGMA** visual analytics (VA) system. We added some mock data inside the **"vigma/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
+## Data
+
+We added some mock data inside the **"vigma/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
 
   <img src="data-storage.png" width="400">
 
@@ -165,20 +171,25 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
 <TODO- Heading- Data Formats. For GRF JNT STEP. Add SS of csvs.>
 
 ## Using the Python API
+- If you are using the Docker installation, simply navigate to [http://localhost:8888/](http://localhost:8888/) and start using the Python API inside existing or new Jupyter notebooks.
+- If you did a manual installation, then open a terminal inside the notebooks folder. Then use the following commands:
+```
+conda activate ./envs
+jupyter notebook
+```
+Afterward, you can start using the Python API inside existing or new Jupyter notebooks.
 
-Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
+⚠️ Follow this [link](https://github.com/komar41/vigma/blob/main/notebooks/README.md) to learn how to use the **VIGMA** Python API.
 
 <!-- You can also watch this short [video tutorial]() to learn the usage of the Python API. -->
 
 ## Replicating the Results
 
-To replicate the the results of Fig. 1 presented in the paper, first complete the installation either using Docker or manually as described above. You have to then navigate to the **notebooks** folder. Here, you will find a Jupyter notebook named **"teaser.ipynb"**. Open this notebook and run the cells sequentially. It includes explanations and code snippets to help you understand each step. For replicating the **visualization frontend**, follow the steps below:
+To replicate the the results of Fig. 1 presented in the paper, first complete the installation either using Docker or manually as described above. Once installed, launch Jupyter Notebook either by navigating directly to [http://localhost:8888/](http://localhost:8888/) (if using Docker) or by activating the conda environment and then running Jupyter Notebook inside the notebooks folder (if installed manually). You have to then navigate to a Jupyter notebook named **"teaser.ipynb"**. Open this notebook and run the cells sequentially. It includes explanations and code snippets to help you understand each step. For replicating the **visualization frontend**, follow the steps below:
 
 - After installation, navigate to the web interface in your browser. You can use the following link to access the web interface: [http://localhost:3000](http://localhost:3000).
 
-- From the **control panel** of the interface, set **File location** to: "C:\Users\qshah\Documents\vigma\backend\data". Here, "C:\Users\qshah\Documents\vigma" is the path to the VIGMA folder on your local machine. You can change this path according to your local setup. For macOS, the path would be something like "/Users/qshah/Documents/vigma/backend/data". 
-
-⚠️ Note: If you're using Docker for installation, set the **File location** to just "Data", since the folder is already mapped inside the container.
+- From the **control panel** of the interface, set **File location** to: "C:\Users\qshah\Documents\vigma\backend\data". Here, "C:\Users\qshah\Documents\vigma" is the path to the VIGMA folder on your local machine. You can change this path according to your local setup. For macOS, the path would be something like "/Users/qshah/Documents/vigma/backend/data". (⚠️ Note: If you're using Docker for installation, set the **File location** to just "Data", since the folder is already mapped inside the container.)
 - Click **"SET"** on the control panel to set the file location.
 - Enable **"Dual group"** checkbox to enable dual group analysis.
 - For **Group 1 files**, select the patient trials for "011918ds" under the stroke_patients group. For **Group 2 files**, select the patient trials for "081017bf".

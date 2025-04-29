@@ -25,6 +25,7 @@ Paper: [[DOI](https://doi.org/10.1109/TVCG.2025.3564866)], [[Arxiv](https://arxi
   - [Installing Manually](#installing-manually)
     - [Project Setup](#project-setup)
     - [Run the Application](#run-the-application)
+- [Data](#data)
 - [Using the Python API](#using-the-python-api)
 - [Replicating the Results](#replicating-the-results)
 - [License](#license)
@@ -155,8 +156,11 @@ Unzip the folder. Now, open a terminal inside the **VIGMA** folder.
   # Start the web application
   npm start
   ```
+This will open a tab in your browser and you're all set to use **VIGMA** visual analytics (VA) system. 
 
-  This will open a tab in your browser and you're all set to use **VIGMA** visual analytics (VA) system. We added some mock data inside the **"vigma/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
+## Data
+
+We added some mock data inside the **"vigma/backend/data"** folder to illustrate the usage of the system. You should follow the same hierarchy and naming conventions for data storage displayed in the image below:
 
   <img src="data-storage.png" width="400">
 

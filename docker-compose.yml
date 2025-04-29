@@ -22,3 +22,16 @@ services:
       - backend
     ports:
       - "3000:3000"
+
+  notebooks:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    command: >
+      sh -c "pip install notebook &&
+         jupyter notebook --notebook-dir=/app/notebooks --ip=0.0.0.0 --port=8888 --allow-root --NotebookApp.token=''"
+
+    volumes:
+      - ./notebooks:/app/notebooks
